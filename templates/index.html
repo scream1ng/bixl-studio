@@ -27,7 +27,7 @@
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideInLeft { from { transform: translateX(-120%); } to { transform: translateX(0); } }
 
-    .screen { display: none; height: 100vh; }
+    .screen { display: none; height: 100vh; height: 100dvh; }
     .screen.active { display: flex; flex-direction: row; gap: 12px; padding: 12px; }
 
     .shell-rail {
@@ -347,7 +347,7 @@
     </div>
   </div>
 
-  <div style="display:flex;gap:8px;padding:11px 16px 22px;border-top:1px solid rgba(0,0,0,0.07);flex-shrink:0;">
+  <div style="display:flex;gap:8px;padding:11px 16px max(22px, env(safe-area-inset-bottom));border-top:1px solid rgba(0,0,0,0.07);flex-shrink:0;">
     <button id="cap-prev-btn" style="flex:1;background:#fff;color:#2C2C2C;border:1px solid rgba(0,0,0,0.1);padding:12px 14px;border-radius:12px;font-size:13px;font-weight:600;">&#8249; Prev</button>
     <button id="cap-addstep-btn" class="btn-black" style="flex:1;background:#1A1A1A;color:#fff;padding:12px 14px;border-radius:12px;font-size:13px;font-weight:600;transition:background 0.1s;">+ Add</button>
     <button id="cap-next-btn" class="btn-red" style="flex:1;background:#CC0000;color:#fff;padding:12px 14px;border-radius:12px;font-size:13px;font-weight:600;transition:background 0.1s;">Next &#8250;</button>
@@ -878,7 +878,7 @@ function sizeCanvas() {
   const area = $('cap-photo-area'), dispW = Math.min(area?.clientWidth || 360, 900);
   const ratio = _photoImg.height / _photoImg.width;
   let dw = dispW, dh = Math.round(dw * ratio);
-  const maxH = Math.round(window.innerHeight * 0.5);
+  const maxH = Math.round(window.innerHeight * 0.38);
   if (dh > maxH) { dh = maxH; dw = Math.round(dh / ratio); }
   _canvas.width = dw * RS; _canvas.height = dh * RS;
   _canvas.style.width = dw + 'px'; _canvas.style.height = dh + 'px';
