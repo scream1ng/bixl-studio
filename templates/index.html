@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1A1A1A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="IXL Studio">
+<link rel="manifest" href="/static/manifest.json">
+<title>IXL | Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #CC0000;
+    --black: #1A1A1A;
+    --dark-grey: #2C2C2C;
+    --grey: #6B6B6B;
+    --light-grey: #F2F2F2;
+    --white: #FFFFFF;
+    --green: #2E9E4F;
+    --border: #E2E2E2;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--black);
+    background: var(--light-grey);
+    font-size: 15px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button { font-family: inherit; cursor: pointer; border: none; background: none; font-size: inherit; }
+  input, textarea { font-family: inherit; font-size: inherit; }
+
+  .hidden { display: none !important; }
+
+  /* ---------- Logo lockup ---------- */
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+  }
+  .logo .ixl-block { display: flex; flex-direction: column; line-height: 1; }
+  .logo .ixl { font-weight: 800; font-size: 22px; letter-spacing: 0.5px; color: var(--white); }
+  .logo .since { font-size: 8px; font-weight: 500; color: var(--grey); letter-spacing: 1px; margin-top: 2px; text-transform: uppercase; }
+  .logo .divider { width: 3px; height: 26px; background: var(--red); border-radius: 1px; }
+  .logo .module { font-weight: 400; font-size: 20px; color: var(--white); letter-spacing: 0.3px; }
+  .logo.dark .ixl, .logo.dark .module { color: var(--black); }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    background: var(--black);
+    border-bottom: 3px solid var(--red);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 60px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 24px; }
+  .module-tabs { display: flex; gap: 4px; }
+  .module-tab {
+    color: var(--grey);
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 14px;
+    position: relative;
+    background: transparent;
+  }
+  .module-tab.active { color: var(--white); background: var(--dark-grey); }
+  .module-tab.disabled { color: #555; cursor: not-allowed; }
+  .module-tab .soon {
+    font-size: 8px;
+    background: var(--red);
+    color: var(--white);
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin-left: 5px;
+    vertical-align: middle;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background 0.12s, opacity 0.12s;
+    white-space: nowrap;
+  }
+  .btn-red { background: var(--red); color: var(--white); }
+  .btn-red:hover { background: #b00000; }
+  .btn-black { background: var(--black); color: var(--white); }
+  .btn-black:hover { background: var(--dark-grey); }
+  .btn-grey { background: var(--white); color: var(--dark-grey); border: 1px solid var(--border); }
+  .btn-grey:hover { background: var(--light-grey); }
+  .btn-ghost { color: var(--grey); padding: 9px 12px; }
+  .btn-ghost:hover { color: var(--black); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+  .btn-block { width: 100%; }
+
+  /* ---------- Screen container ---------- */
+  .screen { display: none; flex-direction: column; height: 100%; }
+  .screen.active { display: flex; }
+  body { display: flex; flex-direction: column; }
+  #app { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+  /* ---------- HOME ---------- */
+  #screen-home .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 24px 60px;
+    max-width: 760px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .home-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .home-head h1 { font-size: 24px; font-weight: 700; }
+  .home-head p { color: var(--grey); font-size: 14px; margin-top: 2px; }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--grey);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 26px 0 10px;
+  }
+  .doc-list { display: flex; flex-direction: column; gap: 8px; }
+  .doc-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: border-color 0.12s, transform 0.06s;
+  }
+  .doc-card:hover { border-color: var(--grey); }
+  .doc-card:active { transform: scale(0.997); }
+  .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .status-dot.draft { background: var(--grey); }
+  .status-dot.done { background: var(--green); }
+  .doc-main { flex: 1; min-width: 0; }
+  .doc-main .doc-title { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .doc-main .doc-sub { color: var(--grey); font-size: 13px; margin-top: 1px; }
+  .doc-time { color: var(--grey); font-size: 12px; flex-shrink: 0; }
+  .doc-del {
+    color: var(--grey);
+    font-size: 18px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .doc-del:hover { color: var(--red); background: var(--light-grey); }
+
+  .empty-state {
+    text-align: center;
+    color: var(--grey);
+    padding: 50px 20px;
+    background: var(--white);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+  }
+  .empty-state .big { font-size: 32px; margin-bottom: 8px; opacity: 0.4; }
+
+  /* ---------- CAPTURE (mobile) ---------- */
+  #screen-capture { background: var(--white); }
+  .capture-top {
+    background: var(--black);
+    border-bottom: 3px solid var(--red);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+  .capture-top .ct-title { color: var(--white); font-weight: 600; font-size: 15px; }
+  .capture-top .ct-title small { color: var(--grey); font-weight: 400; }
+  .capture-back { color: var(--white); font-size: 15px; font-weight: 600; }
+
+  .step-dots {
+    display: flex;
+    gap: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .step-dot {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--white);
+    color: var(--grey);
+    font-size: 13px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .step-dot.active { border-color: var(--red); color: var(--red); }
+  .step-dot.filled { background: var(--black); border-color: var(--black); color: var(--white); }
+  .step-dot.active.filled { background: var(--red); border-color: var(--red); color: var(--white); }
+  .step-dot-add { color: var(--grey); font-size: 20px; font-weight: 400; }
+
+  .capture-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+  .photo-area {
+    position: relative;
+    background: var(--light-grey);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    min-height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .photo-placeholder { text-align: center; padding: 30px 20px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+  .photo-placeholder .icon { font-size: 40px; opacity: 0.35; }
+  .photo-placeholder p { color: var(--grey); font-size: 13px; }
+  .photo-actions { display: flex; gap: 10px; }
+  #captureCanvas { display: block; max-width: 100%; touch-action: none; background: #000; }
+
+  .annot-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tool-btn {
+    flex: 1;
+    min-width: 70px;
+    padding: 10px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--white);
+    color: var(--dark-grey);
+    font-weight: 600;
+    font-size: 13px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  .tool-btn .ti { font-size: 17px; }
+  .tool-btn.active { background: var(--red); color: var(--white); border-color: var(--red); }
+  .tool-btn.util { color: var(--grey); }
+  .tool-btn.util:hover { background: var(--light-grey); }
+
+  .note-field { display: flex; flex-direction: column; gap: 6px; }
+  .note-field label { font-size: 12px; font-weight: 700; color: var(--grey); text-transform: uppercase; letter-spacing: 0.5px; }
+  .note-field textarea {
+    width: 100%;
+    min-height: 90px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    resize: vertical;
+    color: var(--black);
+    line-height: 1.4;
+  }
+  .note-field textarea:focus { outline: none; border-color: var(--red); }
+
+  .capture-nav {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--white);
+  }
+  .capture-nav .btn { flex: 1; }
+
+  /* ---------- EDITOR (desktop) ---------- */
+  #screen-editor { flex-direction: row; }
+  .editor-left {
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--white);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .editor-left-head { padding: 16px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+  .search-box {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--light-grey);
+  }
+  .search-box:focus { outline: none; border-color: var(--red); background: var(--white); }
+  .editor-list { flex: 1; overflow-y: auto; padding: 8px; }
+  .list-item {
+    padding: 11px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .list-item:hover { background: var(--light-grey); }
+  .list-item.active { background: var(--light-grey); box-shadow: inset 3px 0 0 var(--red); }
+  .list-item .li-main { flex: 1; min-width: 0; }
+  .list-item .li-title { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .list-item .li-sub { color: var(--grey); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .list-group-label { font-size: 11px; font-weight: 700; color: var(--grey); text-transform: uppercase; letter-spacing: 1px; padding: 12px 12px 6px; }
+
+  .editor-right { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .editor-right-head {
+    height: 60px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+  .editor-right-head .erh-left { display: flex; align-items: center; gap: 14px; }
+  .editor-right-head h2 { font-size: 17px; font-weight: 700; }
+  .status-toggle { display: flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .status-toggle button { padding: 6px 14px; font-weight: 600; font-size: 13px; color: var(--grey); background: var(--white); }
+  .status-toggle button.active { color: var(--white); }
+  .status-toggle button.draft.active { background: var(--grey); }
+  .status-toggle button.done.active { background: var(--green); }
+  .erh-right { display: flex; align-items: center; gap: 10px; }
+
+  .editor-canvas-area { flex: 1; overflow-y: auto; padding: 24px; }
+  .editor-sheet {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px;
+  }
+  .meta-row { display: flex; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+  .meta-field { flex: 1; min-width: 160px; display: flex; flex-direction: column; gap: 5px; }
+  .meta-field label { font-size: 11px; font-weight: 700; color: var(--grey); text-transform: uppercase; letter-spacing: 0.5px; }
+  .meta-field input {
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  .meta-field input:focus { outline: none; border-color: var(--red); }
+
+  .preview-hint {
+    font-size: 12px;
+    color: var(--grey);
+    background: var(--light-grey);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+  }
+
+  .step-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .step-cell {
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+    position: relative;
+  }
+  .step-cell .step-head {
+    background: var(--black);
+    color: var(--white);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 6px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .step-cell .step-head .del-step { color: var(--grey); font-size: 14px; cursor: pointer; }
+  .step-cell .step-head .del-step:hover { color: var(--red); }
+  .step-img {
+    aspect-ratio: 4 / 3;
+    background: var(--light-grey);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+  }
+  .step-img img { width: 100%; height: 100%; object-fit: contain; }
+  .step-img .img-hint { color: var(--grey); font-size: 12px; text-align: center; padding: 12px; }
+  .step-img:hover .img-overlay { opacity: 1; }
+  .img-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.45);
+    color: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+    opacity: 0; transition: opacity 0.12s;
+  }
+  .step-text {
+    padding: 10px;
+    font-size: 13px;
+    line-height: 1.4;
+    min-height: 64px;
+    outline: none;
+    color: var(--black);
+  }
+  .step-text:empty::before { content: attr(data-ph); color: var(--grey); }
+  .step-text:focus { background: #fffdf6; }
+
+  .add-step-cell {
+    border: 1px dashed var(--border);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--grey);
+    font-weight: 600;
+    min-height: 120px;
+    cursor: pointer;
+  }
+  .add-step-cell:hover { border-color: var(--red); color: var(--red); }
+
+  /* ---------- Toast ---------- */
+  #toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--black);
+    color: var(--white);
+    padding: 12px 20px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 1000;
+    max-width: 90%;
+    border-left: 3px solid var(--red);
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.success { border-left-color: var(--green); }
+
+  /* ---------- Spinner ---------- */
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: var(--white);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 500; padding: 20px;
+  }
+  .modal {
+    background: var(--white);
+    border-radius: 9px;
+    width: 100%; max-width: 380px;
+    padding: 22px;
+    border-top: 3px solid var(--red);
+  }
+  .modal h3 { font-size: 17px; margin-bottom: 14px; }
+  .modal .meta-field { margin-bottom: 12px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 767px) {
+    .module-tabs { display: none; }
+    #screen-editor { flex-direction: column; }
+    .editor-left { display: none; }
+    .step-grid { grid-template-columns: repeat(2, 1fr); }
+    .home-head h1 { font-size: 20px; }
+  }
+  @media (min-width: 768px) {
+    .capture-only { }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============ HOME ============ -->
+  <section id="screen-home" class="screen active">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="logo">
+          <div class="ixl-block">
+            <span class="ixl">IXL</span>
+            <span class="since">since 1858</span>
+          </div>
+          <div class="divider"></div>
+          <span class="module">Studio</span>
+        </div>
+        <div class="module-tabs">
+          <button class="module-tab active">SOP</button>
+          <button class="module-tab disabled">ICL<span class="soon">Soon</span></button>
+          <button class="module-tab disabled">PFC<span class="soon">Soon</span></button>
+          <button class="module-tab disabled">MLB<span class="soon">Soon</span></button>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-red" onclick="newSop()">+ New SOP</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="home-head">
+        <div>
+          <h1>Standard operating procedures</h1>
+          <p>Capture photos, annotate steps, generate the Word document.</p>
+        </div>
+      </div>
+      <div id="homeDocs"></div>
+    </div>
+  </section>
+
+  <!-- ============ CAPTURE (mobile) ============ -->
+  <section id="screen-capture" class="screen">
+    <div class="capture-top">
+      <button class="capture-back" onclick="leaveCapture()">‹ Home</button>
+      <div class="ct-title">New SOP <small>/ Step <span id="capStepNum">1</span></small></div>
+      <button class="capture-back" onclick="finishCapture()">Done</button>
+    </div>
+    <div class="step-dots" id="capStepDots"></div>
+    <div class="capture-body">
+      <div class="photo-area" id="capPhotoArea">
+        <div class="photo-placeholder" id="capPlaceholder">
+          <span class="icon">📷</span>
+          <p>No photo yet for this step</p>
+          <div class="photo-actions">
+            <label class="btn btn-red">
+              Take photo
+              <input type="file" accept="image/*" capture="environment" class="hidden" onchange="onPhotoSelected(event)">
+            </label>
+            <label class="btn btn-grey">
+              Upload
+              <input type="file" accept="image/*" class="hidden" onchange="onPhotoSelected(event)">
+            </label>
+          </div>
+        </div>
+        <canvas id="captureCanvas" class="hidden"></canvas>
+      </div>
+
+      <div class="annot-toolbar" id="capToolbar">
+        <button class="tool-btn" data-tool="arrow" onclick="setTool('arrow')"><span class="ti">↗</span>Arrow</button>
+        <button class="tool-btn" data-tool="circle" onclick="setTool('circle')"><span class="ti">◯</span>Circle</button>
+        <button class="tool-btn" data-tool="label" onclick="setTool('label')"><span class="ti">A</span>Label</button>
+        <button class="tool-btn util" onclick="undoAnnotation()"><span class="ti">↺</span>Undo</button>
+        <button class="tool-btn util" onclick="clearAnnotations()"><span class="ti">✕</span>Clear</button>
+      </div>
+
+      <div class="photo-actions" id="capReplaceRow" style="display:none">
+        <label class="btn btn-grey btn-sm">
+          Replace photo
+          <input type="file" accept="image/*" capture="environment" class="hidden" onchange="onPhotoSelected(event)">
+        </label>
+      </div>
+
+      <div class="note-field">
+        <label>Step description</label>
+        <textarea id="capNote" placeholder="Describe this step…" oninput="onNoteInput(this.value)"></textarea>
+      </div>
+    </div>
+    <div class="capture-nav">
+      <button class="btn btn-grey" onclick="capturePrev()" id="capPrevBtn">‹ Previous</button>
+      <button class="btn btn-black" onclick="captureAddStep()">+ Add step</button>
+      <button class="btn btn-red" onclick="captureNext()" id="capNextBtn">Next ›</button>
+    </div>
+  </section>
+
+  <!-- ============ EDITOR (desktop) ============ -->
+  <section id="screen-editor" class="screen">
+    <div class="editor-left">
+      <div class="editor-left-head">
+        <div class="logo dark" style="cursor:pointer" onclick="goHome()">
+          <div class="ixl-block">
+            <span class="ixl">IXL</span>
+            <span class="since">since 1858</span>
+          </div>
+          <div class="divider"></div>
+          <span class="module">SOP</span>
+        </div>
+        <input class="search-box" id="editorSearch" placeholder="Search documents…" oninput="renderEditorList()">
+        <button class="btn btn-red btn-block btn-sm" onclick="newSop()">+ New SOP</button>
+      </div>
+      <div class="editor-list" id="editorList"></div>
+    </div>
+
+    <div class="editor-right">
+      <div class="editor-right-head">
+        <div class="erh-left">
+          <button class="btn btn-ghost" onclick="goHome()">‹ Home</button>
+          <h2 id="editorTitle">SOP editor</h2>
+        </div>
+        <div class="erh-right">
+          <div class="status-toggle">
+            <button class="draft" id="stDraft" onclick="setStatus('draft')">Draft</button>
+            <button class="done" id="stDone" onclick="setStatus('done')">Complete</button>
+          </div>
+          <button class="btn btn-red" id="downloadBtn" onclick="generateDocx()">↓ Download .docx</button>
+        </div>
+      </div>
+      <div class="editor-canvas-area">
+        <div class="editor-sheet" id="editorSheet">
+          <div class="meta-row">
+            <div class="meta-field">
+              <label>Part No</label>
+              <input id="fPartNo" placeholder="e.g. 36611" oninput="onMetaInput()">
+            </div>
+            <div class="meta-field">
+              <label>Part Name</label>
+              <input id="fPartName" placeholder="e.g. Tastic Luminate Heat Module" oninput="onMetaInput()">
+            </div>
+            <div class="meta-field">
+              <label>Doc No</label>
+              <input id="fDocNo" placeholder="e.g. A0866" oninput="onMetaInput()">
+            </div>
+          </div>
+          <div class="preview-hint">
+            This is the editor — the generated .docx is the formatted result and may differ slightly from this preview.
+          </div>
+          <div class="step-grid" id="editorSteps"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="toast"></div>
+
+<!-- hidden file input used by the editor for per-cell uploads -->
+<input type="file" id="editorImgInput" accept="image/*" class="hidden">
+
+<script>
+/* =========================================================
+   IXL Studio — single-file frontend
+   ========================================================= */
+
+const MOBILE = () => window.matchMedia('(max-width: 767px)').matches;
+
+/* ---------- State ---------- */
+let sops = [];                 // list of SOP summaries
+let currentSop = null;         // full SOP being edited { ..., steps: [] }
+let captureIndex = 0;          // current step index in capture flow
+let saveTimer = null;
+
+/* Canvas / annotation state */
+let canvas = null, ctx = null;
+let photoImg = null;           // HTMLImageElement of the current step's base photo
+let annotations = [];          // [{type,x1,y1,x2,y2,label,color}]
+let currentDraw = null;
+let activeTool = 'arrow';
+let drawing = false;
+const ANNOT_COLOR = '#CC0000';
+
+/* =========================================================
+   Utilities
+   ========================================================= */
+function toast(msg, kind) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show' + (kind ? ' ' + kind : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = ''; }, 3000);
+}
+
+function uuid() {
+  return (crypto.randomUUID ? crypto.randomUUID()
+    : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+      }));
+}
+
+async function api(method, path, body) {
+  const opts = { method, headers: {} };
+  if (body !== undefined) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+  let res;
+  try {
+    res = await fetch(path, opts);
+  } catch (e) {
+    throw new Error('Network error — is the server running?');
+  }
+  if (!res.ok) {
+    let detail = '';
+    try { const j = await res.json(); detail = j.error || j.message || ''; } catch (e) {}
+    throw new Error(detail || (method + ' ' + path + ' failed (' + res.status + ')'));
+  }
+  if (res.status === 204) return null;
+  const ct = res.headers.get('content-type') || '';
+  if (ct.includes('application/json')) return res.json();
+  return res;
+}
+
+function fmtTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function groupByDate(items) {
+  const now = new Date();
+  const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startWeek = new Date(startToday); startWeek.setDate(startWeek.getDate() - 7);
+  const groups = { Today: [], 'This week': [], Earlier: [] };
+  for (const it of items) {
+    const d = new Date(it.updated_at || it.created_at || 0);
+    if (d >= startToday) groups.Today.push(it);
+    else if (d >= startWeek) groups['This week'].push(it);
+    else groups.Earlier.push(it);
+  }
+  return groups;
+}
+
+/* =========================================================
+   Screen navigation
+   ========================================================= */
+function show(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+}
+
+function goHome() {
+  currentSop = null;
+  show('screen-home');
+  loadSops();
+}
+
+/* =========================================================
+   Data loading
+   ========================================================= */
+async function loadSops() {
+  try {
+    sops = await api('GET', '/api/sops') || [];
+  } catch (e) {
+    sops = [];
+    toast(e.message);
+  }
+  renderHome();
+}
+
+function renderHome() {
+  const host = document.getElementById('homeDocs');
+  if (!sops.length) {
+    host.innerHTML = `
+      <div class="empty-state">
+        <div class="big">📄</div>
+        <div>No documents yet.</div>
+        <p style="margin-top:6px">Tap <strong>+ New SOP</strong> to capture your first procedure.</p>
+      </div>`;
+    return;
+  }
+  const groups = groupByDate(sops);
+  let html = '';
+  for (const [label, items] of Object.entries(groups)) {
+    if (!items.length) continue;
+    html += `<div class="section-label">${label}</div><div class="doc-list">`;
+    for (const s of items) html += docCard(s);
+    html += `</div>`;
+  }
+  host.innerHTML = html;
+}
+
+function docCard(s) {
+  const status = s.status === 'done' ? 'done' : 'draft';
+  const title = esc(s.part_name || 'Untitled SOP');
+  const sub = [s.part_no, s.doc_no].filter(Boolean).map(esc).join(' · ') || 'No part details';
+  return `
+    <div class="doc-card" onclick="openSop('${s.id}')">
+      <span class="status-dot ${status}" title="${status}"></span>
+      <div class="doc-main">
+        <div class="doc-title">${title}</div>
+        <div class="doc-sub">${sub}</div>
+      </div>
+      <span class="doc-time">${fmtTime(s.updated_at || s.created_at)}</span>
+      <span class="doc-del" onclick="event.stopPropagation(); deleteSop('${s.id}')" title="Delete">🗑</span>
+    </div>`;
+}
+
+function esc(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/* =========================================================
+   Create / open / delete
+   ========================================================= */
+async function newSop() {
+  showNewSopModal();
+}
+
+function showNewSopModal() {
+  const back = document.createElement('div');
+  back.className = 'modal-backdrop';
+  back.innerHTML = `
+    <div class="modal">
+      <h3>New SOP</h3>
+      <div class="meta-field"><label>Part No</label><input id="nPartNo" placeholder="e.g. 36611"></div>
+      <div class="meta-field"><label>Part Name</label><input id="nPartName" placeholder="e.g. Tastic Luminate Heat Module"></div>
+      <div class="meta-field"><label>Doc No</label><input id="nDocNo" placeholder="e.g. A0866"></div>
+      <div class="modal-actions">
+        <button class="btn btn-grey" id="nCancel">Cancel</button>
+        <button class="btn btn-red" id="nCreate">Create</button>
+      </div>
+    </div>`;
+  document.body.appendChild(back);
+  back.querySelector('#nPartName').focus();
+  const close = () => back.remove();
+  back.addEventListener('click', e => { if (e.target === back) close(); });
+  back.querySelector('#nCancel').onclick = close;
+  back.querySelector('#nCreate').onclick = async () => {
+    const payload = {
+      part_no: back.querySelector('#nPartNo').value.trim(),
+      part_name: back.querySelector('#nPartName').value.trim(),
+      doc_no: back.querySelector('#nDocNo').value.trim(),
+    };
+    let created;
+    try {
+      created = await api('POST', '/api/sops', payload);
+    } catch (e) { toast(e.message); return; }
+    close();
+    await loadSops();
+    // Branch by device: mobile → capture, desktop → editor
+    if (MOBILE()) {
+      openCapture(created.id);
+    } else {
+      openSop(created.id);
+    }
+  };
+}
+
+async function openSop(id) {
+  try {
+    currentSop = await api('GET', '/api/sops/' + id);
+  } catch (e) { toast(e.message); return; }
+  if (!currentSop.steps) currentSop.steps = [];
+  currentSop.steps.sort((a, b) => (a.index || 0) - (b.index || 0));
+  if (MOBILE()) {
+    openCaptureFromSop();
+  } else {
+    show('screen-editor');
+    renderEditor();
+    renderEditorList();
+  }
+}
+
+async function deleteSop(id) {
+  if (!confirm('Delete this SOP? This cannot be undone.')) return;
+  try {
+    await api('DELETE', '/api/sops/' + id);
+  } catch (e) { toast(e.message); return; }
+  toast('Deleted', 'success');
+  if (currentSop && currentSop.id === id) goHome();
+  else loadSops();
+}
+
+/* =========================================================
+   Persistence (debounced PUT)
+   ========================================================= */
+function queueSave() {
+  if (!currentSop) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveNow, 800);
+}
+
+async function saveNow() {
+  if (!currentSop) return;
+  const payload = {
+    part_no: currentSop.part_no,
+    part_name: currentSop.part_name,
+    doc_no: currentSop.doc_no,
+    status: currentSop.status,
+    steps: currentSop.steps.map((s, i) => ({
+      index: i,
+      image: s.image || null,
+      text: s.text || '',
+      annotations: s.annotations || [],
+    })),
+  };
+  try {
+    const updated = await api('PUT', '/api/sops/' + currentSop.id, payload);
+    if (updated && updated.updated_at) currentSop.updated_at = updated.updated_at;
+  } catch (e) {
+    toast('Save failed: ' + e.message);
+  }
+}
+
+/* =========================================================
+   EDITOR (desktop)
+   ========================================================= */
+function renderEditor() {
+  if (!currentSop) return;
+  document.getElementById('editorTitle').textContent =
+    currentSop.part_name ? currentSop.part_name : 'Untitled SOP';
+  document.getElementById('fPartNo').value = currentSop.part_no || '';
+  document.getElementById('fPartName').value = currentSop.part_name || '';
+  document.getElementById('fDocNo').value = currentSop.doc_no || '';
+  updateStatusToggle();
+  renderEditorSteps();
+}
+
+function updateStatusToggle() {
+  const done = currentSop && currentSop.status === 'done';
+  document.getElementById('stDraft').classList.toggle('active', !done);
+  document.getElementById('stDone').classList.toggle('active', done);
+}
+
+function setStatus(status) {
+  if (!currentSop) return;
+  currentSop.status = status;
+  updateStatusToggle();
+  queueSave();
+}
+
+function onMetaInput() {
+  if (!currentSop) return;
+  currentSop.part_no = document.getElementById('fPartNo').value;
+  currentSop.part_name = document.getElementById('fPartName').value;
+  currentSop.doc_no = document.getElementById('fDocNo').value;
+  document.getElementById('editorTitle').textContent = currentSop.part_name || 'Untitled SOP';
+  queueSave();
+}
+
+function renderEditorSteps() {
+  const host = document.getElementById('editorSteps');
+  const steps = currentSop.steps;
+  let html = '';
+  steps.forEach((s, i) => {
+    const imgInner = s.image
+      ? `<img src="${s.image}" alt="Step ${i + 1}"><div class="img-overlay">Click to replace</div>`
+      : `<div class="img-hint">Click to add photo</div>`;
+    html += `
+      <div class="step-cell">
+        <div class="step-head">
+          <span>STEP ${i + 1}</span>
+          <span class="del-step" onclick="deleteStep(${i})" title="Remove step">✕</span>
+        </div>
+        <div class="step-img" onclick="pickEditorImage(${i})">${imgInner}</div>
+        <div class="step-text" contenteditable="true" data-ph="Describe this step…"
+             oninput="onStepTextInput(${i}, this.innerText)">${esc(s.text || '')}</div>
+      </div>`;
+  });
+  html += `<div class="add-step-cell" onclick="addStep()">+ Add step</div>`;
+  host.innerHTML = html;
+}
+
+function onStepTextInput(i, text) {
+  if (!currentSop || !currentSop.steps[i]) return;
+  currentSop.steps[i].text = text;
+  queueSave();
+}
+
+function addStep() {
+  if (!currentSop) return;
+  currentSop.steps.push({ id: uuid(), index: currentSop.steps.length, image: null, text: '', annotations: [] });
+  renderEditorSteps();
+  queueSave();
+}
+
+function deleteStep(i) {
+  if (!currentSop) return;
+  if (!confirm('Remove step ' + (i + 1) + '?')) return;
+  currentSop.steps.splice(i, 1);
+  renderEditorSteps();
+  queueSave();
+}
+
+let editorImgTargetIndex = null;
+function pickEditorImage(i) {
+  editorImgTargetIndex = i;
+  const input = document.getElementById('editorImgInput');
+  input.value = '';
+  input.click();
+}
+document.getElementById('editorImgInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file || editorImgTargetIndex === null) return;
+  try {
+    const dataUrl = await fileToDataUrl(file);
+    currentSop.steps[editorImgTargetIndex].image = dataUrl;
+    renderEditorSteps();
+    queueSave();
+  } catch (err) { toast('Could not load image'); }
+});
+
+function renderEditorList() {
+  const host = document.getElementById('editorList');
+  const q = (document.getElementById('editorSearch').value || '').toLowerCase().trim();
+  let items = sops;
+  if (q) {
+    items = sops.filter(s =>
+      [s.part_no, s.part_name, s.doc_no].filter(Boolean).join(' ').toLowerCase().includes(q));
+  }
+  if (!items.length) {
+    host.innerHTML = `<div style="padding:20px;color:var(--grey);font-size:13px;text-align:center">No documents.</div>`;
+    return;
+  }
+  const groups = groupByDate(items);
+  let html = '';
+  for (const [label, arr] of Object.entries(groups)) {
+    if (!arr.length) continue;
+    html += `<div class="list-group-label">${label}</div>`;
+    for (const s of arr) {
+      const active = currentSop && currentSop.id === s.id ? ' active' : '';
+      const status = s.status === 'done' ? 'done' : 'draft';
+      html += `
+        <div class="list-item${active}" onclick="openSop('${s.id}')">
+          <span class="status-dot ${status}"></span>
+          <div class="li-main">
+            <div class="li-title">${esc(s.part_name || 'Untitled SOP')}</div>
+            <div class="li-sub">${esc([s.part_no, s.doc_no].filter(Boolean).join(' · ') || 'No details')}</div>
+          </div>
+        </div>`;
+    }
+  }
+  host.innerHTML = html;
+}
+
+/* =========================================================
+   Generate .docx
+   ========================================================= */
+async function generateDocx() {
+  if (!currentSop) return;
+  const btn = document.getElementById('downloadBtn');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Generating…';
+  try {
+    await saveNow(); // make sure server has latest
+    const res = await api('POST', '/api/sops/' + currentSop.id + '/generate');
+    const blob = await res.blob();
+    const fname = (currentSop.doc_no || currentSop.part_no || 'SOP') + '.docx';
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fname;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    toast('Document downloaded', 'success');
+  } catch (e) {
+    toast('Generate failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+}
+
+/* =========================================================
+   CAPTURE (mobile)
+   ========================================================= */
+function openCapture(id) {
+  api('GET', '/api/sops/' + id).then(s => {
+    currentSop = s;
+    if (!currentSop.steps) currentSop.steps = [];
+    currentSop.steps.sort((a, b) => (a.index || 0) - (b.index || 0));
+    openCaptureFromSop();
+  }).catch(e => toast(e.message));
+}
+
+function openCaptureFromSop() {
+  if (!currentSop.steps.length) {
+    currentSop.steps.push({ id: uuid(), index: 0, image: null, text: '', annotations: [] });
+  }
+  captureIndex = 0;
+  show('screen-capture');
+  initCanvas();
+  loadCaptureStep();
+}
+
+function leaveCapture() {
+  // bake & save current step before leaving
+  commitCaptureStep();
+  saveNow();
+  goHome();
+}
+
+function finishCapture() {
+  commitCaptureStep();
+  saveNow();
+  toast('Saved', 'success');
+  goHome();
+}
+
+function renderStepDots() {
+  const host = document.getElementById('capStepDots');
+  let html = '';
+  currentSop.steps.forEach((s, i) => {
+    const cls = ['step-dot'];
+    if (i === captureIndex) cls.push('active');
+    if (s.image || (s.text && s.text.trim())) cls.push('filled');
+    html += `<button class="${cls.join(' ')}" onclick="jumpStep(${i})">${i + 1}</button>`;
+  });
+  html += `<button class="step-dot step-dot-add" onclick="captureAddStep()">+</button>`;
+  host.innerHTML = html;
+  document.getElementById('capStepNum').textContent = captureIndex + 1;
+}
+
+function jumpStep(i) {
+  if (i === captureIndex) return;
+  commitCaptureStep();
+  captureIndex = i;
+  loadCaptureStep();
+}
+
+function loadCaptureStep() {
+  const step = currentSop.steps[captureIndex];
+  renderStepDots();
+  document.getElementById('capNote').value = step.text || '';
+  annotations = Array.isArray(step.annotations) ? step.annotations.slice() : [];
+  currentDraw = null;
+  setTool(activeTool);
+
+  if (step.image) {
+    // load baked image as the base (annotations already in it OR re-overlay)
+    loadPhotoForCanvas(step.image, () => {
+      // If annotations were stored separately, redraw them; otherwise image already baked.
+      redraw();
+    });
+    showCanvas(true);
+  } else {
+    photoImg = null;
+    showCanvas(false);
+  }
+}
+
+function showCanvas(hasPhoto) {
+  document.getElementById('captureCanvas').classList.toggle('hidden', !hasPhoto);
+  document.getElementById('capPlaceholder').style.display = hasPhoto ? 'none' : 'flex';
+  document.getElementById('capToolbar').style.display = hasPhoto ? 'flex' : 'none';
+  document.getElementById('capReplaceRow').style.display = hasPhoto ? 'flex' : 'none';
+}
+
+function onNoteInput(val) {
+  if (!currentSop) return;
+  currentSop.steps[captureIndex].text = val;
+  renderStepDots();
+  queueSave();
+}
+
+/* ---- photo selection ---- */
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+async function onPhotoSelected(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  ev.target.value = '';
+  let dataUrl;
+  try { dataUrl = await fileToDataUrl(file); }
+  catch (e) { toast('Could not load photo'); return; }
+  annotations = [];
+  currentDraw = null;
+  loadPhotoForCanvas(dataUrl, () => {
+    showCanvas(true);
+    redraw();
+    // store the raw photo now; baked version saved on commit
+    currentSop.steps[captureIndex].image = dataUrl;
+    currentSop.steps[captureIndex].annotations = [];
+    renderStepDots();
+    queueSave();
+  });
+}
+
+function loadPhotoForCanvas(src, cb) {
+  const img = new Image();
+  img.onload = () => {
+    photoImg = img;
+    sizeCanvasToPhoto();
+    if (cb) cb();
+  };
+  img.onerror = () => { toast('Image failed to load'); };
+  img.src = src;
+}
+
+function sizeCanvasToPhoto() {
+  if (!photoImg || !canvas) return;
+  // Fit canvas into the photo-area width while keeping the photo aspect ratio.
+  const maxW = Math.min(document.getElementById('capPhotoArea').clientWidth || 360, 900);
+  const ratio = photoImg.height / photoImg.width;
+  let w = maxW;
+  let h = Math.round(w * ratio);
+  // cap height so very tall portraits don't dominate the screen
+  const maxH = Math.round(window.innerHeight * 0.5);
+  if (h > maxH) { h = maxH; w = Math.round(h / ratio); }
+  canvas.width = w;
+  canvas.height = h;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+}
+
+/* =========================================================
+   Canvas annotation engine
+   ========================================================= */
+function initCanvas() {
+  canvas = document.getElementById('captureCanvas');
+  ctx = canvas.getContext('2d');
+  // bind once
+  if (canvas._bound) return;
+  canvas._bound = true;
+
+  canvas.addEventListener('mousedown', e => startDraw(eventPos(e)));
+  canvas.addEventListener('mousemove', e => moveDraw(eventPos(e)));
+  window.addEventListener('mouseup', e => endDraw());
+
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(eventPos(e)); }, { passive: false });
+  canvas.addEventListener('touchmove', e => { e.preventDefault(); moveDraw(eventPos(e)); }, { passive: false });
+  canvas.addEventListener('touchend', e => { e.preventDefault(); endDraw(); }, { passive: false });
+}
+
+function eventPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const src = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]) || e;
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  return {
+    x: (src.clientX - rect.left) * scaleX,
+    y: (src.clientY - rect.top) * scaleY,
+  };
+}
+
+function setTool(tool) {
+  activeTool = tool;
+  document.querySelectorAll('#capToolbar .tool-btn[data-tool]').forEach(b => {
+    b.classList.toggle('active', b.dataset.tool === tool);
+  });
+}
+
+function startDraw(pos) {
+  if (!photoImg) return;
+  if (activeTool === 'label') {
+    const text = prompt('Label text:');
+    if (text && text.trim()) {
+      annotations.push({ type: 'label', x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y, label: text.trim(), color: ANNOT_COLOR });
+      persistAnnotations();
+      redraw();
+    }
+    return;
+  }
+  drawing = true;
+  currentDraw = { type: activeTool, x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y, label: '', color: ANNOT_COLOR };
+}
+
+function moveDraw(pos) {
+  if (!drawing || !currentDraw) return;
+  currentDraw.x2 = pos.x;
+  currentDraw.y2 = pos.y;
+  redraw();
+}
+
+function endDraw() {
+  if (!drawing || !currentDraw) { drawing = false; return; }
+  drawing = false;
+  // discard near-zero drags
+  const dx = currentDraw.x2 - currentDraw.x1;
+  const dy = currentDraw.y2 - currentDraw.y1;
+  if (Math.hypot(dx, dy) > 4) {
+    annotations.push(currentDraw);
+    persistAnnotations();
+  }
+  currentDraw = null;
+  redraw();
+}
+
+function persistAnnotations() {
+  if (!currentSop) return;
+  currentSop.steps[captureIndex].annotations = annotations.slice();
+  renderStepDots();
+  queueSave();
+}
+
+function undoAnnotation() {
+  if (!annotations.length) return;
+  annotations.pop();
+  persistAnnotations();
+  redraw();
+}
+
+function clearAnnotations() {
+  if (!annotations.length) return;
+  if (!confirm('Clear all annotations on this photo?')) return;
+  annotations = [];
+  persistAnnotations();
+  redraw();
+}
+
+function redraw() {
+  if (!ctx || !canvas) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (photoImg) ctx.drawImage(photoImg, 0, 0, canvas.width, canvas.height);
+  for (const a of annotations) drawAnnotation(a);
+  if (currentDraw) drawAnnotation(currentDraw);
+}
+
+function drawAnnotation(a) {
+  ctx.save();
+  ctx.strokeStyle = a.color || ANNOT_COLOR;
+  ctx.fillStyle = a.color || ANNOT_COLOR;
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  if (a.type === 'arrow') {
+    drawArrow(a.x1, a.y1, a.x2, a.y2);
+  } else if (a.type === 'circle') {
+    drawEllipse(a.x1, a.y1, a.x2, a.y2);
+  } else if (a.type === 'label') {
+    drawLabel(a.x1, a.y1, a.label || '');
+  }
+  ctx.restore();
+}
+
+function drawArrow(x1, y1, x2, y2) {
+  const headLen = 14;
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  // shaft
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  // head (filled triangle)
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6), y2 - headLen * Math.sin(angle - Math.PI / 6));
+  ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6), y2 - headLen * Math.sin(angle + Math.PI / 6));
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawEllipse(x1, y1, x2, y2) {
+  const cx = (x1 + x2) / 2;
+  const cy = (y1 + y2) / 2;
+  const rx = Math.abs(x2 - x1) / 2;
+  const ry = Math.abs(y2 - y1) / 2;
+  if (rx < 1 || ry < 1) return;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+function drawLabel(x, y, text) {
+  const padX = 6, padY = 4;
+  ctx.font = '600 15px Inter, sans-serif';
+  ctx.textBaseline = 'top';
+  const metrics = ctx.measureText(text);
+  const w = metrics.width + padX * 2;
+  const h = 15 + padY * 2;
+  // background
+  ctx.fillStyle = '#FFFFFF';
+  ctx.strokeStyle = ANNOT_COLOR;
+  ctx.lineWidth = 2;
+  roundRect(x, y, w, h, 4);
+  ctx.fill();
+  ctx.stroke();
+  // text
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillText(text, x + padX, y + padY);
+}
+
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+/* Bake the annotated canvas into a JPEG and store on the step. */
+function commitCaptureStep() {
+  if (!currentSop) return;
+  const step = currentSop.steps[captureIndex];
+  step.text = document.getElementById('capNote').value;
+  if (photoImg && canvas) {
+    redraw();
+    try {
+      step.image = canvas.toDataURL('image/jpeg', 0.9);
+      // annotations remain stored as data too (in case re-render is wanted)
+      step.annotations = annotations.slice();
+    } catch (e) { /* tainted canvas — keep original */ }
+  }
+}
+
+/* ---- capture navigation ---- */
+function capturePrev() {
+  if (captureIndex === 0) return;
+  commitCaptureStep();
+  captureIndex--;
+  loadCaptureStep();
+}
+
+function captureNext() {
+  commitCaptureStep();
+  if (captureIndex < currentSop.steps.length - 1) {
+    captureIndex++;
+  } else {
+    // create a new step
+    currentSop.steps.push({ id: uuid(), index: currentSop.steps.length, image: null, text: '', annotations: [] });
+    captureIndex = currentSop.steps.length - 1;
+  }
+  saveNow();
+  loadCaptureStep();
+}
+
+function captureAddStep() {
+  commitCaptureStep();
+  currentSop.steps.push({ id: uuid(), index: currentSop.steps.length, image: null, text: '', annotations: [] });
+  captureIndex = currentSop.steps.length - 1;
+  saveNow();
+  loadCaptureStep();
+}
+
+/* update prev/next button labels */
+function updateCaptureNav() {
+  document.getElementById('capPrevBtn').disabled = captureIndex === 0;
+  const next = document.getElementById('capNextBtn');
+  next.textContent = captureIndex < currentSop.steps.length - 1 ? 'Next ›' : 'New step ›';
+}
+
+/* hook nav update into step load */
+const _loadCaptureStep = loadCaptureStep;
+loadCaptureStep = function () { _loadCaptureStep(); updateCaptureNav(); };
+
+/* =========================================================
+   PWA service worker
+   ========================================================= */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/static/sw.js').catch(() => {/* offline support optional */});
+  });
+}
+
+/* keep canvas sized on rotation/resize while capturing */
+window.addEventListener('resize', () => {
+  if (document.getElementById('screen-capture').classList.contains('active') && photoImg) {
+    sizeCanvasToPhoto();
+    redraw();
+  }
+});
+
+/* =========================================================
+   Boot
+   ========================================================= */
+loadSops();
+setTool('arrow');
+</script>
+</body>
+</html>
