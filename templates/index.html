@@ -112,11 +112,11 @@
       <div style="width:2px;height:16px;background:#CC0000;border-radius:1px;"></div>
       <span style="font-size:17px;font-weight:700;color:#1A1A1A;">Studio</span>
     </div>
-    <div style="max-width:660px;">
+    <div style="max-width:780px;">
 
       <h1 style="font-size:26px;font-weight:800;letter-spacing:-0.4px;color:#1A1A1A;max-width:480px;line-height:1.22;">One workspace for the factory floor.</h1>
       <p style="color:#6B6B6B;font-size:14px;margin-top:9px;max-width:480px;">Pick a module to get started. More tools are landing soon.</p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px;margin-top:32px;">
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:32px;">
         <!-- SOP live -->
         <div class="module-card" id="landing-sop-card" style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;transition:border-color 0.12s,box-shadow 0.12s;">
           <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -681,8 +681,8 @@ function renderEditorSteps() {
   if (!sop) return;
   const grid = $('editor-steps-grid');
   grid.innerHTML = sop.steps.map((s, i) => `
-    <div style="border:1px solid #EBEBEB;border-radius:9px;overflow:hidden;display:flex;flex-direction:column;background:#fff;">
-      <div style="background:#1A1A1A;color:#fff;font-size:11px;font-weight:700;letter-spacing:0.8px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;cursor:grab;">
+    <div class="step-item" data-i="${i}" style="border:1px solid #EBEBEB;border-radius:9px;overflow:hidden;display:flex;flex-direction:column;background:#fff;">
+      <div class="step-header" draggable="true" data-i="${i}" style="background:#1A1A1A;color:#fff;font-size:11px;font-weight:700;letter-spacing:0.8px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;cursor:grab;">
         <span style="display:flex;align-items:center;gap:6px;"><span style="color:#666;font-size:14px;letter-spacing:-2px;line-height:1;">&#10783;</span>STEP ${i+1}</span>
         <button class="step-del" data-i="${i}" style="color:#555;font-size:13px;padding:2px 4px;line-height:1;transition:color 0.1s;" title="Remove">&#10005;</button>
       </div>
@@ -705,6 +705,33 @@ function renderEditorSteps() {
     ta.addEventListener('blur', () => { ta.style.background = 'transparent'; });
   });
   grid.querySelector('.add-step-cell').addEventListener('click', addStep);
+
+  // Drag-to-reorder
+  let _dragFromIdx = null;
+  grid.querySelectorAll('.step-header').forEach(hdr => {
+    hdr.addEventListener('dragstart', e => {
+      _dragFromIdx = +hdr.dataset.i;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => hdr.closest('.step-item').style.opacity = '0.45', 0);
+    });
+    hdr.addEventListener('dragend', () => { hdr.closest('.step-item').style.opacity = ''; });
+  });
+  grid.querySelectorAll('.step-item').forEach(item => {
+    item.addEventListener('dragover', e => { e.preventDefault(); item.style.outline = '2px solid #CC0000'; item.style.outlineOffset = '-2px'; });
+    item.addEventListener('dragleave', () => { item.style.outline = ''; });
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      item.style.outline = '';
+      const toIdx = +item.dataset.i;
+      if (_dragFromIdx === null || _dragFromIdx === toIdx) return;
+      const steps = state.currentSop.steps;
+      const [moved] = steps.splice(_dragFromIdx, 1);
+      steps.splice(toIdx, 0, moved);
+      _dragFromIdx = null;
+      renderEditorSteps();
+      queueSave();
+    });
+  });
 }
 
 function setStatus(status) {
