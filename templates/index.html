@@ -22,6 +22,7 @@
     ::-webkit-scrollbar-thumb { background: #C8C8C8; border-radius: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
 
     .screen { display: none; height: 100vh; }
     .screen.active { display: flex; }
@@ -37,20 +38,116 @@
     .home-btn:hover { color: #1A1A1A !important; }
     .back-btn:hover { color: #CC0000 !important; }
     .dot-add:hover { border-color: #CC0000 !important; color: #CC0000 !important; }
+    .hamburger-btn:hover span { background: #CC0000 !important; }
+    .module-card:hover { border-color: #CC0000 !important; box-shadow: 0 6px 16px rgba(204,0,0,0.08) !important; cursor: pointer; }
+    .drawer-item:hover { background: #262626 !important; }
     input:focus, textarea:focus { border-color: #CC0000 !important; outline: none; }
     textarea:focus { background: #FFFCF5 !important; }
   </style>
 </head>
 <body>
 
-<!-- ═══════════════════ HOME ═══════════════════ -->
+<!-- ═══════════════════ LANDING ═══════════════════ -->
+<div id="screen-landing" class="screen" style="flex-direction:column; background:#F2F2F2;">
+
+  <header style="background:#1A1A1A; border-bottom:3px solid #CC0000; display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:62px; flex-shrink:0;">
+    <div style="display:flex; align-items:center; gap:18px;">
+      <button class="hamburger-btn" id="landing-hamburger" style="display:flex; flex-direction:column; gap:4.5px; padding:8px 4px; background:none; flex-shrink:0;">
+        <span style="width:20px; height:2px; background:#fff; border-radius:1px; display:block; transition:background 0.1s;"></span>
+        <span style="width:20px; height:2px; background:#fff; border-radius:1px; display:block; transition:background 0.1s;"></span>
+        <span style="width:20px; height:2px; background:#fff; border-radius:1px; display:block; transition:background 0.1s;"></span>
+      </button>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <img src="/static/IXL-white.png" style="height:38px; width:auto; display:block;" alt="IXL">
+        <div style="width:2px; height:24px; background:#CC0000; border-radius:1px;"></div>
+        <span style="font-size:22px; font-weight:700; color:#FFFFFF; letter-spacing:0.3px;">Studio</span>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:16px;">
+      <span style="color:#9A9A9A; font-size:13px; font-weight:500; display:none;" id="shift-label">Plant 3 · Day shift</span>
+      <div style="width:34px; height:34px; border-radius:50%; background:#CC0000; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0;">RM</div>
+    </div>
+  </header>
+
+  <div style="flex:1; overflow-y:auto; padding:44px 28px 60px;">
+    <div style="max-width:860px; margin:0 auto;">
+      <div style="font-size:12px; font-weight:800; color:#CC0000; letter-spacing:2px; margin-bottom:10px;">IXL | STUDIO</div>
+      <h1 style="font-size:28px; font-weight:800; letter-spacing:-0.5px; color:#1A1A1A; max-width:500px; line-height:1.2;">One workspace for the factory floor.</h1>
+      <p style="color:#6B6B6B; font-size:15px; margin-top:9px; max-width:500px;">Pick a module to get started. More tools are landing soon.</p>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; margin-top:32px;">
+
+        <!-- SOP — live -->
+        <div class="module-card" id="landing-sop-card" style="background:#fff; border:1px solid #E4E4E4; border-radius:13px; padding:22px; display:flex; flex-direction:column; gap:15px; box-shadow:0 2px 4px rgba(0,0,0,0.04); transition:all 0.12s;">
+          <div style="display:flex; align-items:center; justify-content:flex-end;">
+            <span style="font-size:11px; font-weight:700; color:#2E9E4F; background:#E7F4EB; padding:4px 9px; border-radius:20px; letter-spacing:0.4px;">● LIVE</span>
+          </div>
+          <div>
+            <div style="font-size:17px; font-weight:700; color:#1A1A1A;">Standard Operating Procedures</div>
+            <p style="color:#7A7A7A; font-size:13.5px; margin-top:4px; line-height:1.5;">Capture photos, annotate steps, generate the Word document.</p>
+          </div>
+          <button id="landing-open-sop" class="btn-red" style="align-self:flex-start; background:#CC0000; color:#fff; padding:10px 20px; border-radius:6px; font-size:14px; font-weight:600; transition:background 0.1s;">Open SOP ›</button>
+        </div>
+
+        <!-- Label — soon -->
+        <div style="background:#FAFAFA; border:1px solid #EAEAEA; border-radius:13px; padding:22px; display:flex; flex-direction:column; gap:15px;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="width:46px; height:46px; border-radius:11px; background:#EDEDED; color:#B4B4B4; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; flex-shrink:0;">LB</div>
+            <span style="font-size:11px; font-weight:700; color:#A0A0A0; background:#F0F0F0; padding:4px 9px; border-radius:20px; letter-spacing:0.4px;">COMING SOON</span>
+          </div>
+          <div>
+            <div style="font-size:17px; font-weight:700; color:#B0B0B0;">Label</div>
+            <p style="color:#B4B4B4; font-size:13.5px; margin-top:4px; line-height:1.5;">Design and print part labels.</p>
+          </div>
+          <button disabled style="align-self:flex-start; background:#fff; color:#BFBFBF; border:1px solid #E4E4E4; padding:10px 20px; border-radius:6px; font-size:14px; font-weight:600; cursor:not-allowed;">Coming soon</button>
+        </div>
+
+        <!-- ICL — soon -->
+        <div style="background:#FAFAFA; border:1px solid #EAEAEA; border-radius:13px; padding:22px; display:flex; flex-direction:column; gap:15px;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="width:46px; height:46px; border-radius:11px; background:#EDEDED; color:#B4B4B4; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0;">ICL</div>
+            <span style="font-size:11px; font-weight:700; color:#A0A0A0; background:#F0F0F0; padding:4px 9px; border-radius:20px; letter-spacing:0.4px;">COMING SOON</span>
+          </div>
+          <div>
+            <div style="font-size:17px; font-weight:700; color:#B0B0B0;">Inspection Checklist</div>
+            <p style="color:#B4B4B4; font-size:13.5px; margin-top:4px; line-height:1.5;">Inspection checklists.</p>
+          </div>
+          <button disabled style="align-self:flex-start; background:#fff; color:#BFBFBF; border:1px solid #E4E4E4; padding:10px 20px; border-radius:6px; font-size:14px; font-weight:600; cursor:not-allowed;">Coming soon</button>
+        </div>
+
+        <!-- MLB/PFC — soon -->
+        <div style="background:#FAFAFA; border:1px solid #EAEAEA; border-radius:13px; padding:22px; display:flex; flex-direction:column; gap:15px;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="width:46px; height:46px; border-radius:11px; background:#EDEDED; color:#B4B4B4; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; line-height:1.15; text-align:center; flex-shrink:0;">MLB<br>PFC</div>
+            <span style="font-size:11px; font-weight:700; color:#A0A0A0; background:#F0F0F0; padding:4px 9px; border-radius:20px; letter-spacing:0.4px;">COMING SOON</span>
+          </div>
+          <div>
+            <div style="font-size:17px; font-weight:700; color:#B0B0B0;">Multi-Level BOM / Process Flow Chart</div>
+            <p style="color:#B4B4B4; font-size:13.5px; margin-top:4px; line-height:1.5;">Multi-level BOM and process flow charts.</p>
+          </div>
+          <button disabled style="align-self:flex-start; background:#fff; color:#BFBFBF; border:1px solid #E4E4E4; padding:10px 20px; border-radius:6px; font-size:14px; font-weight:600; cursor:not-allowed;">Coming soon</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ HOME (SOP list) ═══════════════════ -->
 <div id="screen-home" class="screen" style="flex-direction:column; background:#F2F2F2;">
 
   <header style="background:#1A1A1A; border-bottom:3px solid #CC0000; display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:62px; flex-shrink:0;">
-    <div style="display:flex; align-items:center; gap:11px;">
-      <img src="/static/IXL-white.png" style="height:40px; width:auto; display:block;" alt="IXL">
-      <div style="width:2px; height:26px; background:#CC0000; border-radius:1px;"></div>
-      <span style="font-size:22px; font-weight:700; color:#FFFFFF; letter-spacing:0.3px;">Studio</span>
+    <div style="display:flex; align-items:center; gap:18px;">
+      <button class="hamburger-btn" id="home-hamburger" style="display:flex; flex-direction:column; gap:4.5px; padding:8px 4px; background:none; flex-shrink:0;">
+        <span style="width:20px; height:2px; background:#fff; border-radius:1px; display:block; transition:background 0.1s;"></span>
+        <span style="width:20px; height:2px; background:#fff; border-radius:1px; display:block; transition:background 0.1s;"></span>
+        <span style="width:20px; height:2px; background:#fff; border-radius:1px; display:block; transition:background 0.1s;"></span>
+      </button>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <img src="/static/IXL-white.png" style="height:38px; width:auto; display:block;" alt="IXL">
+        <div style="width:2px; height:24px; background:#CC0000; border-radius:1px;"></div>
+        <span style="font-size:22px; font-weight:700; color:#FFFFFF; letter-spacing:0.3px;">SOP</span>
+      </div>
     </div>
     <button id="home-new-btn" class="btn-red" style="background:#CC0000; color:#fff; padding:9px 20px; border-radius:5px; font-size:14px; font-weight:600; transition:background 0.1s;">+ New SOP</button>
   </header>
@@ -148,7 +245,7 @@
       <div id="sidebar-logo" style="display:flex; align-items:center; gap:10px; cursor:pointer; padding:2px 0;">
         <img src="/static/IXL.png" style="height:28px; width:auto; display:block;" alt="IXL">
         <div style="width:2px; height:20px; background:#CC0000; border-radius:1px;"></div>
-        <span style="font-size:15px; font-weight:400; color:#1A1A1A; letter-spacing:0.3px;">SOP</span>
+        <span style="font-size:15px; font-weight:700; color:#1A1A1A; letter-spacing:0.3px;">SOP</span>
       </div>
       <input id="sidebar-search" placeholder="Search documents&#8230;" style="width:100%; padding:9px 12px; border:1px solid #E0E0E0; border-radius:6px; background:#F8F8F8; font-size:13px; color:#1A1A1A; transition:all 0.1s;">
       <button id="sidebar-new-btn" class="btn-red" style="background:#CC0000; color:#FFFFFF; width:100%; padding:8px 14px; border-radius:5px; font-size:13px; font-weight:600; transition:background 0.1s;">+ New SOP</button>
@@ -174,12 +271,8 @@
     <div style="flex:1; overflow-y:auto; padding:24px; background:#F2F2F2; min-height:0;">
       <div id="editor-sheet" style="max-width:1100px; margin:0 auto; background:#FFFFFF; border:1px solid #EBEBEB; border-radius:8px; padding:22px;">
         <div style="display:flex; gap:16px; margin-bottom:20px; flex-wrap:wrap;">
-          <div style="flex:1; min-width:140px; display:flex; flex-direction:column; gap:5px;">
-            <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">Part No</label>
-            <input id="field-part-no" placeholder="e.g. 36611" style="padding:9px 11px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; transition:border-color 0.1s; width:100%;">
-          </div>
           <div style="flex:2; min-width:200px; display:flex; flex-direction:column; gap:5px;">
-            <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">Part Name</label>
+            <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">SOP Name</label>
             <input id="field-part-name" placeholder="e.g. Tastic Luminate Heat Module" style="padding:9px 11px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; transition:border-color 0.1s; width:100%;">
           </div>
           <div style="flex:1; min-width:140px; display:flex; flex-direction:column; gap:5px;">
@@ -196,30 +289,68 @@
   </div>
 </div>
 
+<!-- ═══════════════════ DRAWER ═══════════════════ -->
+<div id="drawer-overlay" style="display:none; position:fixed; inset:0; z-index:400;">
+  <div id="drawer-scrim" style="position:absolute; inset:0; background:rgba(0,0,0,0.5); animation:fadeIn 0.15s ease;"></div>
+  <aside style="position:absolute; left:0; top:0; bottom:0; width:300px; background:#1A1A1A; display:flex; flex-direction:column; box-shadow:6px 0 30px rgba(0,0,0,0.4); animation:slideInLeft 0.2s ease; overflow:hidden;">
+    <div style="padding:14px 18px 14px 22px; border-bottom:1px solid #2C2C2C; display:flex; align-items:center; justify-content:space-between; height:62px; flex-shrink:0;">
+      <div style="display:flex; align-items:center; gap:11px;">
+        <img src="/static/IXL-white.png" style="height:30px; width:auto; display:block;" alt="IXL">
+        <div style="width:2px; height:18px; background:#CC0000; border-radius:1px;"></div>
+        <span style="font-size:17px; font-weight:700; color:#fff; letter-spacing:0.3px;">Studio</span>
+      </div>
+      <button id="drawer-close" style="width:30px; height:30px; border-radius:50%; background:#2C2C2C; color:#9A9A9A; font-size:15px; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background 0.1s;">✕</button>
+    </div>
+    <div style="padding:6px 12px 12px; flex:1; overflow-y:auto;">
+      <div style="font-size:11px; font-weight:700; color:#6B6B6B; letter-spacing:1.5px; padding:14px 10px 8px;">MODULES</div>
+      <nav style="display:flex; flex-direction:column; gap:2px;">
+        <button id="drawer-sop" class="drawer-item" style="display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:8px; background:#262626; text-align:left; width:100%; transition:background 0.1s;">
+          <div style="width:34px; height:34px; border-radius:8px; background:#CC0000; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0;">SOP</div>
+          <div style="flex:1;">
+            <div style="color:#fff; font-size:14px; font-weight:600;">SOP</div>
+            <div style="color:#8A8A8A; font-size:11.5px;">Operating procedures</div>
+          </div>
+        </button>
+        <div style="display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:8px;">
+          <div style="width:34px; height:34px; border-radius:8px; background:#2C2C2C; color:#6B6B6B; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; flex-shrink:0;">LB</div>
+          <div style="flex:1;"><div style="color:#9A9A9A; font-size:14px; font-weight:600;">Label</div></div>
+          <span style="font-size:9.5px; font-weight:700; color:#7A7A7A; border:1px solid #3A3A3A; padding:3px 7px; border-radius:20px; letter-spacing:0.4px;">SOON</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:8px;">
+          <div style="width:34px; height:34px; border-radius:8px; background:#2C2C2C; color:#6B6B6B; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; flex-shrink:0;">ICL</div>
+          <div style="flex:1;"><div style="color:#9A9A9A; font-size:14px; font-weight:600;">Inspection Checklist</div></div>
+          <span style="font-size:9.5px; font-weight:700; color:#7A7A7A; border:1px solid #3A3A3A; padding:3px 7px; border-radius:20px; letter-spacing:0.4px;">SOON</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:8px;">
+          <div style="width:34px; height:34px; border-radius:8px; background:#2C2C2C; color:#6B6B6B; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:800; line-height:1.15; text-align:center; flex-shrink:0;">MLB<br>PFC</div>
+          <div style="flex:1;"><div style="color:#9A9A9A; font-size:14px; font-weight:600; line-height:1.3;">Multi-Level BOM / PFC</div></div>
+          <span style="font-size:9.5px; font-weight:700; color:#7A7A7A; border:1px solid #3A3A3A; padding:3px 7px; border-radius:20px; letter-spacing:0.4px;">SOON</span>
+        </div>
+      </nav>
+    </div>
+  </aside>
+</div>
+
 <!-- ═══════════════════ TOAST ═══════════════════ -->
 <div id="toast" style="position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(14px); background:#1A1A1A; color:#FFFFFF; padding:12px 22px; border-radius:8px; font-size:14px; font-weight:500; opacity:0; pointer-events:none; z-index:1000; border-left:3px solid #CC0000; white-space:nowrap; transition:opacity 0.2s, transform 0.2s; max-width:90vw;"></div>
 
 <!-- ═══════════════════ MODAL ═══════════════════ -->
-<div id="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:500; padding:20px; animation:fadeIn 0.15s ease;">
-  <div style="background:#FFFFFF; border-radius:10px; width:100%; max-width:380px; padding:26px; border-top:3px solid #CC0000; box-shadow:0 20px 60px rgba(0,0,0,0.18);">
+<div id="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:flex-end; justify-content:center; z-index:500; padding:0; animation:fadeIn 0.15s ease;">
+  <div style="background:#FFFFFF; border-radius:18px 18px 0 0; width:100%; max-width:480px; padding:26px 24px 32px; border-top:3px solid #CC0000; box-shadow:0 -8px 40px rgba(0,0,0,0.15);">
     <h3 style="font-size:17px; font-weight:700; margin-bottom:18px; color:#1A1A1A;">New SOP</h3>
     <div style="display:flex; flex-direction:column; gap:13px; margin-bottom:22px;">
       <div style="display:flex; flex-direction:column; gap:5px;">
-        <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">Part No</label>
-        <input id="modal-part-no" placeholder="e.g. 36611" style="padding:10px 12px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; width:100%; transition:border-color 0.1s;">
-      </div>
-      <div style="display:flex; flex-direction:column; gap:5px;">
-        <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">Part Name</label>
-        <input id="modal-part-name" placeholder="e.g. Tastic Luminate Heat Module" style="padding:10px 12px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; width:100%; transition:border-color 0.1s;">
+        <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">SOP Name</label>
+        <input id="modal-part-name" placeholder="e.g. Tastic Luminate Heat Module" style="padding:11px 12px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; width:100%; transition:border-color 0.1s;">
       </div>
       <div style="display:flex; flex-direction:column; gap:5px;">
         <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">Doc No</label>
-        <input id="modal-doc-no" placeholder="e.g. A0866" style="padding:10px 12px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; width:100%; transition:border-color 0.1s;">
+        <input id="modal-doc-no" placeholder="e.g. A0866" style="padding:11px 12px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; width:100%; transition:border-color 0.1s;">
       </div>
     </div>
-    <div style="display:flex; gap:10px; justify-content:flex-end;">
-      <button id="modal-cancel" class="btn-white" style="background:#FFFFFF; color:#2C2C2C; border:1px solid #E0E0E0; padding:9px 18px; border-radius:5px; font-size:14px; font-weight:600; transition:background 0.1s;">Cancel</button>
-      <button id="modal-create" class="btn-red" style="background:#CC0000; color:#FFFFFF; padding:9px 18px; border-radius:5px; font-size:14px; font-weight:600; transition:background 0.1s;">Create</button>
+    <div style="display:flex; gap:10px;">
+      <button id="modal-cancel" class="btn-white" style="flex:1; background:#FFFFFF; color:#2C2C2C; border:1px solid #E0E0E0; padding:11px 18px; border-radius:6px; font-size:14px; font-weight:600; transition:background 0.1s;">Cancel</button>
+      <button id="modal-create" class="btn-red" style="flex:1; background:#CC0000; color:#FFFFFF; padding:11px 18px; border-radius:6px; font-size:14px; font-weight:600; transition:background 0.1s;">Create</button>
     </div>
   </div>
 </div>
@@ -232,13 +363,15 @@
 
 // ── State ─────────────────────────────────────────────────────────────────
 const state = {
-  screen: 'home',
+  screen: 'landing',
   sops: [],
   currentSop: null,
   captureIndex: 0,
   activeTool: 'arrow',
   editorSearch: '',
 };
+
+const RS = 3; // canvas render scale — 3× display size for thick annotations in Word
 
 let _saveTimer = null, _toastTimer = null;
 let _canvas = null, _ctx = null, _photoImg = null;
@@ -313,6 +446,15 @@ function showScreen(name) {
   }
 }
 
+// ── Drawer ────────────────────────────────────────────────────────────────
+function openDrawer() {
+  $('drawer-overlay').style.display = 'block';
+}
+
+function closeDrawer() {
+  $('drawer-overlay').style.display = 'none';
+}
+
 // ── Autosave ──────────────────────────────────────────────────────────────
 function queueSave() {
   clearTimeout(_saveTimer);
@@ -341,8 +483,18 @@ async function loadSops() {
   renderSidebarList();
 }
 
+function goLanding() {
+  state.currentSop = null;
+  showScreen('landing');
+}
+
 function goHome() {
   state.currentSop = null;
+  loadSops();
+  showScreen('home');
+}
+
+function enterSop() {
   loadSops();
   showScreen('home');
 }
@@ -376,11 +528,10 @@ async function deleteSop(id) {
 
 // ── Modal ─────────────────────────────────────────────────────────────────
 function openModal() {
-  $('modal-part-no').value = '';
   $('modal-part-name').value = '';
   $('modal-doc-no').value = '';
   $('modal-overlay').style.display = 'flex';
-  setTimeout(() => $('modal-part-no').focus(), 50);
+  setTimeout(() => $('modal-part-name').focus(), 50);
 }
 
 function closeModal() { $('modal-overlay').style.display = 'none'; }
@@ -388,7 +539,7 @@ function closeModal() { $('modal-overlay').style.display = 'none'; }
 async function createSop() {
   try {
     const created = await api('POST', '/api/sops', {
-      part_no: $('modal-part-no').value.trim(),
+      part_no: '',
       part_name: $('modal-part-name').value.trim(),
       doc_no: $('modal-doc-no').value.trim(),
     });
@@ -413,6 +564,7 @@ function computeGroups(items) {
 // ── Home ──────────────────────────────────────────────────────────────────
 function renderHomeList() {
   const list = $('home-list'), empty = $('home-empty');
+  if (!list) return;
   if (!state.sops.length) { empty.style.display = 'block'; list.innerHTML = ''; return; }
   empty.style.display = 'none';
   list.innerHTML = computeGroups(state.sops).map(g => `
@@ -465,7 +617,6 @@ function renderEditorScreen() {
   const sop = state.currentSop;
   if (!sop) return;
   $('editor-title').textContent = sop.part_name || 'Untitled SOP';
-  $('field-part-no').value = sop.part_no || '';
   $('field-part-name').value = sop.part_name || '';
   $('field-doc-no').value = sop.doc_no || '';
   updateStatusToggle();
@@ -681,13 +832,13 @@ function loadPhotoForCanvas(src, cb) {
 
 function sizeCanvas() {
   if (!_photoImg || !_canvas) return;
-  const area = $('cap-photo-area'), maxW = Math.min(area?.clientWidth || 360, 900);
+  const area = $('cap-photo-area'), dispW = Math.min(area?.clientWidth || 360, 900);
   const ratio = _photoImg.height / _photoImg.width;
-  let w = maxW, h = Math.round(w * ratio);
+  let dw = dispW, dh = Math.round(dw * ratio);
   const maxH = Math.round(window.innerHeight * 0.5);
-  if (h > maxH) { h = maxH; w = Math.round(h / ratio); }
-  _canvas.width = w; _canvas.height = h;
-  _canvas.style.width = w + 'px'; _canvas.style.height = h + 'px';
+  if (dh > maxH) { dh = maxH; dw = Math.round(dh / ratio); }
+  _canvas.width = dw * RS; _canvas.height = dh * RS;
+  _canvas.style.width = dw + 'px'; _canvas.style.height = dh + 'px';
 }
 
 function bindCanvasEvents() {
@@ -748,18 +899,18 @@ function redrawCanvas() {
 }
 
 function drawAnnotation(a) {
-  const ctx = _ctx;
+  const ctx = _ctx, s = _canvas.width / 360;
   ctx.save();
   ctx.strokeStyle = ctx.fillStyle = a.color || RED;
-  ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  if (a.type === 'arrow') drawArrow(a.x1, a.y1, a.x2, a.y2);
+  ctx.lineWidth = 8 * s; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (a.type === 'arrow') drawArrow(a.x1, a.y1, a.x2, a.y2, s);
   else if (a.type === 'circle') drawEllipse(a.x1, a.y1, a.x2, a.y2);
-  else if (a.type === 'label') drawLabel(a.x1, a.y1, a.label || '');
+  else if (a.type === 'label') drawLabel(a.x1, a.y1, a.label || '', s);
   ctx.restore();
 }
 
-function drawArrow(x1, y1, x2, y2) {
-  const hlen = 14, angle = Math.atan2(y2 - y1, x2 - x1);
+function drawArrow(x1, y1, x2, y2, s = 1) {
+  const hlen = 26 * s, angle = Math.atan2(y2 - y1, x2 - x1);
   _ctx.beginPath(); _ctx.moveTo(x1, y1); _ctx.lineTo(x2, y2); _ctx.stroke();
   _ctx.beginPath();
   _ctx.moveTo(x2, y2);
@@ -774,13 +925,13 @@ function drawEllipse(x1, y1, x2, y2) {
   _ctx.beginPath(); _ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2); _ctx.stroke();
 }
 
-function drawLabel(x, y, text) {
-  const ctx = _ctx, padX = 6, padY = 4;
-  ctx.font = '600 14px Inter, sans-serif'; ctx.textBaseline = 'top';
-  const w = ctx.measureText(text).width + padX*2, h = 14 + padY*2;
-  ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = RED; ctx.lineWidth = 2;
+function drawLabel(x, y, text, s = 1) {
+  const ctx = _ctx, fs = Math.round(14 * s), padX = 8 * s, padY = 5 * s;
+  ctx.font = `600 ${fs}px Inter, sans-serif`; ctx.textBaseline = 'top';
+  const w = ctx.measureText(text).width + padX * 2, h = fs + padY * 2;
+  ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = RED; ctx.lineWidth = 3 * s;
   ctx.beginPath();
-  if (ctx.roundRect) ctx.roundRect(x, y, w, h, 4); else ctx.rect(x, y, w, h);
+  if (ctx.roundRect) ctx.roundRect(x, y, w, h, 5 * s); else ctx.rect(x, y, w, h);
   ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#1A1A1A'; ctx.fillText(text, x + padX, y + padY);
 }
@@ -804,14 +955,25 @@ function onPhotoSelected(file) {
 
 // ── Wire up events ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  // Landing
+  $('landing-hamburger').addEventListener('click', openDrawer);
+  $('landing-open-sop').addEventListener('click', enterSop);
+  $('landing-sop-card').addEventListener('click', enterSop);
+
   // Home
+  $('home-hamburger').addEventListener('click', openDrawer);
   $('home-new-btn').addEventListener('click', openModal);
+
+  // Drawer
+  $('drawer-close').addEventListener('click', closeDrawer);
+  $('drawer-scrim').addEventListener('click', closeDrawer);
+  $('drawer-sop').addEventListener('click', () => { enterSop(); closeDrawer(); });
 
   // Modal
   $('modal-overlay').addEventListener('click', e => { if (e.target === $('modal-overlay')) closeModal(); });
   $('modal-cancel').addEventListener('click', closeModal);
   $('modal-create').addEventListener('click', createSop);
-  ['modal-part-no','modal-part-name','modal-doc-no'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') createSop(); }));
+  ['modal-part-name','modal-doc-no'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') createSop(); }));
 
   // Capture
   $('cap-back-btn').addEventListener('click', leaveCapture);
@@ -841,10 +1003,6 @@ document.addEventListener('DOMContentLoaded', () => {
   $('status-done-btn').addEventListener('click', () => setStatus('done'));
   $('download-btn').addEventListener('click', generateDocx);
 
-  $('field-part-no').addEventListener('input', () => {
-    if (!state.currentSop) return;
-    state.currentSop.part_no = $('field-part-no').value; queueSave();
-  });
   $('field-part-name').addEventListener('input', () => {
     if (!state.currentSop) return;
     state.currentSop.part_name = $('field-part-name').value;
@@ -872,7 +1030,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Boot
-  showScreen('home');
+  showScreen('landing');
   loadSops();
 
   if ('serviceWorker' in navigator) {

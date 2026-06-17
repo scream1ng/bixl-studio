@@ -157,7 +157,8 @@ def set_part_title(doc, part_no: str, part_name: str) -> None:
     if not header.tables:
         return
     para = header.tables[0].rows[1].cells[2].paragraphs[0]
-    _replace_paragraph_text(para, f"{part_no} - {part_name}")
+    title = f"{part_no} - {part_name}" if part_no else part_name
+    _replace_paragraph_text(para, title)
 
 
 def set_doc_number(doc, doc_no: str) -> None:
