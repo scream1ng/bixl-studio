@@ -67,6 +67,21 @@
     input:focus, textarea:focus { border-color: #CC0000 !important; outline: none; }
     textarea:focus { background: #FFFCF5 !important; }
     .editor-home-lnk:hover { color: #CC0000 !important; }
+
+    /* sync status pill */
+    .sync-pill {
+      display: none; align-items: center; gap: 5px;
+      font-size: 11px; color: #6B6B6B; padding: 2px 8px;
+      border-radius: 999px; background: #EBEBEB; white-space: nowrap;
+    }
+    .sync-pill.show { display: inline-flex; }
+    .sync-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #9B9B9B; flex-shrink: 0; }
+    .sync-pill.saving .dot { animation: pulse 1s infinite; }
+    .sync-pill.saved  { color: #2E9E4F; background: rgba(46,158,79,0.1); }
+    .sync-pill.saved  .dot { background: #2E9E4F; }
+    .sync-pill.error  { color: #CC0000; background: rgba(204,0,0,0.08); }
+    .sync-pill.error  .dot { background: #CC0000; }
+    @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
   </style>
 </head>
 <body>
@@ -299,7 +314,10 @@
 
   <div style="height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);">
     <button id="cap-back-btn" style="color:#1A1A1A;font-size:15px;font-weight:600;padding:8px 2px;">&#8249; Home</button>
-    <div style="font-weight:700;font-size:14px;color:#1A1A1A;">Step <span id="cap-step-num" style="color:#CC0000;">1</span> <span id="cap-step-total" style="color:#B4B4B4;font-weight:500;">/ 1</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+      <div style="font-weight:700;font-size:14px;color:#1A1A1A;">Step <span id="cap-step-num" style="color:#CC0000;">1</span> <span id="cap-step-total" style="color:#B4B4B4;font-weight:500;">/ 1</span></div>
+      <span id="sync-pill" class="sync-pill" aria-live="polite"></span>
+    </div>
     <button id="cap-done-btn" style="color:#CC0000;font-size:15px;font-weight:700;padding:8px 2px;">Done</button>
   </div>
 
@@ -433,10 +451,19 @@ const state = {
 
 const RS = 3;
 
-let _saveTimer = null, _toastTimer = null;
+let _saveTimer = null, _toastTimer = null, _syncFade = null;
 let _canvas = null, _ctx = null, _photoImg = null;
 let _annotations = [], _drawing = false, _currentDraw = null;
 let _editorImgIdx = null;
+
+// ── Save queue state ──────────────────────────────────────────────────────────
+const _serverHashes = new Set();  // image hashes the server has confirmed
+let _saving = false;              // single-flight lock
+let _dirty = false;               // changes pending since last clean save
+let _retryDelay = 0;
+let _syncState = 'idle';
+let _flushResolvers = [];         // promises waiting for a clean save
+const RETRY_BASE = 1000, RETRY_MAX = 30000;
 const RED = '#CC0000';
 
 const $ = id => document.getElementById(id);
@@ -477,11 +504,16 @@ async function api(method, path, body) {
   if (body !== undefined) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
   let res;
   try { res = await fetch(path, opts); }
-  catch (e) { throw new Error('Network error'); }
+  catch (e) { const err = new Error('Network error'); err.transient = true; throw err; }
   if (!res.ok) {
-    let d = '';
-    try { const j = await res.json(); d = j.error || j.message || ''; } catch (_) {}
-    throw new Error(d || `${method} ${path} (${res.status})`);
+    let d = '', j = null;
+    try { j = await res.json(); d = j.error || j.message || ''; } catch (_) {}
+    const err = new Error(d || `${method} ${path} (${res.status})`);
+    err.status = res.status; err.body = j;
+    if (res.status === 409) err.stale = true;
+    else if (res.status >= 500) err.transient = true;
+    else err.permanent = true;
+    throw err;
   }
   if (res.status === 204) return null;
   return res.headers.get('content-type')?.includes('json') ? res.json() : res;
@@ -505,22 +537,120 @@ function openDrawer() { $('drawer-overlay').style.display = 'block'; }
 function closeDrawer() { $('drawer-overlay').style.display = 'none'; }
 
 function queueSave() {
+  _dirty = true;
+  setSyncState('pending');
   clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(saveNow, 800);
+  _saveTimer = setTimeout(runSaveLoop, 800);
+}
+
+async function sha256Hex(str) {
+  if (!crypto.subtle) return null;  // non-secure context: always send full image
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function buildSteps(sop) {
+  return Promise.all(sop.steps.map(async (s, i) => {
+    const out = { id: s.id, index: i, text: s.text || '', annotations: s.annotations || [] };
+    if (s.image) {
+      const h = await sha256Hex(s.image);
+      if (h) {
+        out.image_hash = h;
+        if (!_serverHashes.has(h)) out.image = s.image;  // only upload if server lacks it
+      } else {
+        out.image = s.image;  // crypto.subtle unavailable — always send
+      }
+    } else {
+      out.image_hash = null;
+    }
+    return out;
+  }));
 }
 
 async function saveNow() {
   const sop = state.currentSop;
   if (!sop) return;
   const payload = {
-    part_no: sop.part_no, part_name: sop.part_name,
-    doc_no: sop.doc_no, status: sop.status,
-    steps: sop.steps.map((s, i) => ({ index: i, image: s.image || null, text: s.text || '', annotations: s.annotations || [] })),
+    part_no: sop.part_no || '', part_name: sop.part_name || '',
+    doc_no: sop.doc_no || '', status: sop.status || 'draft',
+    base_updated_at: sop.updated_at || null,
+    steps: await buildSteps(sop),
   };
+  const updated = await api('PUT', '/api/sops/' + sop.id, payload);
+  if (updated?.updated_at) sop.updated_at = updated.updated_at;
+  (updated?.have_hashes || []).forEach(h => _serverHashes.add(h));
+  return updated;
+}
+
+async function runSaveLoop() {
+  if (_saving) return;
+  if (!_dirty) return;
+  _saving = true;
   try {
-    const updated = await api('PUT', '/api/sops/' + sop.id, payload);
-    if (updated?.updated_at) sop.updated_at = updated.updated_at;
-  } catch (e) { toast('Save failed: ' + e.message); }
+    while (_dirty) {
+      _dirty = false;
+      setSyncState('saving');
+      try {
+        await saveNow();
+        _retryDelay = 0;
+      } catch (e) {
+        _dirty = true;
+        if (e && e.stale) {
+          reconcileStale(e.body && e.body.server);
+          _retryDelay = 0;
+          continue;
+        }
+        if (e && e.permanent) {
+          setSyncState('error');
+          toast('Save failed: ' + e.message);
+          resolveFlush(false);
+          break;
+        }
+        // transient (network / 5xx) — back off and retry silently
+        setSyncState('error');
+        _retryDelay = Math.min(_retryDelay ? _retryDelay * 2 : RETRY_BASE, RETRY_MAX);
+        await new Promise(r => setTimeout(r, _retryDelay));
+      }
+    }
+    if (!_dirty) { setSyncState('saved'); resolveFlush(true); }
+  } finally {
+    _saving = false;
+    if (_dirty) runSaveLoop();
+  }
+}
+
+function resolveFlush(ok) { _flushResolvers.forEach(r => r(ok)); _flushResolvers = []; }
+
+function flushSaves() {
+  if (!_dirty && !_saving) return Promise.resolve(true);
+  return new Promise(resolve => { _flushResolvers.push(resolve); runSaveLoop(); });
+}
+
+function reconcileStale(server) {
+  const sop = state.currentSop;
+  if (!sop || !server || server.id !== sop.id) return;
+  sop.updated_at = server.updated_at;
+  const localById = new Map(sop.steps.map(s => [s.id, s]));
+  const editingId = sop.steps[state.captureIndex]?.id;
+  const merged = (server.steps || []).map(srv => {
+    if (srv.id === editingId && localById.has(editingId)) return localById.get(editingId);
+    return localById.get(srv.id) || srv;
+  });
+  for (const s of sop.steps) if (!merged.some(m => m.id === s.id)) merged.push(s);
+  merged.forEach((s, i) => s.index = i);
+  sop.steps = merged;
+  (server.steps || []).forEach(s => { if (s.image_hash) _serverHashes.add(s.image_hash); });
+}
+
+function setSyncState(s) {
+  _syncState = s;
+  const el = $('sync-pill');
+  if (!el) return;
+  clearTimeout(_syncFade);
+  const label = { pending: 'Saving…', saving: 'Saving…', saved: 'Saved', error: 'Retrying…', idle: '' }[s] || '';
+  el.className = 'sync-pill' + (s !== 'idle' ? ' show ' + (s === 'pending' ? 'saving' : s) : '');
+  el.innerHTML = label ? '<span class="dot"></span>' + esc(label) : '';
+  if (s === 'saved') _syncFade = setTimeout(() => { el.classList.remove('show'); }, 2000);
 }
 
 async function loadSops() {
@@ -552,6 +682,12 @@ async function openSop(id) {
     if (!sop.steps) sop.steps = [];
     sop.steps.sort((a, b) => (a.index || 0) - (b.index || 0));
     state.currentSop = sop;
+    // Seed confirmed hashes so we don't re-upload images the server already has.
+    _serverHashes.clear();
+    await Promise.all(sop.steps.map(async s => {
+      if (s.image_hash) { _serverHashes.add(s.image_hash); }
+      else if (s.image) { const h = await sha256Hex(s.image); if (h) _serverHashes.add(h); }
+    }));
     if (window.matchMedia('(max-width: 767px)').matches) {
       if (!sop.steps.length) sop.steps.push({ id: uuid(), index: 0, image: null, text: '', annotations: [] });
       state.captureIndex = 0;
@@ -768,7 +904,8 @@ async function generateDocx() {
   const btn = $('download-btn');
   btn.textContent = 'Generating…'; btn.disabled = true;
   try {
-    await saveNow();
+    clearTimeout(_saveTimer);
+    await flushSaves();
     const res = await api('POST', '/api/sops/' + sop.id + '/generate');
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
@@ -890,8 +1027,16 @@ function captureAddStep() {
   saveNow(); loadCaptureStep();
 }
 
-function finishCapture() { commitCaptureStep(); saveNow(); toast('Saved', 'success'); goHome(); }
-function leaveCapture() { commitCaptureStep(); saveNow(); goHome(); }
+async function finishCapture() {
+  commitCaptureStep();
+  queueSave();
+  clearTimeout(_saveTimer);  // don't wait out the debounce on an explicit finish
+  const ok = await flushSaves();
+  if (ok) toast('Saved', 'success');
+  else toast('Saved locally — will sync when back online');
+  goHome();
+}
+function leaveCapture() { commitCaptureStep(); queueSave(); goHome(); }
 
 function loadPhotoForCanvas(src, cb) {
   const img = new Image();

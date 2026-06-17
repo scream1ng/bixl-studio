@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import io
 import json
 import os
@@ -30,7 +31,18 @@ db = SQLAlchemy(app)
 TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "SOP_Template_A3.docx")
 
 
+def _sha256(data_url: str) -> str:
+    return hashlib.sha256(data_url.encode("utf-8")).hexdigest()
+
+
 # ── Models ────────────────────────────────────────────────────────────────────
+
+class ImageBlob(db.Model):
+    """Content-addressed image store. One row per unique image, keyed by SHA-256."""
+    __tablename__ = "image_blobs"
+    hash = db.Column(db.String(64), primary_key=True)
+    data = db.Column(db.Text, nullable=False)
+
 
 class SOP(db.Model):
     __tablename__ = "sops"
@@ -65,19 +77,22 @@ class SOP(db.Model):
 class Step(db.Model):
     __tablename__ = "steps"
 
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = db.Column(db.String(36), primary_key=True)  # client-supplied stable id
     sop_id = db.Column(db.String(36), db.ForeignKey("sops.id"), nullable=False)
     index = db.Column(db.Integer, nullable=False)
-    image = db.Column(db.Text)        # base64 data URL
+    image_hash = db.Column(db.String(64), db.ForeignKey("image_blobs.hash"))
     text = db.Column(db.Text, default="")
-    annotations = db.Column(db.Text, default="[]")  # JSON
+    annotations = db.Column(db.Text, default="[]")
+
+    blob = db.relationship("ImageBlob", lazy="joined")
 
     def to_dict(self) -> dict:
         return {
             "id": self.id,
             "sop_id": self.sop_id,
             "index": self.index,
-            "image": self.image,
+            "image": self.blob.data if self.blob else None,
+            "image_hash": self.image_hash,
             "text": self.text or "",
             "annotations": json.loads(self.annotations or "[]"),
         }
@@ -139,26 +154,68 @@ def update_sop(sop_id: str):
     sop = db.get_or_404(SOP, sop_id)
     data = request.get_json(silent=True) or {}
 
+    # Optimistic concurrency: reject saves built on a stale base.
+    base = data.get("base_updated_at")
+    if base is not None and base != sop.updated_at.isoformat():
+        return jsonify({
+            "error": "stale",
+            "server": sop.to_dict(include_steps=True),
+        }), 409
+
     for field in ("part_no", "part_name", "doc_no", "status"):
         if field in data:
             setattr(sop, field, data[field])
 
+    have_hashes: set[str] = set()
+
     if "steps" in data:
-        for step in list(sop.steps):
-            db.session.delete(step)
-        db.session.flush()
+        existing = {s.id: s for s in sop.steps}
+        seen_ids: set[str] = set()
+
         for i, s in enumerate(data["steps"]):
-            db.session.add(Step(
-                sop_id=sop.id,
-                index=s.get("index", i),
-                image=s.get("image"),
-                text=s.get("text", ""),
-                annotations=json.dumps(s.get("annotations", [])),
-            ))
+            sid = s.get("id") or str(uuid.uuid4())
+            seen_ids.add(sid)
+
+            img_hash = s.get("image_hash")
+            img_data = s.get("image")  # full data URL, only sent when new
+
+            if img_data:
+                img_hash = _sha256(img_data)
+                if not db.session.get(ImageBlob, img_hash):
+                    db.session.add(ImageBlob(hash=img_hash, data=img_data))
+            if img_hash:
+                have_hashes.add(img_hash)
+
+            step = existing.get(sid)
+            if step is None:
+                step = Step(id=sid, sop_id=sop.id)
+                db.session.add(step)
+            step.index = s.get("index", i)
+            step.text = s.get("text", "")
+            step.annotations = json.dumps(s.get("annotations", []))
+            # Only relink the image when the client told us about one —
+            # never blank an image we already hold on a partial payload.
+            if "image_hash" in s or "image" in s:
+                step.image_hash = img_hash if img_hash else None
+
+        for sid, step in existing.items():
+            if sid not in seen_ids:
+                db.session.delete(step)
+
+        # GC orphaned blobs after step deletions.
+        db.session.flush()
+        orphans = (ImageBlob.query
+                   .outerjoin(Step, Step.image_hash == ImageBlob.hash)
+                   .filter(Step.id.is_(None)).all())
+        for b in orphans:
+            db.session.delete(b)
 
     sop.updated_at = datetime.utcnow()
     db.session.commit()
-    return jsonify(sop.to_dict(include_steps=True))
+
+    resp = sop.to_dict(include_steps=True)
+    resp["have_hashes"] = sorted(have_hashes)
+    return jsonify(resp)
 
 
 @app.route("/api/sops/<sop_id>", methods=["DELETE"])
@@ -178,8 +235,8 @@ def generate_sop(sop_id: str):
     steps = []
     for step in sorted(sop.steps, key=lambda s: s.index):
         image_bytes = None
-        if step.image:
-            img_data = step.image
+        img_data = step.blob.data if step.blob else None
+        if img_data:
             if "," in img_data:
                 img_data = img_data.split(",", 1)[1]
             image_bytes = base64.b64decode(img_data)
@@ -193,7 +250,6 @@ def generate_sop(sop_id: str):
         template_path=TEMPLATE_PATH,
     )
 
-    # Mark as done
     sop.status = "done"
     sop.updated_at = datetime.utcnow()
     db.session.commit()
