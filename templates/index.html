@@ -15,342 +15,400 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; overflow: hidden; }
-    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; background: #F2F2F2; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; background: #E7E5E0; }
     button { cursor: pointer; border: none; background: none; font-family: inherit; }
     input, textarea, select { font-family: inherit; }
     ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-thumb { background: #C8C8C8; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+    @keyframes slideInLeft { from { transform: translateX(-120%); } to { transform: translateX(0); } }
 
     .screen { display: none; height: 100vh; }
-    .screen.active { display: flex; }
+    .screen.active { display: flex; flex-direction: row; gap: 12px; padding: 12px; }
+
+    .shell-rail {
+      width: 280px; flex-shrink: 0;
+      background: #161616; border-radius: 18px;
+      display: flex; flex-direction: column;
+      padding: 20px 14px 16px;
+      overflow: hidden;
+    }
+    .shell-panel {
+      flex: 1; min-width: 0;
+      background: #F5F4F1; border-radius: 18px;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+
+    @media (max-width: 767px) {
+      body { background: #F5F4F1; }
+      .screen.active { flex-direction: column; padding: 0; gap: 0; background: #F5F4F1; }
+      .shell-rail { display: none !important; }
+      .shell-panel { border-radius: 0; flex: 1; min-height: 0; }
+      .dt-only { display: none !important; }
+    }
+    @media (min-width: 768px) {
+      .mb-only { display: none !important; }
+    }
 
     .btn-red:hover { background: #b00000 !important; }
     .btn-black:hover { background: #2C2C2C !important; }
-    .btn-white:hover { background: #F5F5F5 !important; }
-    .doc-card:hover { border-color: #AAAAAA !important; }
-    .sidebar-item:hover { background: #F5F5F5 !important; }
-    .step-photo:hover { background: #EDEDED !important; }
+    .btn-ghost:hover { background: rgba(255,255,255,0.06) !important; }
+    .doc-card:hover { background: #F0EEE9 !important; }
+    .rail-item:hover { background: #1E1E1E !important; }
     .add-step-cell:hover { border-color: #CC0000 !important; color: #CC0000 !important; }
-    .trash-btn:hover { color: #CC0000 !important; background: #F5F5F5 !important; }
-    .home-btn:hover { color: #1A1A1A !important; }
-    .back-btn:hover { color: #CC0000 !important; }
-    .dot-add:hover { border-color: #CC0000 !important; color: #CC0000 !important; }
-    .hamburger-btn:hover span { background: #CC0000 !important; }
-    .module-card:hover { border-color: #CC0000 !important; box-shadow: 0 6px 16px rgba(204,0,0,0.08) !important; cursor: pointer; }
-    .drawer-item:hover { background: #262626 !important; }
+    .trash-btn:hover { color: #CC0000 !important; }
+    .step-photo:hover { opacity: 0.85; }
+    .module-card:hover { border-color: rgba(0,0,0,0.16) !important; box-shadow: 0 4px 14px rgba(0,0,0,0.07) !important; }
     input:focus, textarea:focus { border-color: #CC0000 !important; outline: none; }
     textarea:focus { background: #FFFCF5 !important; }
+    .editor-home-lnk:hover { color: #CC0000 !important; }
   </style>
 </head>
 <body>
 
 <!-- ═══════════════════ LANDING ═══════════════════ -->
-<div id="screen-landing" class="screen" style="flex-direction:column; background:#F2F2F2;">
+<div id="screen-landing" class="screen">
 
-  <header style="background:#1A1A1A; border-bottom:3px solid #CC0000; display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:62px; flex-shrink:0;">
-    <div style="display:flex; align-items:center; gap:18px;">
-      <button class="hamburger-btn" id="landing-hamburger" style="display:flex; flex-direction:column; gap:4.5px; padding:8px 4px; background:none; flex-shrink:0;">
-        <span style="width:20px; height:2px; background:#fff; border-radius:1px; display:block; transition:background 0.1s;"></span>
-        <span style="width:20px; height:2px; background:#fff; border-radius:1px; display:block; transition:background 0.1s;"></span>
-        <span style="width:20px; height:2px; background:#fff; border-radius:1px; display:block; transition:background 0.1s;"></span>
-      </button>
-      <div style="display:flex; align-items:center; gap:12px;">
-        <img src="/static/IXL-white.png" style="height:38px; width:auto; display:block;" alt="IXL">
-        <div style="width:2px; height:24px; background:#CC0000; border-radius:1px;"></div>
-        <span style="font-size:22px; font-weight:700; color:#FFFFFF; letter-spacing:0.3px;">Studio</span>
+  <aside class="shell-rail">
+    <div style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;">
+      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
+      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
+      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
+    </div>
+    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <div class="rail-item" id="landing-sop-rail" onclick="enterSop()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
+        <span style="font-size:9px;font-weight:700;color:#2E9E4F;background:rgba(46,158,79,0.15);padding:3px 7px;border-radius:20px;flex-shrink:0;letter-spacing:0.3px;">LIVE</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
+        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
+        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.2;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">MLB / PFC</div><div style="font-size:11px;color:#6E6E6E;">BOM &amp; flow</div></div>
+        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
       </div>
     </div>
-    <div style="display:flex; align-items:center; gap:16px;">
-      <span style="color:#9A9A9A; font-size:13px; font-weight:500; display:none;" id="shift-label">Plant 3 · Day shift</span>
-      <div style="width:34px; height:34px; border-radius:50%; background:#CC0000; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0;">RM</div>
+  </aside>
+
+  <main class="shell-panel" style="overflow-y:auto;padding:40px 40px 60px;">
+    <!-- mobile header -->
+    <div class="mb-only" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px;">
+      <img src="/static/IXL.png" style="height:24px;width:auto;" alt="IXL">
+      <div style="width:2px;height:16px;background:#CC0000;border-radius:1px;"></div>
+      <span style="font-size:17px;font-weight:700;color:#1A1A1A;">Studio</span>
     </div>
-  </header>
+    <div style="max-width:660px;">
 
-  <div style="flex:1; overflow-y:auto; padding:44px 28px 60px;">
-    <div style="max-width:860px; margin:0 auto;">
-      <div style="font-size:12px; font-weight:800; color:#CC0000; letter-spacing:2px; margin-bottom:10px;">IXL | STUDIO</div>
-      <h1 style="font-size:28px; font-weight:800; letter-spacing:-0.5px; color:#1A1A1A; max-width:500px; line-height:1.2;">One workspace for the factory floor.</h1>
-      <p style="color:#6B6B6B; font-size:15px; margin-top:9px; max-width:500px;">Pick a module to get started. More tools are landing soon.</p>
-
-      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; margin-top:32px;">
-
-        <!-- SOP — live -->
-        <div class="module-card" id="landing-sop-card" style="background:#fff; border:1px solid #E4E4E4; border-radius:13px; padding:22px; display:flex; flex-direction:column; gap:15px; box-shadow:0 2px 4px rgba(0,0,0,0.04); transition:all 0.12s;">
-          <div style="display:flex; align-items:center; justify-content:flex-end;">
-            <span style="font-size:11px; font-weight:700; color:#2E9E4F; background:#E7F4EB; padding:4px 9px; border-radius:20px; letter-spacing:0.4px;">● LIVE</span>
+      <h1 style="font-size:26px;font-weight:800;letter-spacing:-0.4px;color:#1A1A1A;max-width:480px;line-height:1.22;">One workspace for the factory floor.</h1>
+      <p style="color:#6B6B6B;font-size:14px;margin-top:9px;max-width:480px;">Pick a module to get started. More tools are landing soon.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px;margin-top:32px;">
+        <!-- SOP live -->
+        <div class="module-card" id="landing-sop-card" style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;transition:border-color 0.12s,box-shadow 0.12s;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="width:44px;height:44px;border-radius:11px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;">SOP</div>
+            <span style="font-size:11px;font-weight:700;color:#2E9E4F;background:#E7F4EB;padding:4px 9px;border-radius:20px;">● LIVE</span>
           </div>
           <div>
-            <div style="font-size:17px; font-weight:700; color:#1A1A1A;">Standard Operating Procedures</div>
-            <p style="color:#7A7A7A; font-size:13.5px; margin-top:4px; line-height:1.5;">Capture photos, annotate steps, generate the Word document.</p>
+            <div style="font-size:16px;font-weight:700;color:#1A1A1A;">Standard Operating Procedures</div>
+            <p style="color:#7A7A7A;font-size:13px;margin-top:4px;line-height:1.5;">Capture photos, annotate steps, generate the Word document.</p>
           </div>
-          <button id="landing-open-sop" class="btn-red" style="align-self:flex-start; background:#CC0000; color:#fff; padding:10px 20px; border-radius:6px; font-size:14px; font-weight:600; transition:background 0.1s;">Open SOP ›</button>
+          <button id="landing-open-sop" class="btn-red" style="align-self:flex-start;background:#CC0000;color:#fff;padding:9px 18px;border-radius:7px;font-size:13.5px;font-weight:600;transition:background 0.1s;">Open SOP ›</button>
         </div>
-
-        <!-- Label — soon -->
-        <div style="background:#FAFAFA; border:1px solid #EAEAEA; border-radius:13px; padding:22px; display:flex; flex-direction:column; gap:15px;">
-          <div style="display:flex; align-items:center; justify-content:space-between;">
-            <div style="width:46px; height:46px; border-radius:11px; background:#EDEDED; color:#B4B4B4; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; flex-shrink:0;">LB</div>
-            <span style="font-size:11px; font-weight:700; color:#A0A0A0; background:#F0F0F0; padding:4px 9px; border-radius:20px; letter-spacing:0.4px;">COMING SOON</span>
+        <!-- LB -->
+        <div style="background:#FBFAF8;border:1px solid rgba(0,0,0,0.06);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="width:44px;height:44px;border-radius:11px;background:#ECEAE6;color:#B4B0A8;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LB</div>
+            <span style="font-size:10px;font-weight:700;color:#A0A0A0;background:#EFEDE9;padding:4px 8px;border-radius:20px;">SOON</span>
           </div>
-          <div>
-            <div style="font-size:17px; font-weight:700; color:#B0B0B0;">Label</div>
-            <p style="color:#B4B4B4; font-size:13.5px; margin-top:4px; line-height:1.5;">Design and print part labels.</p>
-          </div>
-          <button disabled style="align-self:flex-start; background:#fff; color:#BFBFBF; border:1px solid #E4E4E4; padding:10px 20px; border-radius:6px; font-size:14px; font-weight:600; cursor:not-allowed;">Coming soon</button>
+          <div><div style="font-size:16px;font-weight:700;color:#B0ACA4;">Label</div><p style="color:#B4B0A8;font-size:13px;margin-top:4px;line-height:1.5;">Design and print part labels.</p></div>
         </div>
-
-        <!-- ICL — soon -->
-        <div style="background:#FAFAFA; border:1px solid #EAEAEA; border-radius:13px; padding:22px; display:flex; flex-direction:column; gap:15px;">
-          <div style="display:flex; align-items:center; justify-content:space-between;">
-            <div style="width:46px; height:46px; border-radius:11px; background:#EDEDED; color:#B4B4B4; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0;">ICL</div>
-            <span style="font-size:11px; font-weight:700; color:#A0A0A0; background:#F0F0F0; padding:4px 9px; border-radius:20px; letter-spacing:0.4px;">COMING SOON</span>
+        <!-- ICL -->
+        <div style="background:#FBFAF8;border:1px solid rgba(0,0,0,0.06);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="width:44px;height:44px;border-radius:11px;background:#ECEAE6;color:#B4B0A8;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">ICL</div>
+            <span style="font-size:10px;font-weight:700;color:#A0A0A0;background:#EFEDE9;padding:4px 8px;border-radius:20px;">SOON</span>
           </div>
-          <div>
-            <div style="font-size:17px; font-weight:700; color:#B0B0B0;">Inspection Checklist</div>
-            <p style="color:#B4B4B4; font-size:13.5px; margin-top:4px; line-height:1.5;">Inspection checklists.</p>
-          </div>
-          <button disabled style="align-self:flex-start; background:#fff; color:#BFBFBF; border:1px solid #E4E4E4; padding:10px 20px; border-radius:6px; font-size:14px; font-weight:600; cursor:not-allowed;">Coming soon</button>
+          <div><div style="font-size:16px;font-weight:700;color:#B0ACA4;">Inspection Checklist</div><p style="color:#B4B0A8;font-size:13px;margin-top:4px;line-height:1.5;">Quality inspection checklists.</p></div>
         </div>
-
-        <!-- MLB/PFC — soon -->
-        <div style="background:#FAFAFA; border:1px solid #EAEAEA; border-radius:13px; padding:22px; display:flex; flex-direction:column; gap:15px;">
-          <div style="display:flex; align-items:center; justify-content:space-between;">
-            <div style="width:46px; height:46px; border-radius:11px; background:#EDEDED; color:#B4B4B4; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; line-height:1.15; text-align:center; flex-shrink:0;">MLB<br>PFC</div>
-            <span style="font-size:11px; font-weight:700; color:#A0A0A0; background:#F0F0F0; padding:4px 9px; border-radius:20px; letter-spacing:0.4px;">COMING SOON</span>
+        <!-- MLB -->
+        <div style="background:#FBFAF8;border:1px solid rgba(0,0,0,0.06);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="width:44px;height:44px;border-radius:11px;background:#ECEAE6;color:#B4B0A8;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.3;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
+            <span style="font-size:10px;font-weight:700;color:#A0A0A0;background:#EFEDE9;padding:4px 8px;border-radius:20px;">SOON</span>
           </div>
-          <div>
-            <div style="font-size:17px; font-weight:700; color:#B0B0B0;">Multi-Level BOM / Process Flow Chart</div>
-            <p style="color:#B4B4B4; font-size:13.5px; margin-top:4px; line-height:1.5;">Multi-level BOM and process flow charts.</p>
-          </div>
-          <button disabled style="align-self:flex-start; background:#fff; color:#BFBFBF; border:1px solid #E4E4E4; padding:10px 20px; border-radius:6px; font-size:14px; font-weight:600; cursor:not-allowed;">Coming soon</button>
+          <div><div style="font-size:16px;font-weight:700;color:#B0ACA4;">MLB / PFC</div><p style="color:#B4B0A8;font-size:13px;margin-top:4px;line-height:1.5;">Multi-level BOM and process flow charts.</p></div>
         </div>
-
       </div>
     </div>
-  </div>
+  </main>
 </div>
 
 <!-- ═══════════════════ HOME (SOP list) ═══════════════════ -->
-<div id="screen-home" class="screen" style="flex-direction:column; background:#F2F2F2;">
+<div id="screen-home" class="screen">
 
-  <header style="background:#1A1A1A; border-bottom:3px solid #CC0000; display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:62px; flex-shrink:0;">
-    <div style="display:flex; align-items:center; gap:18px;">
-      <button class="hamburger-btn" id="home-hamburger" style="display:flex; flex-direction:column; gap:4.5px; padding:8px 4px; background:none; flex-shrink:0;">
-        <span style="width:20px; height:2px; background:#fff; border-radius:1px; display:block; transition:background 0.1s;"></span>
-        <span style="width:20px; height:2px; background:#fff; border-radius:1px; display:block; transition:background 0.1s;"></span>
-        <span style="width:20px; height:2px; background:#fff; border-radius:1px; display:block; transition:background 0.1s;"></span>
-      </button>
-      <div style="display:flex; align-items:center; gap:12px;">
-        <img src="/static/IXL-white.png" style="height:38px; width:auto; display:block;" alt="IXL">
-        <div style="width:2px; height:24px; background:#CC0000; border-radius:1px;"></div>
-        <span style="font-size:22px; font-weight:700; color:#FFFFFF; letter-spacing:0.3px;">SOP</span>
+  <aside class="shell-rail">
+    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">
+      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
+      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
+      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
+    </div>
+    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;">SOP</div><div style="font-size:11px;color:#9A9A9A;">Operating procedures</div></div>
+        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
+        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
+        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.2;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">MLB / PFC</div><div style="font-size:11px;color:#6E6E6E;">BOM &amp; flow</div></div>
+        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
       </div>
     </div>
-    <button id="home-new-btn" class="btn-red" style="background:#CC0000; color:#fff; padding:9px 20px; border-radius:5px; font-size:14px; font-weight:600; transition:background 0.1s;">+ New SOP</button>
-  </header>
+  </aside>
 
-  <div style="flex:1; overflow-y:auto; padding:36px 28px 60px; max-width:740px; width:100%; margin:0 auto;">
-    <div style="margin-bottom:32px;">
-      <h1 style="font-size:22px; font-weight:700; color:#1A1A1A;">Standard operating procedures</h1>
-      <p style="color:#6B6B6B; font-size:14px; margin-top:5px;">Capture photos, annotate steps, generate the Word document.</p>
+  <main class="shell-panel">
+    <!-- mobile header -->
+    <header class="mb-only" style="height:58px;display:flex;align-items:center;padding:0 18px;flex-shrink:0;">
+      <button id="home-hamburger" style="width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex-shrink:0;">
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+      </button>
+      <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">SOP</span>
+      <button id="home-new-btn" style="width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;color:#CC0000;font-size:20px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
+    </header>
+    <!-- desktop panel header -->
+    <div class="dt-only" style="padding:28px 32px 22px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
+      <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Standard operating procedures</h1>
+      <button class="btn-red" onclick="openModal()" style="background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;transition:background 0.1s;">+ New SOP</button>
     </div>
-    <div id="home-empty" style="display:none; text-align:center; padding:64px 20px; background:#FFFFFF; border:1px dashed #E0E0E0; border-radius:10px;">
-      <div style="font-size:40px; margin-bottom:14px; opacity:0.2; line-height:1;">📄</div>
-      <div style="font-size:16px; font-weight:700; color:#1A1A1A; margin-bottom:7px;">No documents yet</div>
-      <p style="font-size:14px; color:#6B6B6B;">Tap <strong>+ New SOP</strong> to capture your first procedure.</p>
+    <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
+      <div id="home-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
+        <div style="font-size:36px;margin-bottom:14px;opacity:0.2;line-height:1;">📄</div>
+        <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No documents yet</div>
+        <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New SOP</strong> to capture your first procedure.</p>
+      </div>
+      <div id="home-list"></div>
     </div>
-    <div id="home-list"></div>
-  </div>
+  </main>
+</div>
+
+<!-- ═══════════════════ EDITOR ═══════════════════ -->
+<div id="screen-editor" class="screen">
+
+  <aside class="shell-rail">
+    <div id="sidebar-logo" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">
+      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
+      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
+      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
+    </div>
+    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;flex-shrink:0;">PRODUCTS</div>
+    <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;">SOP</div><div style="font-size:11px;color:#9A9A9A;">Operating procedures</div></div>
+        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
+        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
+        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.2;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">MLB / PFC</div><div style="font-size:11px;color:#6E6E6E;">BOM &amp; flow</div></div>
+        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+      </div>
+    </div>
+    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:22px 10px 8px;flex-shrink:0;">RECENT</div>
+    <div style="display:flex;gap:6px;margin-bottom:8px;padding:0 1px;flex-shrink:0;">
+      <input id="sidebar-search" placeholder="Search…" style="flex:1;padding:7px 10px;background:#242424;border:none;border-radius:8px;font-size:12px;color:#C8C8C8;width:0;">
+      <button id="sidebar-new-btn" class="btn-red" style="background:#CC0000;color:#fff;padding:7px 12px;border-radius:8px;font-size:13px;font-weight:600;flex-shrink:0;transition:background 0.1s;">+</button>
+    </div>
+    <div id="sidebar-list" style="flex:1;overflow-y:auto;min-height:0;"></div>
+  </aside>
+
+  <main class="shell-panel">
+    <div style="padding:26px 28px 20px;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
+      <div style="min-width:0;flex:1;">
+        <button id="editor-home-btn" class="editor-home-lnk" style="font-size:12px;font-weight:500;color:#999;padding:0 0 8px;display:block;transition:color 0.1s;">&#8249; All SOPs</button>
+        <h2 id="editor-title" style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:480px;"></h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;padding-top:20px;">
+        <div style="display:flex;gap:5px;">
+          <button id="status-draft-btn" style="padding:5px 13px;border-radius:20px;font-size:11.5px;font-weight:700;background:#6B6B6B;color:#fff;border:none;transition:all 0.1s;">Draft</button>
+          <button id="status-done-btn" style="padding:5px 13px;border-radius:20px;font-size:11.5px;font-weight:700;background:transparent;color:#9B9B9B;border:1px solid rgba(0,0,0,0.14);transition:all 0.1s;">Complete</button>
+        </div>
+        <button id="download-btn" class="btn-red" style="background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;transition:background 0.1s;">&#8595; Download .docx</button>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:20px 28px 28px;min-height:0;">
+      <div style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:14px;padding:22px;min-height:100%;">
+        <div style="display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap;">
+          <div style="flex:2;min-width:180px;display:flex;flex-direction:column;gap:5px;">
+            <label style="font-size:11px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">SOP Name</label>
+            <input id="field-part-name" placeholder="e.g. Tastic Luminate Heat Module" style="padding:9px 11px;border:1px solid #E0E0E0;border-radius:7px;font-size:14px;color:#1A1A1A;transition:border-color 0.1s;width:100%;">
+          </div>
+          <div style="flex:1;min-width:120px;display:flex;flex-direction:column;gap:5px;">
+            <label style="font-size:11px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">Doc No</label>
+            <input id="field-doc-no" placeholder="e.g. A0866" style="padding:9px 11px;border:1px solid #E0E0E0;border-radius:7px;font-size:14px;color:#1A1A1A;transition:border-color 0.1s;width:100%;">
+          </div>
+        </div>
+        <div style="font-size:12px;color:#AAAAAA;background:#F8F8F8;padding:8px 12px;border-radius:6px;margin-bottom:18px;line-height:1.4;">
+          This is the editor &#8212; the generated .docx is the formatted output and may differ slightly in layout.
+        </div>
+        <div id="editor-steps-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;"></div>
+      </div>
+    </div>
+  </main>
 </div>
 
 <!-- ═══════════════════ CAPTURE ═══════════════════ -->
-<div id="screen-capture" class="screen" style="flex-direction:column; background:#FFFFFF;">
+<div id="screen-capture" class="screen" style="flex-direction:column;background:#F5F4F1;">
 
-  <div style="background:#1A1A1A; border-bottom:3px solid #CC0000; display:flex; align-items:center; justify-content:space-between; padding:0 18px; height:56px; flex-shrink:0;">
-    <button id="cap-back-btn" class="back-btn" style="color:#FFFFFF; font-size:15px; font-weight:600; padding:8px 2px; transition:color 0.1s;">&#8249; Home</button>
-    <div style="color:#FFFFFF; font-weight:600; font-size:15px;">Step <span id="cap-step-num" style="color:#CC0000;">1</span> <span id="cap-step-total" style="color:#505050; font-weight:400;">/ 1</span></div>
-    <button id="cap-done-btn" style="color:#CC0000; font-size:15px; font-weight:700; padding:8px 2px;">Done</button>
+  <div style="height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);">
+    <button id="cap-back-btn" style="color:#1A1A1A;font-size:15px;font-weight:600;padding:8px 2px;">&#8249; Home</button>
+    <div style="font-weight:700;font-size:14px;color:#1A1A1A;">Step <span id="cap-step-num" style="color:#CC0000;">1</span> <span id="cap-step-total" style="color:#B4B4B4;font-weight:500;">/ 1</span></div>
+    <button id="cap-done-btn" style="color:#CC0000;font-size:15px;font-weight:700;padding:8px 2px;">Done</button>
   </div>
 
-  <div id="cap-dots-row" style="display:flex; gap:8px; padding:11px 16px; overflow-x:auto; flex-shrink:0; border-bottom:1px solid #EBEBEB; align-items:center;">
-    <button id="cap-add-dot" class="dot-add" style="width:30px; height:30px; border-radius:50%; border:2px solid #E0E0E0; color:#AAAAAA; font-size:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.12s; line-height:1; background:transparent;">+</button>
+  <div id="cap-dots-row" style="display:flex;gap:7px;padding:10px 16px;overflow-x:auto;flex-shrink:0;align-items:center;border-bottom:1px solid rgba(0,0,0,0.06);">
+    <button id="cap-add-dot" style="width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(0,0,0,0.15);color:#AAAAAA;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;background:transparent;">+</button>
   </div>
 
-  <div style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:14px;">
-
-    <div id="cap-photo-area" style="position:relative; background:#F2F2F2; border:1px solid #E8E8E8; border-radius:8px; min-height:220px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-      <div id="cap-placeholder" style="text-align:center; padding:32px 20px; display:flex; flex-direction:column; gap:13px; align-items:center;">
-        <div style="font-size:40px; opacity:0.22; line-height:1;">📷</div>
-        <p style="color:#6B6B6B; font-size:13px;">No photo for this step yet</p>
-        <div style="display:flex; gap:10px;">
-          <label class="btn-red" style="background:#CC0000; color:#FFFFFF; padding:9px 18px; border-radius:5px; font-size:14px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background 0.1s;">
+  <div style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px;">
+    <div id="cap-photo-area" style="position:relative;background:#E8E7E3;border-radius:14px;min-height:210px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+      <div id="cap-placeholder" style="text-align:center;padding:32px 20px;display:flex;flex-direction:column;gap:13px;align-items:center;">
+        <div style="font-size:38px;opacity:0.18;line-height:1;">📷</div>
+        <p style="color:#6B6B6B;font-size:13px;">No photo for this step yet</p>
+        <div style="display:flex;gap:10px;">
+          <label class="btn-red" style="background:#CC0000;color:#fff;padding:9px 18px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background 0.1s;">
             Take photo
             <input id="cap-camera-input" type="file" accept="image/*" capture="environment" style="display:none;">
           </label>
-          <label class="btn-white" style="background:#FFFFFF; color:#2C2C2C; padding:9px 18px; border-radius:5px; font-size:14px; font-weight:600; cursor:pointer; border:1px solid #E0E0E0; display:inline-flex; align-items:center; gap:6px; transition:background 0.1s;">
+          <label style="background:#fff;color:#2C2C2C;padding:9px 18px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid rgba(0,0,0,0.1);display:inline-flex;align-items:center;gap:6px;">
             Upload
             <input id="cap-upload-input" type="file" accept="image/*" style="display:none;">
           </label>
         </div>
       </div>
-      <canvas id="cap-canvas" style="display:none; max-width:100%; touch-action:none;"></canvas>
+      <canvas id="cap-canvas" style="display:none;max-width:100%;touch-action:none;"></canvas>
     </div>
 
-    <div id="cap-toolbar" style="display:none; gap:8px; flex-wrap:wrap;">
-      <button id="tool-arrow" class="ann-tool" style="flex:1; min-width:62px; padding:10px 6px; border:2px solid #CC0000; border-radius:6px; background:#CC0000; color:#FFFFFF; font-size:12px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; transition:all 0.1s;">
-        <span style="font-size:16px;">&#8599;</span>Arrow
-      </button>
-      <button id="tool-circle" class="ann-tool" style="flex:1; min-width:62px; padding:10px 6px; border:2px solid #E0E0E0; border-radius:6px; background:#FFFFFF; color:#2C2C2C; font-size:12px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; transition:all 0.1s;">
-        <span style="font-size:16px;">&#9711;</span>Circle
-      </button>
-      <button id="tool-label" class="ann-tool" style="flex:1; min-width:62px; padding:10px 6px; border:2px solid #E0E0E0; border-radius:6px; background:#FFFFFF; color:#2C2C2C; font-size:12px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; transition:all 0.1s;">
-        <span style="font-size:16px;">A</span>Label
-      </button>
-      <button id="tool-undo" class="btn-white" style="flex:1; min-width:62px; padding:10px 6px; border:1px solid #E8E8E8; border-radius:6px; background:#FFFFFF; color:#6B6B6B; font-size:12px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; transition:background 0.1s;">
-        <span style="font-size:16px;">&#8634;</span>Undo
-      </button>
-      <button id="tool-clear" class="btn-white" style="flex:1; min-width:62px; padding:10px 6px; border:1px solid #E8E8E8; border-radius:6px; background:#FFFFFF; color:#6B6B6B; font-size:12px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; transition:background 0.1s;">
-        <span style="font-size:16px;">&#10005;</span>Clear
-      </button>
+    <div id="cap-toolbar" style="display:none;gap:7px;">
+      <button id="tool-arrow" class="ann-tool" style="flex:1;min-width:56px;padding:9px 4px;border:2px solid #CC0000;border-radius:11px;background:#CC0000;color:#fff;font-size:12px;font-weight:600;text-align:center;transition:all 0.1s;">&#8599; Arrow</button>
+      <button id="tool-circle" class="ann-tool" style="flex:1;min-width:56px;padding:9px 4px;border:1px solid rgba(0,0,0,0.1);border-radius:11px;background:#fff;color:#2C2C2C;font-size:12px;font-weight:600;text-align:center;transition:all 0.1s;">&#9711; Circle</button>
+      <button id="tool-label" class="ann-tool" style="flex:1;min-width:56px;padding:9px 4px;border:1px solid rgba(0,0,0,0.1);border-radius:11px;background:#fff;color:#2C2C2C;font-size:12px;font-weight:600;text-align:center;transition:all 0.1s;">A Label</button>
+      <button id="tool-undo" style="flex:1;min-width:56px;padding:9px 4px;border:1px solid rgba(0,0,0,0.1);border-radius:11px;background:#fff;color:#6B6B6B;font-size:12px;font-weight:600;text-align:center;transition:background 0.1s;">&#8634; Undo</button>
+      <button id="tool-clear" style="flex:1;min-width:56px;padding:9px 4px;border:1px solid rgba(0,0,0,0.1);border-radius:11px;background:#fff;color:#6B6B6B;font-size:12px;font-weight:600;text-align:center;transition:background 0.1s;">&#10005; Clear</button>
     </div>
 
     <div id="cap-replace-row" style="display:none;">
-      <label class="btn-white" style="background:#FFFFFF; color:#2C2C2C; padding:7px 14px; border-radius:5px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid #E0E0E0; display:inline-flex; align-items:center; gap:6px; transition:background 0.1s;">
+      <label style="background:#fff;color:#2C2C2C;padding:7px 14px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid rgba(0,0,0,0.1);display:inline-flex;align-items:center;gap:6px;">
         Replace photo
         <input id="cap-replace-input" type="file" accept="image/*" capture="environment" style="display:none;">
       </label>
     </div>
 
-    <div style="display:flex; flex-direction:column; gap:6px;">
-      <label style="font-size:11px; font-weight:700; color:#9B9B9B; text-transform:uppercase; letter-spacing:1px;">Step description</label>
-      <textarea id="cap-note" placeholder="Describe this step…" style="width:100%; min-height:90px; padding:12px; border:1px solid #E0E0E0; border-radius:7px; resize:vertical; color:#1A1A1A; line-height:1.45; font-size:14px; transition:border-color 0.1s; background:#FFFFFF;"></textarea>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <label style="font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1px;">Step description</label>
+      <textarea id="cap-note" placeholder="Describe this step…" style="width:100%;min-height:88px;padding:12px;border:1px solid rgba(0,0,0,0.1);border-radius:12px;resize:vertical;color:#1A1A1A;line-height:1.45;font-size:14px;transition:border-color 0.1s;background:#fff;"></textarea>
     </div>
   </div>
 
-  <div style="display:flex; gap:8px; padding:12px 16px; border-top:1px solid #EBEBEB; flex-shrink:0; background:#FFFFFF;">
-    <button id="cap-prev-btn" class="btn-white" style="flex:1; background:#FFFFFF; color:#2C2C2C; border:1px solid #E0E0E0; padding:11px 14px; border-radius:5px; font-size:14px; font-weight:600; transition:background 0.1s;">&#8249; Previous</button>
-    <button id="cap-addstep-btn" class="btn-black" style="flex:1; background:#1A1A1A; color:#FFFFFF; padding:11px 14px; border-radius:5px; font-size:14px; font-weight:600; transition:background 0.1s;">+ Add step</button>
-    <button id="cap-next-btn" class="btn-red" style="flex:1; background:#CC0000; color:#FFFFFF; padding:11px 14px; border-radius:5px; font-size:14px; font-weight:600; transition:background 0.1s;">Next &#8250;</button>
-  </div>
-</div>
-
-<!-- ═══════════════════ EDITOR ═══════════════════ -->
-<div id="screen-editor" class="screen" style="flex-direction:row;">
-
-  <aside style="width:272px; flex-shrink:0; background:#FFFFFF; border-right:1px solid #EBEBEB; display:flex; flex-direction:column; min-height:0;">
-    <div style="padding:16px; border-bottom:1px solid #EBEBEB; display:flex; flex-direction:column; gap:10px;">
-      <div id="sidebar-logo" style="display:flex; align-items:center; gap:10px; cursor:pointer; padding:2px 0;">
-        <img src="/static/IXL.png" style="height:28px; width:auto; display:block;" alt="IXL">
-        <div style="width:2px; height:20px; background:#CC0000; border-radius:1px;"></div>
-        <span style="font-size:15px; font-weight:700; color:#1A1A1A; letter-spacing:0.3px;">SOP</span>
-      </div>
-      <input id="sidebar-search" placeholder="Search documents&#8230;" style="width:100%; padding:9px 12px; border:1px solid #E0E0E0; border-radius:6px; background:#F8F8F8; font-size:13px; color:#1A1A1A; transition:all 0.1s;">
-      <button id="sidebar-new-btn" class="btn-red" style="background:#CC0000; color:#FFFFFF; width:100%; padding:8px 14px; border-radius:5px; font-size:13px; font-weight:600; transition:background 0.1s;">+ New SOP</button>
-    </div>
-    <div id="sidebar-list" style="flex:1; overflow-y:auto; padding:6px; min-height:0;"></div>
-  </aside>
-
-  <div style="flex:1; display:flex; flex-direction:column; min-width:0; min-height:0;">
-    <div style="height:60px; background:#FFFFFF; border-bottom:1px solid #EBEBEB; display:flex; align-items:center; justify-content:space-between; padding:0 24px; flex-shrink:0;">
-      <div style="display:flex; align-items:center; gap:14px; min-width:0;">
-        <button id="editor-home-btn" class="home-btn" style="color:#9B9B9B; font-size:14px; font-weight:600; padding:6px 2px; transition:color 0.1s;">&#8249; Home</button>
-        <h2 id="editor-title" style="font-size:15px; font-weight:700; color:#1A1A1A; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></h2>
-      </div>
-      <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
-        <div style="display:flex; border:1px solid #E0E0E0; border-radius:6px; overflow:hidden;">
-          <button id="status-draft-btn" style="padding:6px 14px; font-size:13px; font-weight:600; background:#6B6B6B; color:#FFFFFF; transition:all 0.1s;">Draft</button>
-          <button id="status-done-btn" style="padding:6px 14px; font-size:13px; font-weight:600; background:#FFFFFF; color:#9B9B9B; transition:all 0.1s;">Complete</button>
-        </div>
-        <button id="download-btn" class="btn-red" style="background:#CC0000; color:#FFFFFF; padding:9px 18px; border-radius:5px; font-size:14px; font-weight:600; display:flex; align-items:center; gap:7px; transition:background 0.1s;">&#8595; Download .docx</button>
-      </div>
-    </div>
-
-    <div style="flex:1; overflow-y:auto; padding:24px; background:#F2F2F2; min-height:0;">
-      <div id="editor-sheet" style="max-width:1100px; margin:0 auto; background:#FFFFFF; border:1px solid #EBEBEB; border-radius:8px; padding:22px;">
-        <div style="display:flex; gap:16px; margin-bottom:20px; flex-wrap:wrap;">
-          <div style="flex:2; min-width:200px; display:flex; flex-direction:column; gap:5px;">
-            <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">SOP Name</label>
-            <input id="field-part-name" placeholder="e.g. Tastic Luminate Heat Module" style="padding:9px 11px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; transition:border-color 0.1s; width:100%;">
-          </div>
-          <div style="flex:1; min-width:140px; display:flex; flex-direction:column; gap:5px;">
-            <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">Doc No</label>
-            <input id="field-doc-no" placeholder="e.g. A0866" style="padding:9px 11px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; transition:border-color 0.1s; width:100%;">
-          </div>
-        </div>
-        <div style="font-size:12px; color:#AAAAAA; background:#F8F8F8; padding:8px 12px; border-radius:6px; margin-bottom:18px; line-height:1.4;">
-          This is the editor &#8212; the generated .docx is the formatted output and may differ slightly in layout.
-        </div>
-        <div id="editor-steps-grid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;"></div>
-      </div>
-    </div>
+  <div style="display:flex;gap:8px;padding:11px 16px 22px;border-top:1px solid rgba(0,0,0,0.07);flex-shrink:0;">
+    <button id="cap-prev-btn" style="flex:1;background:#fff;color:#2C2C2C;border:1px solid rgba(0,0,0,0.1);padding:12px 14px;border-radius:12px;font-size:13px;font-weight:600;">&#8249; Prev</button>
+    <button id="cap-addstep-btn" class="btn-black" style="flex:1;background:#1A1A1A;color:#fff;padding:12px 14px;border-radius:12px;font-size:13px;font-weight:600;transition:background 0.1s;">+ Add</button>
+    <button id="cap-next-btn" class="btn-red" style="flex:1;background:#CC0000;color:#fff;padding:12px 14px;border-radius:12px;font-size:13px;font-weight:600;transition:background 0.1s;">Next &#8250;</button>
   </div>
 </div>
 
-<!-- ═══════════════════ DRAWER ═══════════════════ -->
-<div id="drawer-overlay" style="display:none; position:fixed; inset:0; z-index:400;">
-  <div id="drawer-scrim" style="position:absolute; inset:0; background:rgba(0,0,0,0.5); animation:fadeIn 0.15s ease;"></div>
-  <aside style="position:absolute; left:0; top:0; bottom:0; width:300px; background:#1A1A1A; display:flex; flex-direction:column; box-shadow:6px 0 30px rgba(0,0,0,0.4); animation:slideInLeft 0.2s ease; overflow:hidden;">
-    <div style="padding:14px 18px 14px 22px; border-bottom:1px solid #2C2C2C; display:flex; align-items:center; justify-content:space-between; height:62px; flex-shrink:0;">
-      <div style="display:flex; align-items:center; gap:11px;">
-        <img src="/static/IXL-white.png" style="height:30px; width:auto; display:block;" alt="IXL">
-        <div style="width:2px; height:18px; background:#CC0000; border-radius:1px;"></div>
-        <span style="font-size:17px; font-weight:700; color:#fff; letter-spacing:0.3px;">Studio</span>
+<!-- ═══════════════════ DRAWER (mobile) ═══════════════════ -->
+<div id="drawer-overlay" style="display:none;position:fixed;inset:0;z-index:400;">
+  <div id="drawer-scrim" style="position:absolute;inset:0;background:rgba(0,0,0,0.45);animation:fadeIn 0.15s ease;"></div>
+  <aside style="position:absolute;left:10px;top:44px;bottom:14px;width:250px;background:#161616;box-shadow:6px 0 28px rgba(0,0,0,0.4);border-radius:18px;display:flex;flex-direction:column;padding:18px 12px 14px;animation:slideInLeft 0.22s ease;overflow:hidden;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px 18px;">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <img src="/static/IXL-white.png" style="height:24px;width:auto;" alt="IXL">
+        <div style="width:2px;height:15px;background:#CC0000;border-radius:1px;"></div>
+        <span style="font-size:15px;font-weight:700;color:#fff;">Studio</span>
       </div>
-      <button id="drawer-close" style="width:30px; height:30px; border-radius:50%; background:#2C2C2C; color:#9A9A9A; font-size:15px; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background 0.1s;">✕</button>
+      <button id="drawer-close" style="width:28px;height:28px;border-radius:50%;background:#2C2C2C;color:#9A9A9A;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">&#10005;</button>
     </div>
-    <div style="padding:6px 12px 12px; flex:1; overflow-y:auto;">
-      <div style="font-size:11px; font-weight:700; color:#6B6B6B; letter-spacing:1.5px; padding:14px 10px 8px;">MODULES</div>
-      <nav style="display:flex; flex-direction:column; gap:2px;">
-        <button id="drawer-sop" class="drawer-item" style="display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:8px; background:#262626; text-align:left; width:100%; transition:background 0.1s;">
-          <div style="width:34px; height:34px; border-radius:8px; background:#CC0000; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0;">SOP</div>
-          <div style="flex:1;">
-            <div style="color:#fff; font-size:14px; font-weight:600;">SOP</div>
-            <div style="color:#8A8A8A; font-size:11.5px;">Operating procedures</div>
-          </div>
-        </button>
-        <div style="display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:8px;">
-          <div style="width:34px; height:34px; border-radius:8px; background:#2C2C2C; color:#6B6B6B; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; flex-shrink:0;">LB</div>
-          <div style="flex:1;"><div style="color:#9A9A9A; font-size:14px; font-weight:600;">Label</div></div>
-          <span style="font-size:9.5px; font-weight:700; color:#7A7A7A; border:1px solid #3A3A3A; padding:3px 7px; border-radius:20px; letter-spacing:0.4px;">SOON</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:8px;">
-          <div style="width:34px; height:34px; border-radius:8px; background:#2C2C2C; color:#6B6B6B; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; flex-shrink:0;">ICL</div>
-          <div style="flex:1;"><div style="color:#9A9A9A; font-size:14px; font-weight:600;">Inspection Checklist</div></div>
-          <span style="font-size:9.5px; font-weight:700; color:#7A7A7A; border:1px solid #3A3A3A; padding:3px 7px; border-radius:20px; letter-spacing:0.4px;">SOON</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:8px;">
-          <div style="width:34px; height:34px; border-radius:8px; background:#2C2C2C; color:#6B6B6B; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:800; line-height:1.15; text-align:center; flex-shrink:0;">MLB<br>PFC</div>
-          <div style="flex:1;"><div style="color:#9A9A9A; font-size:14px; font-weight:600; line-height:1.3;">Multi-Level BOM / PFC</div></div>
-          <span style="font-size:9.5px; font-weight:700; color:#7A7A7A; border:1px solid #3A3A3A; padding:3px 7px; border-radius:20px; letter-spacing:0.4px;">SOON</span>
-        </div>
-      </nav>
+    <div style="font-size:10px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 9px 9px;">PRODUCTS</div>
+    <div style="display:flex;flex-direction:column;gap:4px;">
+      <button id="drawer-sop" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:#242424;text-align:left;width:100%;transition:background 0.1s;">
+        <div style="width:32px;height:32px;border-radius:9px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">SOP</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:#fff;">SOP</div></div>
+        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
+      </button>
+      <div style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;">
+        <div style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">LB</div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#C8C8C8;">Label</div></div>
+        <span style="font-size:8.5px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:2px 6px;border-radius:20px;">SOON</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;">
+        <div style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;flex-shrink:0;">ICL</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div></div>
+        <span style="font-size:8.5px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:2px 6px;border-radius:20px;">SOON</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;">
+        <div style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">MLB</div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#C8C8C8;">MLB / PFC</div></div>
+        <span style="font-size:8.5px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:2px 6px;border-radius:20px;">SOON</span>
+      </div>
     </div>
   </aside>
 </div>
 
 <!-- ═══════════════════ TOAST ═══════════════════ -->
-<div id="toast" style="position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(14px); background:#1A1A1A; color:#FFFFFF; padding:12px 22px; border-radius:8px; font-size:14px; font-weight:500; opacity:0; pointer-events:none; z-index:1000; border-left:3px solid #CC0000; white-space:nowrap; transition:opacity 0.2s, transform 0.2s; max-width:90vw;"></div>
+<div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(14px);background:#1A1A1A;color:#fff;padding:12px 22px;border-radius:10px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;z-index:1000;border-left:3px solid #CC0000;white-space:nowrap;transition:opacity 0.2s,transform 0.2s;max-width:90vw;"></div>
 
 <!-- ═══════════════════ MODAL ═══════════════════ -->
-<div id="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:flex-end; justify-content:center; z-index:500; padding:0; animation:fadeIn 0.15s ease;">
-  <div style="background:#FFFFFF; border-radius:18px 18px 0 0; width:100%; max-width:480px; padding:26px 24px 32px; border-top:3px solid #CC0000; box-shadow:0 -8px 40px rgba(0,0,0,0.15);">
-    <h3 style="font-size:17px; font-weight:700; margin-bottom:18px; color:#1A1A1A;">New SOP</h3>
-    <div style="display:flex; flex-direction:column; gap:13px; margin-bottom:22px;">
-      <div style="display:flex; flex-direction:column; gap:5px;">
-        <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">SOP Name</label>
-        <input id="modal-part-name" placeholder="e.g. Tastic Luminate Heat Module" style="padding:11px 12px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; width:100%; transition:border-color 0.1s;">
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:500;padding:20px;animation:fadeIn 0.15s ease;">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:420px;padding:28px 24px;box-shadow:0 24px 60px rgba(0,0,0,0.22);">
+    <h3 style="font-size:18px;font-weight:800;letter-spacing:-0.2px;margin-bottom:20px;color:#1A1A1A;text-align:center;">New SOP</h3>
+    <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:22px;">
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <label style="font-size:11px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">SOP Name</label>
+        <input id="modal-part-name" placeholder="e.g. Tastic Luminate Heat Module" style="padding:12px;border:1px solid #E0E0E0;border-radius:10px;font-size:14px;color:#1A1A1A;width:100%;transition:border-color 0.1s;">
       </div>
-      <div style="display:flex; flex-direction:column; gap:5px;">
-        <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">Doc No</label>
-        <input id="modal-doc-no" placeholder="e.g. A0866" style="padding:11px 12px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; width:100%; transition:border-color 0.1s;">
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <label style="font-size:11px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">Doc No</label>
+        <input id="modal-doc-no" placeholder="e.g. A0866" style="padding:12px;border:1px solid #E0E0E0;border-radius:10px;font-size:14px;color:#1A1A1A;width:100%;transition:border-color 0.1s;">
       </div>
     </div>
-    <div style="display:flex; gap:10px;">
-      <button id="modal-cancel" class="btn-white" style="flex:1; background:#FFFFFF; color:#2C2C2C; border:1px solid #E0E0E0; padding:11px 18px; border-radius:6px; font-size:14px; font-weight:600; transition:background 0.1s;">Cancel</button>
-      <button id="modal-create" class="btn-red" style="flex:1; background:#CC0000; color:#FFFFFF; padding:11px 18px; border-radius:6px; font-size:14px; font-weight:600; transition:background 0.1s;">Create</button>
+    <div style="display:flex;gap:10px;">
+      <button id="modal-cancel" style="flex:1;background:#fff;color:#2C2C2C;border:1px solid rgba(0,0,0,0.12);padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;transition:background 0.1s;">Cancel</button>
+      <button id="modal-create" class="btn-red" style="flex:1;background:#CC0000;color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;transition:background 0.1s;">Create</button>
     </div>
   </div>
 </div>
@@ -361,7 +419,6 @@
 <script>
 'use strict';
 
-// ── State ─────────────────────────────────────────────────────────────────
 const state = {
   screen: 'landing',
   sops: [],
@@ -371,7 +428,7 @@ const state = {
   editorSearch: '',
 };
 
-const RS = 3; // canvas render scale — 3× display size for thick annotations in Word
+const RS = 3;
 
 let _saveTimer = null, _toastTimer = null;
 let _canvas = null, _ctx = null, _photoImg = null;
@@ -379,7 +436,6 @@ let _annotations = [], _drawing = false, _currentDraw = null;
 let _editorImgIdx = null;
 const RED = '#CC0000';
 
-// ── Helpers ───────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
 function uuid() {
@@ -400,7 +456,6 @@ function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Toast ─────────────────────────────────────────────────────────────────
 function toast(msg, kind) {
   const el = $('toast');
   el.textContent = msg;
@@ -414,7 +469,6 @@ function toast(msg, kind) {
   }, 3200);
 }
 
-// ── API ───────────────────────────────────────────────────────────────────
 async function api(method, path, body) {
   const opts = { method, headers: {} };
   if (body !== undefined) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
@@ -430,12 +484,10 @@ async function api(method, path, body) {
   return res.headers.get('content-type')?.includes('json') ? res.json() : res;
 }
 
-// ── Screen ────────────────────────────────────────────────────────────────
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
   const el = $('screen-' + name);
   if (el) el.classList.add('active');
-  const prev = state.screen;
   state.screen = name;
   if (name === 'capture') {
     setTimeout(() => {
@@ -446,16 +498,9 @@ function showScreen(name) {
   }
 }
 
-// ── Drawer ────────────────────────────────────────────────────────────────
-function openDrawer() {
-  $('drawer-overlay').style.display = 'block';
-}
+function openDrawer() { $('drawer-overlay').style.display = 'block'; }
+function closeDrawer() { $('drawer-overlay').style.display = 'none'; }
 
-function closeDrawer() {
-  $('drawer-overlay').style.display = 'none';
-}
-
-// ── Autosave ──────────────────────────────────────────────────────────────
 function queueSave() {
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(saveNow, 800);
@@ -475,7 +520,6 @@ async function saveNow() {
   } catch (e) { toast('Save failed: ' + e.message); }
 }
 
-// ── SOP list ──────────────────────────────────────────────────────────────
 async function loadSops() {
   try { state.sops = await api('GET', '/api/sops') || []; }
   catch (_) { state.sops = []; }
@@ -526,7 +570,6 @@ async function deleteSop(id) {
   } catch (e) { toast(e.message); }
 }
 
-// ── Modal ─────────────────────────────────────────────────────────────────
 function openModal() {
   $('modal-part-name').value = '';
   $('modal-doc-no').value = '';
@@ -549,7 +592,6 @@ async function createSop() {
   } catch (e) { toast(e.message); }
 }
 
-// ── Date grouping ─────────────────────────────────────────────────────────
 function computeGroups(items) {
   const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
@@ -561,24 +603,23 @@ function computeGroups(items) {
   return g.filter(x => x.items.length);
 }
 
-// ── Home ──────────────────────────────────────────────────────────────────
 function renderHomeList() {
   const list = $('home-list'), empty = $('home-empty');
   if (!list) return;
   if (!state.sops.length) { empty.style.display = 'block'; list.innerHTML = ''; return; }
   empty.style.display = 'none';
   list.innerHTML = computeGroups(state.sops).map(g => `
-    <div style="font-size:11px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.2px;margin:28px 0 10px;">${esc(g.label)}</div>
+    <div style="font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.1px;margin:20px 0 8px;">${esc(g.label)}</div>
     <div style="display:flex;flex-direction:column;gap:7px;">
       ${g.items.map(s => `
-        <div class="doc-card" data-id="${esc(s.id)}" style="background:#FFFFFF;border:1px solid #EBEBEB;border-radius:8px;padding:15px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color 0.12s;">
-          <div style="width:9px;height:9px;border-radius:50%;background:${s.status==='done'?'#2E9E4F':'#BBBBBB'};flex-shrink:0;"></div>
+        <div class="doc-card" data-id="${esc(s.id)}" style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s;">
+          <span style="width:9px;height:9px;border-radius:50%;background:${s.status==='done'?'#2E9E4F':'#BBBBBB'};flex-shrink:0;"></span>
           <div style="flex:1;min-width:0;">
-            <div style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1A1A1A;">${esc(s.part_name||'Untitled SOP')}</div>
-            <div style="color:#9B9B9B;font-size:13px;margin-top:2px;">${esc([s.part_no,s.doc_no].filter(Boolean).join(' · ')||'No part details')}</div>
+            <div style="font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1A1A1A;">${esc(s.part_name||'Untitled SOP')}</div>
+            <div style="color:#9B9B9B;font-size:12px;margin-top:1px;">${esc([s.doc_no].filter(Boolean).join(' · ')||(s.part_no||'No details'))}</div>
           </div>
-          <span style="color:#AAAAAA;font-size:12px;flex-shrink:0;margin-right:4px;">${esc(fmtTime(s.updated_at||s.created_at))}</span>
-          <button class="trash-btn" data-del="${esc(s.id)}" style="color:#C0C0C0;font-size:15px;padding:4px 6px;border-radius:4px;flex-shrink:0;transition:all 0.1s;" title="Delete">&#128465;</button>
+          <span style="color:#CCC;font-size:16px;flex-shrink:0;">&#8250;</span>
+          <button class="trash-btn" data-del="${esc(s.id)}" style="color:#C8C8C8;font-size:14px;padding:3px 5px;border-radius:4px;flex-shrink:0;transition:color 0.1s;" title="Delete">&#128465;</button>
         </div>`).join('')}
     </div>`).join('');
   list.querySelectorAll('.doc-card').forEach(card => {
@@ -589,21 +630,20 @@ function renderHomeList() {
   });
 }
 
-// ── Sidebar ───────────────────────────────────────────────────────────────
 function renderSidebarList() {
   const container = $('sidebar-list');
   if (!container) return;
   const q = state.editorSearch.toLowerCase().trim();
   const filtered = q ? state.sops.filter(s => [s.part_no,s.part_name,s.doc_no].filter(Boolean).join(' ').toLowerCase().includes(q)) : state.sops;
   container.innerHTML = computeGroups(filtered).map(g => `
-    <div style="font-size:10px;font-weight:700;color:#AAAAAA;text-transform:uppercase;letter-spacing:1.2px;padding:12px 10px 5px;">${esc(g.label)}</div>
+    <div style="font-size:10px;font-weight:700;color:#5E5E5E;text-transform:uppercase;letter-spacing:1.4px;padding:10px 10px 5px;">${esc(g.label)}</div>
     ${g.items.map(s => {
       const active = state.currentSop?.id === s.id;
-      return `<div class="sidebar-item" data-id="${esc(s.id)}" style="padding:10px 12px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:10px;border-left:${active?'3px solid #CC0000':'3px solid transparent'};background:${active?'#F5F5F5':'transparent'};transition:background 0.1s;">
-        <div style="width:8px;height:8px;border-radius:50%;background:${s.status==='done'?'#2E9E4F':'#BBBBBB'};flex-shrink:0;"></div>
+      return `<div class="sidebar-item rail-item" data-id="${esc(s.id)}" style="display:flex;align-items:center;gap:11px;padding:8px 11px;border-radius:9px;cursor:pointer;transition:background 0.1s;${active?'background:#242424;':''}">
+        <span style="width:8px;height:8px;border-radius:50%;background:${s.status==='done'?'#2E9E4F':'#666'};flex-shrink:0;"></span>
         <div style="flex:1;min-width:0;">
-          <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1A1A1A;">${esc(s.part_name||'Untitled SOP')}</div>
-          <div style="color:#AAAAAA;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px;">${esc([s.part_no,s.doc_no].filter(Boolean).join(' · ')||'No details')}</div>
+          <div style="font-size:12.5px;font-weight:${active?'600':'500'};color:${active?'#fff':'#C8C8C8'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(s.part_name||'Untitled SOP')}</div>
+          <div style="color:#6E6E6E;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px;">${esc([s.doc_no].filter(Boolean).join(' · ')||(s.part_no||''))}</div>
         </div>
       </div>`;
     }).join('')}`).join('');
@@ -612,7 +652,6 @@ function renderSidebarList() {
   });
 }
 
-// ── Editor ────────────────────────────────────────────────────────────────
 function renderEditorScreen() {
   const sop = state.currentSop;
   if (!sop) return;
@@ -626,10 +665,12 @@ function renderEditorScreen() {
 
 function updateStatusToggle() {
   const done = state.currentSop?.status === 'done';
-  $('status-draft-btn').style.background = done ? '#FFFFFF' : '#6B6B6B';
-  $('status-draft-btn').style.color = done ? '#9B9B9B' : '#FFFFFF';
-  $('status-done-btn').style.background = done ? '#2E9E4F' : '#FFFFFF';
-  $('status-done-btn').style.color = done ? '#FFFFFF' : '#9B9B9B';
+  $('status-draft-btn').style.background = done ? 'transparent' : '#6B6B6B';
+  $('status-draft-btn').style.color = done ? '#9B9B9B' : '#fff';
+  $('status-draft-btn').style.border = done ? '1px solid rgba(0,0,0,0.14)' : 'none';
+  $('status-done-btn').style.background = done ? '#2E9E4F' : 'transparent';
+  $('status-done-btn').style.color = done ? '#fff' : '#9B9B9B';
+  $('status-done-btn').style.border = done ? 'none' : '1px solid rgba(0,0,0,0.14)';
 }
 
 function renderEditorSteps() {
@@ -637,17 +678,17 @@ function renderEditorSteps() {
   if (!sop) return;
   const grid = $('editor-steps-grid');
   grid.innerHTML = sop.steps.map((s, i) => `
-    <div style="border:1px solid #EBEBEB;border-radius:7px;overflow:hidden;display:flex;flex-direction:column;background:#FFFFFF;">
-      <div style="background:#1A1A1A;color:#FFFFFF;font-size:11px;font-weight:700;letter-spacing:0.8px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;">
-        <span>STEP ${i+1}</span>
+    <div style="border:1px solid #EBEBEB;border-radius:9px;overflow:hidden;display:flex;flex-direction:column;background:#fff;">
+      <div style="background:#1A1A1A;color:#fff;font-size:11px;font-weight:700;letter-spacing:0.8px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;cursor:grab;">
+        <span style="display:flex;align-items:center;gap:6px;"><span style="color:#666;font-size:14px;letter-spacing:-2px;line-height:1;">&#10783;</span>STEP ${i+1}</span>
         <button class="step-del" data-i="${i}" style="color:#555;font-size:13px;padding:2px 4px;line-height:1;transition:color 0.1s;" title="Remove">&#10005;</button>
       </div>
-      <div class="step-photo" data-i="${i}" style="aspect-ratio:4/3;background:#F5F5F5;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:background 0.1s;">
+      <div class="step-photo" data-i="${i}" style="aspect-ratio:4/3;background:#F5F5F5;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:opacity 0.1s;">
         ${s.image ? `<img src="${esc(s.image)}" style="width:100%;height:100%;object-fit:contain;display:block;" alt="">` : `<div style="color:#BBBBBB;font-size:12px;text-align:center;line-height:1.6;">Click to<br>add photo</div>`}
       </div>
-      <textarea class="step-text" data-i="${i}" placeholder="Describe this step…" style="padding:10px;font-size:13px;line-height:1.45;min-height:68px;border:none;resize:none;color:#1A1A1A;width:100%;background:transparent;">${esc(s.text||'')}</textarea>
+      <textarea class="step-text" data-i="${i}" placeholder="Describe this step…" style="padding:10px;font-size:12.5px;line-height:1.45;min-height:66px;border:none;resize:none;color:#1A1A1A;width:100%;background:transparent;">${esc(s.text||'')}</textarea>
     </div>`).join('') +
-    `<div class="add-step-cell" style="border:1px dashed #E0E0E0;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-weight:600;font-size:14px;min-height:120px;cursor:pointer;transition:all 0.12s;">+ Add step</div>`;
+    `<div class="add-step-cell" style="border:1px dashed #D8D6D2;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#BBB;font-weight:600;font-size:14px;min-height:120px;cursor:pointer;transition:all 0.12s;">+ Add step</div>`;
 
   grid.querySelectorAll('.step-photo').forEach(el => el.addEventListener('click', () => pickEditorImage(+el.dataset.i)));
   grid.querySelectorAll('.step-del').forEach(btn => {
@@ -708,10 +749,9 @@ async function generateDocx() {
     toast('Document downloaded', 'success');
     sop.status = 'done'; updateStatusToggle();
   } catch (e) { toast('Generate failed: ' + e.message); }
-  finally { btn.textContent = '↓ Download .docx'; btn.disabled = false; }
+  finally { btn.innerHTML = '&#8595; Download .docx'; btn.disabled = false; }
 }
 
-// ── Capture ───────────────────────────────────────────────────────────────
 function renderCaptureScreen() {
   const sop = state.currentSop;
   if (!sop) return;
@@ -730,11 +770,11 @@ function renderCaptureScreen() {
     btn.className = 'step-dot';
     btn.textContent = i + 1;
     Object.assign(btn.style, {
-      width: '30px', height: '30px', borderRadius: '50%',
-      border: `2px solid ${active ? RED : filled ? '#1A1A1A' : '#E0E0E0'}`,
-      background: active ? RED : filled ? '#1A1A1A' : '#FFFFFF',
-      color: (active || filled) ? '#FFFFFF' : '#9B9B9B',
-      fontSize: '12px', fontWeight: '700', display: 'flex', alignItems: 'center',
+      width: '28px', height: '28px', borderRadius: '50%',
+      border: active ? 'none' : filled ? 'none' : '1.5px solid rgba(0,0,0,0.15)',
+      background: active ? RED : filled ? '#1A1A1A' : 'transparent',
+      color: (active || filled) ? '#fff' : '#9B9B9B',
+      fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center',
       justifyContent: 'center', flexShrink: '0', transition: 'all 0.12s', cursor: 'pointer',
     });
     btn.addEventListener('click', () => jumpStep(i));
@@ -746,9 +786,10 @@ function setActiveTool(tool) {
   state.activeTool = tool;
   ['arrow', 'circle', 'label'].forEach(t => {
     const btn = $('tool-' + t), active = t === tool;
-    btn.style.background = active ? RED : '#FFFFFF';
-    btn.style.color = active ? '#FFFFFF' : '#2C2C2C';
-    btn.style.borderColor = active ? RED : '#E0E0E0';
+    btn.style.background = active ? RED : '#fff';
+    btn.style.color = active ? '#fff' : '#2C2C2C';
+    btn.style.borderColor = active ? RED : 'rgba(0,0,0,0.1)';
+    btn.style.borderWidth = active ? '2px' : '1px';
   });
 }
 
@@ -822,7 +863,6 @@ function captureAddStep() {
 function finishCapture() { commitCaptureStep(); saveNow(); toast('Saved', 'success'); goHome(); }
 function leaveCapture() { commitCaptureStep(); saveNow(); goHome(); }
 
-// ── Canvas ────────────────────────────────────────────────────────────────
 function loadPhotoForCanvas(src, cb) {
   const img = new Image();
   img.onload = () => { _photoImg = img; sizeCanvas(); if (cb) cb(); };
@@ -953,14 +993,12 @@ function onPhotoSelected(file) {
   reader.readAsDataURL(file);
 }
 
-// ── Wire up events ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   // Landing
-  $('landing-hamburger').addEventListener('click', openDrawer);
   $('landing-open-sop').addEventListener('click', enterSop);
   $('landing-sop-card').addEventListener('click', enterSop);
 
-  // Home
+  // Home (mobile)
   $('home-hamburger').addEventListener('click', openDrawer);
   $('home-new-btn').addEventListener('click', openModal);
 
@@ -1029,7 +1067,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.screen === 'capture' && _photoImg) { sizeCanvas(); redrawCanvas(); }
   });
 
-  // Boot
   showScreen('landing');
   loadSops();
 
