@@ -1,1496 +1,884 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#1A1A1A">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="IXL Studio">
-<link rel="manifest" href="/static/manifest.json">
-<title>IXL | Studio</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --red: #CC0000;
-    --black: #1A1A1A;
-    --dark-grey: #2C2C2C;
-    --grey: #6B6B6B;
-    --light-grey: #F2F2F2;
-    --white: #FFFFFF;
-    --green: #2E9E4F;
-    --border: #E2E2E2;
-  }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>IXL | Studio</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+  <meta name="theme-color" content="#1A1A1A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; background: #F2F2F2; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    input, textarea, select { font-family: inherit; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-thumb { background: #C8C8C8; border-radius: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    .screen { display: none; height: 100vh; }
+    .screen.active { display: flex; }
 
-  html, body {
-    height: 100%;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    color: var(--black);
-    background: var(--light-grey);
-    font-size: 15px;
-    line-height: 1.45;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  button { font-family: inherit; cursor: pointer; border: none; background: none; font-size: inherit; }
-  input, textarea { font-family: inherit; font-size: inherit; }
-
-  .hidden { display: none !important; }
-
-  /* ---------- Logo lockup ---------- */
-  .logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    user-select: none;
-  }
-  .logo .ixl-block { display: flex; flex-direction: column; line-height: 1; }
-  .logo .ixl { font-weight: 800; font-size: 22px; letter-spacing: 0.5px; color: var(--white); }
-  .logo .since { font-size: 8px; font-weight: 500; color: var(--grey); letter-spacing: 1px; margin-top: 2px; text-transform: uppercase; }
-  .logo .divider { width: 3px; height: 26px; background: var(--red); border-radius: 1px; }
-  .logo .module { font-weight: 400; font-size: 20px; color: var(--white); letter-spacing: 0.3px; }
-  .logo.dark .ixl, .logo.dark .module { color: var(--black); }
-
-  /* ---------- Top bar ---------- */
-  .topbar {
-    background: var(--black);
-    border-bottom: 3px solid var(--red);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    height: 60px;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 10;
-  }
-  .topbar-left { display: flex; align-items: center; gap: 24px; }
-  .module-tabs { display: flex; gap: 4px; }
-  .module-tab {
-    color: var(--grey);
-    padding: 6px 14px;
-    border-radius: 4px;
-    font-weight: 600;
-    font-size: 14px;
-    position: relative;
-    background: transparent;
-  }
-  .module-tab.active { color: var(--white); background: var(--dark-grey); }
-  .module-tab.disabled { color: #555; cursor: not-allowed; }
-  .module-tab .soon {
-    font-size: 8px;
-    background: var(--red);
-    color: var(--white);
-    padding: 1px 4px;
-    border-radius: 3px;
-    margin-left: 5px;
-    vertical-align: middle;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-  }
-  .topbar-right { display: flex; align-items: center; gap: 12px; }
-
-  /* ---------- Buttons ---------- */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    padding: 9px 18px;
-    border-radius: 5px;
-    font-weight: 600;
-    font-size: 14px;
-    transition: background 0.12s, opacity 0.12s;
-    white-space: nowrap;
-  }
-  .btn-red { background: var(--red); color: var(--white); }
-  .btn-red:hover { background: #b00000; }
-  .btn-black { background: var(--black); color: var(--white); }
-  .btn-black:hover { background: var(--dark-grey); }
-  .btn-grey { background: var(--white); color: var(--dark-grey); border: 1px solid var(--border); }
-  .btn-grey:hover { background: var(--light-grey); }
-  .btn-ghost { color: var(--grey); padding: 9px 12px; }
-  .btn-ghost:hover { color: var(--black); }
-  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  .btn-sm { padding: 6px 12px; font-size: 13px; }
-  .btn-block { width: 100%; }
-
-  /* ---------- Screen container ---------- */
-  .screen { display: none; flex-direction: column; height: 100%; }
-  .screen.active { display: flex; }
-  body { display: flex; flex-direction: column; }
-  #app { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-
-  /* ---------- HOME ---------- */
-  #screen-home .content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 32px 24px 60px;
-    max-width: 760px;
-    width: 100%;
-    margin: 0 auto;
-  }
-  .home-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 28px;
-  }
-  .home-head h1 { font-size: 24px; font-weight: 700; }
-  .home-head p { color: var(--grey); font-size: 14px; margin-top: 2px; }
-
-  .section-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--grey);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin: 26px 0 10px;
-  }
-  .doc-list { display: flex; flex-direction: column; gap: 8px; }
-  .doc-card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    cursor: pointer;
-    transition: border-color 0.12s, transform 0.06s;
-  }
-  .doc-card:hover { border-color: var(--grey); }
-  .doc-card:active { transform: scale(0.997); }
-  .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .status-dot.draft { background: var(--grey); }
-  .status-dot.done { background: var(--green); }
-  .doc-main { flex: 1; min-width: 0; }
-  .doc-main .doc-title { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .doc-main .doc-sub { color: var(--grey); font-size: 13px; margin-top: 1px; }
-  .doc-time { color: var(--grey); font-size: 12px; flex-shrink: 0; }
-  .doc-del {
-    color: var(--grey);
-    font-size: 18px;
-    padding: 4px 6px;
-    border-radius: 4px;
-    flex-shrink: 0;
-  }
-  .doc-del:hover { color: var(--red); background: var(--light-grey); }
-
-  .empty-state {
-    text-align: center;
-    color: var(--grey);
-    padding: 50px 20px;
-    background: var(--white);
-    border: 1px dashed var(--border);
-    border-radius: 8px;
-  }
-  .empty-state .big { font-size: 32px; margin-bottom: 8px; opacity: 0.4; }
-
-  /* ---------- CAPTURE (mobile) ---------- */
-  #screen-capture { background: var(--white); }
-  .capture-top {
-    background: var(--black);
-    border-bottom: 3px solid var(--red);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    height: 56px;
-    flex-shrink: 0;
-  }
-  .capture-top .ct-title { color: var(--white); font-weight: 600; font-size: 15px; }
-  .capture-top .ct-title small { color: var(--grey); font-weight: 400; }
-  .capture-back { color: var(--white); font-size: 15px; font-weight: 600; }
-
-  .step-dots {
-    display: flex;
-    gap: 8px;
-    padding: 14px 16px;
-    overflow-x: auto;
-    flex-shrink: 0;
-    border-bottom: 1px solid var(--border);
-    align-items: center;
-  }
-  .step-dot {
-    width: 30px; height: 30px;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    background: var(--white);
-    color: var(--grey);
-    font-size: 13px;
-    font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    position: relative;
-  }
-  .step-dot.active { border-color: var(--red); color: var(--red); }
-  .step-dot.filled { background: var(--black); border-color: var(--black); color: var(--white); }
-  .step-dot.active.filled { background: var(--red); border-color: var(--red); color: var(--white); }
-  .step-dot-add { color: var(--grey); font-size: 20px; font-weight: 400; }
-
-  .capture-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
-
-  .photo-area {
-    position: relative;
-    background: var(--light-grey);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    min-height: 240px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-  .photo-placeholder { text-align: center; padding: 30px 20px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
-  .photo-placeholder .icon { font-size: 40px; opacity: 0.35; }
-  .photo-placeholder p { color: var(--grey); font-size: 13px; }
-  .photo-actions { display: flex; gap: 10px; }
-  #captureCanvas { display: block; max-width: 100%; touch-action: none; background: #000; }
-
-  .annot-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
-  .tool-btn {
-    flex: 1;
-    min-width: 70px;
-    padding: 10px 8px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--white);
-    color: var(--dark-grey);
-    font-weight: 600;
-    font-size: 13px;
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-  }
-  .tool-btn .ti { font-size: 17px; }
-  .tool-btn.active { background: var(--red); color: var(--white); border-color: var(--red); }
-  .tool-btn.util { color: var(--grey); }
-  .tool-btn.util:hover { background: var(--light-grey); }
-
-  .note-field { display: flex; flex-direction: column; gap: 6px; }
-  .note-field label { font-size: 12px; font-weight: 700; color: var(--grey); text-transform: uppercase; letter-spacing: 0.5px; }
-  .note-field textarea {
-    width: 100%;
-    min-height: 90px;
-    padding: 12px;
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    resize: vertical;
-    color: var(--black);
-    line-height: 1.4;
-  }
-  .note-field textarea:focus { outline: none; border-color: var(--red); }
-
-  .capture-nav {
-    display: flex;
-    gap: 8px;
-    padding: 12px 16px;
-    border-top: 1px solid var(--border);
-    flex-shrink: 0;
-    background: var(--white);
-  }
-  .capture-nav .btn { flex: 1; }
-
-  /* ---------- EDITOR (desktop) ---------- */
-  #screen-editor { flex-direction: row; }
-  .editor-left {
-    width: 280px;
-    flex-shrink: 0;
-    background: var(--white);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-  .editor-left-head { padding: 16px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
-  .search-box {
-    width: 100%;
-    padding: 9px 12px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--light-grey);
-  }
-  .search-box:focus { outline: none; border-color: var(--red); background: var(--white); }
-  .editor-list { flex: 1; overflow-y: auto; padding: 8px; }
-  .list-item {
-    padding: 11px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .list-item:hover { background: var(--light-grey); }
-  .list-item.active { background: var(--light-grey); box-shadow: inset 3px 0 0 var(--red); }
-  .list-item .li-main { flex: 1; min-width: 0; }
-  .list-item .li-title { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .list-item .li-sub { color: var(--grey); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .list-group-label { font-size: 11px; font-weight: 700; color: var(--grey); text-transform: uppercase; letter-spacing: 1px; padding: 12px 12px 6px; }
-
-  .editor-right { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-  .editor-right-head {
-    height: 60px;
-    background: var(--white);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    flex-shrink: 0;
-  }
-  .editor-right-head .erh-left { display: flex; align-items: center; gap: 14px; }
-  .editor-right-head h2 { font-size: 17px; font-weight: 700; }
-  .status-toggle { display: flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
-  .status-toggle button { padding: 6px 14px; font-weight: 600; font-size: 13px; color: var(--grey); background: var(--white); }
-  .status-toggle button.active { color: var(--white); }
-  .status-toggle button.draft.active { background: var(--grey); }
-  .status-toggle button.done.active { background: var(--green); }
-  .erh-right { display: flex; align-items: center; gap: 10px; }
-
-  .editor-canvas-area { flex: 1; overflow-y: auto; padding: 24px; }
-  .editor-sheet {
-    max-width: 1100px;
-    margin: 0 auto;
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 22px;
-  }
-  .meta-row { display: flex; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
-  .meta-field { flex: 1; min-width: 160px; display: flex; flex-direction: column; gap: 5px; }
-  .meta-field label { font-size: 11px; font-weight: 700; color: var(--grey); text-transform: uppercase; letter-spacing: 0.5px; }
-  .meta-field input {
-    padding: 9px 11px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-weight: 500;
-  }
-  .meta-field input:focus { outline: none; border-color: var(--red); }
-
-  .preview-hint {
-    font-size: 12px;
-    color: var(--grey);
-    background: var(--light-grey);
-    padding: 8px 12px;
-    border-radius: 6px;
-    margin-bottom: 16px;
-  }
-
-  .step-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-  }
-  .step-cell {
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    background: var(--white);
-    position: relative;
-  }
-  .step-cell .step-head {
-    background: var(--black);
-    color: var(--white);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    padding: 6px 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .step-cell .step-head .del-step { color: var(--grey); font-size: 14px; cursor: pointer; }
-  .step-cell .step-head .del-step:hover { color: var(--red); }
-  .step-img {
-    aspect-ratio: 4 / 3;
-    background: var(--light-grey);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    overflow: hidden;
-    position: relative;
-  }
-  .step-img img { width: 100%; height: 100%; object-fit: contain; }
-  .step-img .img-hint { color: var(--grey); font-size: 12px; text-align: center; padding: 12px; }
-  .step-img:hover .img-overlay { opacity: 1; }
-  .img-overlay {
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,0.45);
-    color: var(--white);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 600;
-    opacity: 0; transition: opacity 0.12s;
-  }
-  .step-text {
-    padding: 10px;
-    font-size: 13px;
-    line-height: 1.4;
-    min-height: 64px;
-    outline: none;
-    color: var(--black);
-  }
-  .step-text:empty::before { content: attr(data-ph); color: var(--grey); }
-  .step-text:focus { background: #fffdf6; }
-
-  .add-step-cell {
-    border: 1px dashed var(--border);
-    border-radius: 7px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--grey);
-    font-weight: 600;
-    min-height: 120px;
-    cursor: pointer;
-  }
-  .add-step-cell:hover { border-color: var(--red); color: var(--red); }
-
-  /* ---------- Toast ---------- */
-  #toast {
-    position: fixed;
-    bottom: 24px; left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--black);
-    color: var(--white);
-    padding: 12px 20px;
-    border-radius: 7px;
-    font-size: 14px;
-    font-weight: 500;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s, transform 0.2s;
-    z-index: 1000;
-    max-width: 90%;
-    border-left: 3px solid var(--red);
-  }
-  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  #toast.success { border-left-color: var(--green); }
-
-  /* ---------- Spinner ---------- */
-  .spinner {
-    width: 16px; height: 16px;
-    border: 2px solid rgba(255,255,255,0.4);
-    border-top-color: var(--white);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ---------- Modal ---------- */
-  .modal-backdrop {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.45);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 500; padding: 20px;
-  }
-  .modal {
-    background: var(--white);
-    border-radius: 9px;
-    width: 100%; max-width: 380px;
-    padding: 22px;
-    border-top: 3px solid var(--red);
-  }
-  .modal h3 { font-size: 17px; margin-bottom: 14px; }
-  .modal .meta-field { margin-bottom: 12px; }
-  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
-
-  /* ---------- Responsive ---------- */
-  @media (max-width: 767px) {
-    .module-tabs { display: none; }
-    #screen-editor { flex-direction: column; }
-    .editor-left { display: none; }
-    .step-grid { grid-template-columns: repeat(2, 1fr); }
-    .home-head h1 { font-size: 20px; }
-  }
-  @media (min-width: 768px) {
-    .capture-only { }
-  }
-</style>
+    .btn-red:hover { background: #b00000 !important; }
+    .btn-black:hover { background: #2C2C2C !important; }
+    .btn-white:hover { background: #F5F5F5 !important; }
+    .doc-card:hover { border-color: #AAAAAA !important; }
+    .sidebar-item:hover { background: #F5F5F5 !important; }
+    .step-photo:hover { background: #EDEDED !important; }
+    .add-step-cell:hover { border-color: #CC0000 !important; color: #CC0000 !important; }
+    .trash-btn:hover { color: #CC0000 !important; background: #F5F5F5 !important; }
+    .home-btn:hover { color: #1A1A1A !important; }
+    .back-btn:hover { color: #CC0000 !important; }
+    .dot-add:hover { border-color: #CC0000 !important; color: #CC0000 !important; }
+    input:focus, textarea:focus { border-color: #CC0000 !important; outline: none; }
+    textarea:focus { background: #FFFCF5 !important; }
+  </style>
 </head>
 <body>
 
-<div id="app">
+<!-- ═══════════════════ HOME ═══════════════════ -->
+<div id="screen-home" class="screen" style="flex-direction:column; background:#F2F2F2;">
 
-  <!-- ============ HOME ============ -->
-  <section id="screen-home" class="screen active">
-    <div class="topbar">
-      <div class="topbar-left">
-        <div class="logo">
-          <div class="ixl-block">
-            <span class="ixl">IXL</span>
-            <span class="since">since 1858</span>
-          </div>
-          <div class="divider"></div>
-          <span class="module">Studio</span>
-        </div>
-        <div class="module-tabs">
-          <button class="module-tab active">SOP</button>
-          <button class="module-tab disabled">ICL<span class="soon">Soon</span></button>
-          <button class="module-tab disabled">PFC<span class="soon">Soon</span></button>
-          <button class="module-tab disabled">MLB<span class="soon">Soon</span></button>
-        </div>
-      </div>
-      <div class="topbar-right">
-        <button class="btn btn-red" onclick="newSop()">+ New SOP</button>
-      </div>
+  <header style="background:#1A1A1A; border-bottom:3px solid #CC0000; display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:62px; flex-shrink:0;">
+    <div style="display:flex; align-items:center; gap:11px;">
+      <img src="/static/IXL-white.png" style="height:40px; width:auto; display:block;" alt="IXL">
+      <div style="width:2px; height:26px; background:#CC0000; border-radius:1px;"></div>
+      <span style="font-size:22px; font-weight:700; color:#FFFFFF; letter-spacing:0.3px;">Studio</span>
     </div>
-    <div class="content">
-      <div class="home-head">
-        <div>
-          <h1>Standard operating procedures</h1>
-          <p>Capture photos, annotate steps, generate the Word document.</p>
-        </div>
-      </div>
-      <div id="homeDocs"></div>
+    <button id="home-new-btn" class="btn-red" style="background:#CC0000; color:#fff; padding:9px 20px; border-radius:5px; font-size:14px; font-weight:600; transition:background 0.1s;">+ New SOP</button>
+  </header>
+
+  <div style="flex:1; overflow-y:auto; padding:36px 28px 60px; max-width:740px; width:100%; margin:0 auto;">
+    <div style="margin-bottom:32px;">
+      <h1 style="font-size:22px; font-weight:700; color:#1A1A1A;">Standard operating procedures</h1>
+      <p style="color:#6B6B6B; font-size:14px; margin-top:5px;">Capture photos, annotate steps, generate the Word document.</p>
     </div>
-  </section>
-
-  <!-- ============ CAPTURE (mobile) ============ -->
-  <section id="screen-capture" class="screen">
-    <div class="capture-top">
-      <button class="capture-back" onclick="leaveCapture()">‹ Home</button>
-      <div class="ct-title">New SOP <small>/ Step <span id="capStepNum">1</span></small></div>
-      <button class="capture-back" onclick="finishCapture()">Done</button>
+    <div id="home-empty" style="display:none; text-align:center; padding:64px 20px; background:#FFFFFF; border:1px dashed #E0E0E0; border-radius:10px;">
+      <div style="font-size:40px; margin-bottom:14px; opacity:0.2; line-height:1;">📄</div>
+      <div style="font-size:16px; font-weight:700; color:#1A1A1A; margin-bottom:7px;">No documents yet</div>
+      <p style="font-size:14px; color:#6B6B6B;">Tap <strong>+ New SOP</strong> to capture your first procedure.</p>
     </div>
-    <div class="step-dots" id="capStepDots"></div>
-    <div class="capture-body">
-      <div class="photo-area" id="capPhotoArea">
-        <div class="photo-placeholder" id="capPlaceholder">
-          <span class="icon">📷</span>
-          <p>No photo yet for this step</p>
-          <div class="photo-actions">
-            <label class="btn btn-red">
-              Take photo
-              <input type="file" accept="image/*" capture="environment" class="hidden" onchange="onPhotoSelected(event)">
-            </label>
-            <label class="btn btn-grey">
-              Upload
-              <input type="file" accept="image/*" class="hidden" onchange="onPhotoSelected(event)">
-            </label>
-          </div>
-        </div>
-        <canvas id="captureCanvas" class="hidden"></canvas>
-      </div>
-
-      <div class="annot-toolbar" id="capToolbar">
-        <button class="tool-btn" data-tool="arrow" onclick="setTool('arrow')"><span class="ti">↗</span>Arrow</button>
-        <button class="tool-btn" data-tool="circle" onclick="setTool('circle')"><span class="ti">◯</span>Circle</button>
-        <button class="tool-btn" data-tool="label" onclick="setTool('label')"><span class="ti">A</span>Label</button>
-        <button class="tool-btn util" onclick="undoAnnotation()"><span class="ti">↺</span>Undo</button>
-        <button class="tool-btn util" onclick="clearAnnotations()"><span class="ti">✕</span>Clear</button>
-      </div>
-
-      <div class="photo-actions" id="capReplaceRow" style="display:none">
-        <label class="btn btn-grey btn-sm">
-          Replace photo
-          <input type="file" accept="image/*" capture="environment" class="hidden" onchange="onPhotoSelected(event)">
-        </label>
-      </div>
-
-      <div class="note-field">
-        <label>Step description</label>
-        <textarea id="capNote" placeholder="Describe this step…" oninput="onNoteInput(this.value)"></textarea>
-      </div>
-    </div>
-    <div class="capture-nav">
-      <button class="btn btn-grey" onclick="capturePrev()" id="capPrevBtn">‹ Previous</button>
-      <button class="btn btn-black" onclick="captureAddStep()">+ Add step</button>
-      <button class="btn btn-red" onclick="captureNext()" id="capNextBtn">Next ›</button>
-    </div>
-  </section>
-
-  <!-- ============ EDITOR (desktop) ============ -->
-  <section id="screen-editor" class="screen">
-    <div class="editor-left">
-      <div class="editor-left-head">
-        <div class="logo dark" style="cursor:pointer" onclick="goHome()">
-          <div class="ixl-block">
-            <span class="ixl">IXL</span>
-            <span class="since">since 1858</span>
-          </div>
-          <div class="divider"></div>
-          <span class="module">SOP</span>
-        </div>
-        <input class="search-box" id="editorSearch" placeholder="Search documents…" oninput="renderEditorList()">
-        <button class="btn btn-red btn-block btn-sm" onclick="newSop()">+ New SOP</button>
-      </div>
-      <div class="editor-list" id="editorList"></div>
-    </div>
-
-    <div class="editor-right">
-      <div class="editor-right-head">
-        <div class="erh-left">
-          <button class="btn btn-ghost" onclick="goHome()">‹ Home</button>
-          <h2 id="editorTitle">SOP editor</h2>
-        </div>
-        <div class="erh-right">
-          <div class="status-toggle">
-            <button class="draft" id="stDraft" onclick="setStatus('draft')">Draft</button>
-            <button class="done" id="stDone" onclick="setStatus('done')">Complete</button>
-          </div>
-          <button class="btn btn-red" id="downloadBtn" onclick="generateDocx()">↓ Download .docx</button>
-        </div>
-      </div>
-      <div class="editor-canvas-area">
-        <div class="editor-sheet" id="editorSheet">
-          <div class="meta-row">
-            <div class="meta-field">
-              <label>Part No</label>
-              <input id="fPartNo" placeholder="e.g. 36611" oninput="onMetaInput()">
-            </div>
-            <div class="meta-field">
-              <label>Part Name</label>
-              <input id="fPartName" placeholder="e.g. Tastic Luminate Heat Module" oninput="onMetaInput()">
-            </div>
-            <div class="meta-field">
-              <label>Doc No</label>
-              <input id="fDocNo" placeholder="e.g. A0866" oninput="onMetaInput()">
-            </div>
-          </div>
-          <div class="preview-hint">
-            This is the editor — the generated .docx is the formatted result and may differ slightly from this preview.
-          </div>
-          <div class="step-grid" id="editorSteps"></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
+    <div id="home-list"></div>
+  </div>
 </div>
 
-<div id="toast"></div>
+<!-- ═══════════════════ CAPTURE ═══════════════════ -->
+<div id="screen-capture" class="screen" style="flex-direction:column; background:#FFFFFF;">
 
-<!-- hidden file input used by the editor for per-cell uploads -->
-<input type="file" id="editorImgInput" accept="image/*" class="hidden">
+  <div style="background:#1A1A1A; border-bottom:3px solid #CC0000; display:flex; align-items:center; justify-content:space-between; padding:0 18px; height:56px; flex-shrink:0;">
+    <button id="cap-back-btn" class="back-btn" style="color:#FFFFFF; font-size:15px; font-weight:600; padding:8px 2px; transition:color 0.1s;">&#8249; Home</button>
+    <div style="color:#FFFFFF; font-weight:600; font-size:15px;">Step <span id="cap-step-num" style="color:#CC0000;">1</span> <span id="cap-step-total" style="color:#505050; font-weight:400;">/ 1</span></div>
+    <button id="cap-done-btn" style="color:#CC0000; font-size:15px; font-weight:700; padding:8px 2px;">Done</button>
+  </div>
+
+  <div id="cap-dots-row" style="display:flex; gap:8px; padding:11px 16px; overflow-x:auto; flex-shrink:0; border-bottom:1px solid #EBEBEB; align-items:center;">
+    <button id="cap-add-dot" class="dot-add" style="width:30px; height:30px; border-radius:50%; border:2px solid #E0E0E0; color:#AAAAAA; font-size:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.12s; line-height:1; background:transparent;">+</button>
+  </div>
+
+  <div style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:14px;">
+
+    <div id="cap-photo-area" style="position:relative; background:#F2F2F2; border:1px solid #E8E8E8; border-radius:8px; min-height:220px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+      <div id="cap-placeholder" style="text-align:center; padding:32px 20px; display:flex; flex-direction:column; gap:13px; align-items:center;">
+        <div style="font-size:40px; opacity:0.22; line-height:1;">📷</div>
+        <p style="color:#6B6B6B; font-size:13px;">No photo for this step yet</p>
+        <div style="display:flex; gap:10px;">
+          <label class="btn-red" style="background:#CC0000; color:#FFFFFF; padding:9px 18px; border-radius:5px; font-size:14px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background 0.1s;">
+            Take photo
+            <input id="cap-camera-input" type="file" accept="image/*" capture="environment" style="display:none;">
+          </label>
+          <label class="btn-white" style="background:#FFFFFF; color:#2C2C2C; padding:9px 18px; border-radius:5px; font-size:14px; font-weight:600; cursor:pointer; border:1px solid #E0E0E0; display:inline-flex; align-items:center; gap:6px; transition:background 0.1s;">
+            Upload
+            <input id="cap-upload-input" type="file" accept="image/*" style="display:none;">
+          </label>
+        </div>
+      </div>
+      <canvas id="cap-canvas" style="display:none; max-width:100%; touch-action:none;"></canvas>
+    </div>
+
+    <div id="cap-toolbar" style="display:none; gap:8px; flex-wrap:wrap;">
+      <button id="tool-arrow" class="ann-tool" style="flex:1; min-width:62px; padding:10px 6px; border:2px solid #CC0000; border-radius:6px; background:#CC0000; color:#FFFFFF; font-size:12px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; transition:all 0.1s;">
+        <span style="font-size:16px;">&#8599;</span>Arrow
+      </button>
+      <button id="tool-circle" class="ann-tool" style="flex:1; min-width:62px; padding:10px 6px; border:2px solid #E0E0E0; border-radius:6px; background:#FFFFFF; color:#2C2C2C; font-size:12px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; transition:all 0.1s;">
+        <span style="font-size:16px;">&#9711;</span>Circle
+      </button>
+      <button id="tool-label" class="ann-tool" style="flex:1; min-width:62px; padding:10px 6px; border:2px solid #E0E0E0; border-radius:6px; background:#FFFFFF; color:#2C2C2C; font-size:12px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; transition:all 0.1s;">
+        <span style="font-size:16px;">A</span>Label
+      </button>
+      <button id="tool-undo" class="btn-white" style="flex:1; min-width:62px; padding:10px 6px; border:1px solid #E8E8E8; border-radius:6px; background:#FFFFFF; color:#6B6B6B; font-size:12px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; transition:background 0.1s;">
+        <span style="font-size:16px;">&#8634;</span>Undo
+      </button>
+      <button id="tool-clear" class="btn-white" style="flex:1; min-width:62px; padding:10px 6px; border:1px solid #E8E8E8; border-radius:6px; background:#FFFFFF; color:#6B6B6B; font-size:12px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; transition:background 0.1s;">
+        <span style="font-size:16px;">&#10005;</span>Clear
+      </button>
+    </div>
+
+    <div id="cap-replace-row" style="display:none;">
+      <label class="btn-white" style="background:#FFFFFF; color:#2C2C2C; padding:7px 14px; border-radius:5px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid #E0E0E0; display:inline-flex; align-items:center; gap:6px; transition:background 0.1s;">
+        Replace photo
+        <input id="cap-replace-input" type="file" accept="image/*" capture="environment" style="display:none;">
+      </label>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      <label style="font-size:11px; font-weight:700; color:#9B9B9B; text-transform:uppercase; letter-spacing:1px;">Step description</label>
+      <textarea id="cap-note" placeholder="Describe this step…" style="width:100%; min-height:90px; padding:12px; border:1px solid #E0E0E0; border-radius:7px; resize:vertical; color:#1A1A1A; line-height:1.45; font-size:14px; transition:border-color 0.1s; background:#FFFFFF;"></textarea>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:8px; padding:12px 16px; border-top:1px solid #EBEBEB; flex-shrink:0; background:#FFFFFF;">
+    <button id="cap-prev-btn" class="btn-white" style="flex:1; background:#FFFFFF; color:#2C2C2C; border:1px solid #E0E0E0; padding:11px 14px; border-radius:5px; font-size:14px; font-weight:600; transition:background 0.1s;">&#8249; Previous</button>
+    <button id="cap-addstep-btn" class="btn-black" style="flex:1; background:#1A1A1A; color:#FFFFFF; padding:11px 14px; border-radius:5px; font-size:14px; font-weight:600; transition:background 0.1s;">+ Add step</button>
+    <button id="cap-next-btn" class="btn-red" style="flex:1; background:#CC0000; color:#FFFFFF; padding:11px 14px; border-radius:5px; font-size:14px; font-weight:600; transition:background 0.1s;">Next &#8250;</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ EDITOR ═══════════════════ -->
+<div id="screen-editor" class="screen" style="flex-direction:row;">
+
+  <aside style="width:272px; flex-shrink:0; background:#FFFFFF; border-right:1px solid #EBEBEB; display:flex; flex-direction:column; min-height:0;">
+    <div style="padding:16px; border-bottom:1px solid #EBEBEB; display:flex; flex-direction:column; gap:10px;">
+      <div id="sidebar-logo" style="display:flex; align-items:center; gap:10px; cursor:pointer; padding:2px 0;">
+        <img src="/static/IXL.png" style="height:28px; width:auto; display:block;" alt="IXL">
+        <div style="width:2px; height:20px; background:#CC0000; border-radius:1px;"></div>
+        <span style="font-size:15px; font-weight:400; color:#1A1A1A; letter-spacing:0.3px;">SOP</span>
+      </div>
+      <input id="sidebar-search" placeholder="Search documents&#8230;" style="width:100%; padding:9px 12px; border:1px solid #E0E0E0; border-radius:6px; background:#F8F8F8; font-size:13px; color:#1A1A1A; transition:all 0.1s;">
+      <button id="sidebar-new-btn" class="btn-red" style="background:#CC0000; color:#FFFFFF; width:100%; padding:8px 14px; border-radius:5px; font-size:13px; font-weight:600; transition:background 0.1s;">+ New SOP</button>
+    </div>
+    <div id="sidebar-list" style="flex:1; overflow-y:auto; padding:6px; min-height:0;"></div>
+  </aside>
+
+  <div style="flex:1; display:flex; flex-direction:column; min-width:0; min-height:0;">
+    <div style="height:60px; background:#FFFFFF; border-bottom:1px solid #EBEBEB; display:flex; align-items:center; justify-content:space-between; padding:0 24px; flex-shrink:0;">
+      <div style="display:flex; align-items:center; gap:14px; min-width:0;">
+        <button id="editor-home-btn" class="home-btn" style="color:#9B9B9B; font-size:14px; font-weight:600; padding:6px 2px; transition:color 0.1s;">&#8249; Home</button>
+        <h2 id="editor-title" style="font-size:15px; font-weight:700; color:#1A1A1A; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></h2>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+        <div style="display:flex; border:1px solid #E0E0E0; border-radius:6px; overflow:hidden;">
+          <button id="status-draft-btn" style="padding:6px 14px; font-size:13px; font-weight:600; background:#6B6B6B; color:#FFFFFF; transition:all 0.1s;">Draft</button>
+          <button id="status-done-btn" style="padding:6px 14px; font-size:13px; font-weight:600; background:#FFFFFF; color:#9B9B9B; transition:all 0.1s;">Complete</button>
+        </div>
+        <button id="download-btn" class="btn-red" style="background:#CC0000; color:#FFFFFF; padding:9px 18px; border-radius:5px; font-size:14px; font-weight:600; display:flex; align-items:center; gap:7px; transition:background 0.1s;">&#8595; Download .docx</button>
+      </div>
+    </div>
+
+    <div style="flex:1; overflow-y:auto; padding:24px; background:#F2F2F2; min-height:0;">
+      <div id="editor-sheet" style="max-width:1100px; margin:0 auto; background:#FFFFFF; border:1px solid #EBEBEB; border-radius:8px; padding:22px;">
+        <div style="display:flex; gap:16px; margin-bottom:20px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:140px; display:flex; flex-direction:column; gap:5px;">
+            <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">Part No</label>
+            <input id="field-part-no" placeholder="e.g. 36611" style="padding:9px 11px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; transition:border-color 0.1s; width:100%;">
+          </div>
+          <div style="flex:2; min-width:200px; display:flex; flex-direction:column; gap:5px;">
+            <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">Part Name</label>
+            <input id="field-part-name" placeholder="e.g. Tastic Luminate Heat Module" style="padding:9px 11px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; transition:border-color 0.1s; width:100%;">
+          </div>
+          <div style="flex:1; min-width:140px; display:flex; flex-direction:column; gap:5px;">
+            <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">Doc No</label>
+            <input id="field-doc-no" placeholder="e.g. A0866" style="padding:9px 11px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; transition:border-color 0.1s; width:100%;">
+          </div>
+        </div>
+        <div style="font-size:12px; color:#AAAAAA; background:#F8F8F8; padding:8px 12px; border-radius:6px; margin-bottom:18px; line-height:1.4;">
+          This is the editor &#8212; the generated .docx is the formatted output and may differ slightly in layout.
+        </div>
+        <div id="editor-steps-grid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ TOAST ═══════════════════ -->
+<div id="toast" style="position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(14px); background:#1A1A1A; color:#FFFFFF; padding:12px 22px; border-radius:8px; font-size:14px; font-weight:500; opacity:0; pointer-events:none; z-index:1000; border-left:3px solid #CC0000; white-space:nowrap; transition:opacity 0.2s, transform 0.2s; max-width:90vw;"></div>
+
+<!-- ═══════════════════ MODAL ═══════════════════ -->
+<div id="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:500; padding:20px; animation:fadeIn 0.15s ease;">
+  <div style="background:#FFFFFF; border-radius:10px; width:100%; max-width:380px; padding:26px; border-top:3px solid #CC0000; box-shadow:0 20px 60px rgba(0,0,0,0.18);">
+    <h3 style="font-size:17px; font-weight:700; margin-bottom:18px; color:#1A1A1A;">New SOP</h3>
+    <div style="display:flex; flex-direction:column; gap:13px; margin-bottom:22px;">
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">Part No</label>
+        <input id="modal-part-no" placeholder="e.g. 36611" style="padding:10px 12px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; width:100%; transition:border-color 0.1s;">
+      </div>
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">Part Name</label>
+        <input id="modal-part-name" placeholder="e.g. Tastic Luminate Heat Module" style="padding:10px 12px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; width:100%; transition:border-color 0.1s;">
+      </div>
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <label style="font-size:11px; font-weight:700; color:#AAAAAA; text-transform:uppercase; letter-spacing:0.5px;">Doc No</label>
+        <input id="modal-doc-no" placeholder="e.g. A0866" style="padding:10px 12px; border:1px solid #E0E0E0; border-radius:6px; font-size:14px; color:#1A1A1A; width:100%; transition:border-color 0.1s;">
+      </div>
+    </div>
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button id="modal-cancel" class="btn-white" style="background:#FFFFFF; color:#2C2C2C; border:1px solid #E0E0E0; padding:9px 18px; border-radius:5px; font-size:14px; font-weight:600; transition:background 0.1s;">Cancel</button>
+      <button id="modal-create" class="btn-red" style="background:#CC0000; color:#FFFFFF; padding:9px 18px; border-radius:5px; font-size:14px; font-weight:600; transition:background 0.1s;">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden editor image picker -->
+<input type="file" id="editor-img-input" accept="image/*" style="display:none;">
 
 <script>
-/* =========================================================
-   IXL Studio — single-file frontend
-   ========================================================= */
+'use strict';
 
-const MOBILE = () => window.matchMedia('(max-width: 767px)').matches;
+// ── State ─────────────────────────────────────────────────────────────────
+const state = {
+  screen: 'home',
+  sops: [],
+  currentSop: null,
+  captureIndex: 0,
+  activeTool: 'arrow',
+  editorSearch: '',
+};
 
-/* ---------- State ---------- */
-let sops = [];                 // list of SOP summaries
-let currentSop = null;         // full SOP being edited { ..., steps: [] }
-let captureIndex = 0;          // current step index in capture flow
-let saveTimer = null;
+let _saveTimer = null, _toastTimer = null;
+let _canvas = null, _ctx = null, _photoImg = null;
+let _annotations = [], _drawing = false, _currentDraw = null;
+let _editorImgIdx = null;
+const RED = '#CC0000';
 
-/* Canvas / annotation state */
-let canvas = null, ctx = null;
-let photoImg = null;           // HTMLImageElement of the current step's base photo
-let annotations = [];          // [{type,x1,y1,x2,y2,label,color}]
-let currentDraw = null;
-let activeTool = 'arrow';
-let drawing = false;
-const ANNOT_COLOR = '#CC0000';
-
-/* =========================================================
-   Utilities
-   ========================================================= */
-function toast(msg, kind) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'show' + (kind ? ' ' + kind : '');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => { t.className = ''; }, 3000);
-}
+// ── Helpers ───────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
 
 function uuid() {
-  return (crypto.randomUUID ? crypto.randomUUID()
-    : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-        const r = Math.random() * 16 | 0;
-        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-      }));
-}
-
-async function api(method, path, body) {
-  const opts = { method, headers: {} };
-  if (body !== undefined) {
-    opts.headers['Content-Type'] = 'application/json';
-    opts.body = JSON.stringify(body);
-  }
-  let res;
-  try {
-    res = await fetch(path, opts);
-  } catch (e) {
-    throw new Error('Network error — is the server running?');
-  }
-  if (!res.ok) {
-    let detail = '';
-    try { const j = await res.json(); detail = j.error || j.message || ''; } catch (e) {}
-    throw new Error(detail || (method + ' ' + path + ' failed (' + res.status + ')'));
-  }
-  if (res.status === 204) return null;
-  const ct = res.headers.get('content-type') || '';
-  if (ct.includes('application/json')) return res.json();
-  return res;
+  if (crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
 }
 
 function fmtTime(iso) {
   if (!iso) return '';
   const d = new Date(iso);
-  if (isNaN(d)) return '';
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return isNaN(d) ? '' : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-function groupByDate(items) {
-  const now = new Date();
-  const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startWeek = new Date(startToday); startWeek.setDate(startWeek.getDate() - 7);
-  const groups = { Today: [], 'This week': [], Earlier: [] };
-  for (const it of items) {
-    const d = new Date(it.updated_at || it.created_at || 0);
-    if (d >= startToday) groups.Today.push(it);
-    else if (d >= startWeek) groups['This week'].push(it);
-    else groups.Earlier.push(it);
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────
+function toast(msg, kind) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.style.borderLeftColor = kind === 'success' ? '#2E9E4F' : '#CC0000';
+  el.style.opacity = '1';
+  el.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(-50%) translateY(14px)';
+  }, 3200);
+}
+
+// ── API ───────────────────────────────────────────────────────────────────
+async function api(method, path, body) {
+  const opts = { method, headers: {} };
+  if (body !== undefined) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+  let res;
+  try { res = await fetch(path, opts); }
+  catch (e) { throw new Error('Network error'); }
+  if (!res.ok) {
+    let d = '';
+    try { const j = await res.json(); d = j.error || j.message || ''; } catch (_) {}
+    throw new Error(d || `${method} ${path} (${res.status})`);
   }
-  return groups;
+  if (res.status === 204) return null;
+  return res.headers.get('content-type')?.includes('json') ? res.json() : res;
 }
 
-/* =========================================================
-   Screen navigation
-   ========================================================= */
-function show(screenId) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(screenId).classList.add('active');
+// ── Screen ────────────────────────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  const el = $('screen-' + name);
+  if (el) el.classList.add('active');
+  const prev = state.screen;
+  state.screen = name;
+  if (name === 'capture') {
+    setTimeout(() => {
+      _canvas = $('cap-canvas');
+      if (_canvas && !_canvas._bound) { _ctx = _canvas.getContext('2d'); bindCanvasEvents(); }
+      loadCaptureStep();
+    }, 60);
+  }
+}
+
+// ── Autosave ──────────────────────────────────────────────────────────────
+function queueSave() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveNow, 800);
+}
+
+async function saveNow() {
+  const sop = state.currentSop;
+  if (!sop) return;
+  const payload = {
+    part_no: sop.part_no, part_name: sop.part_name,
+    doc_no: sop.doc_no, status: sop.status,
+    steps: sop.steps.map((s, i) => ({ index: i, image: s.image || null, text: s.text || '', annotations: s.annotations || [] })),
+  };
+  try {
+    const updated = await api('PUT', '/api/sops/' + sop.id, payload);
+    if (updated?.updated_at) sop.updated_at = updated.updated_at;
+  } catch (e) { toast('Save failed: ' + e.message); }
+}
+
+// ── SOP list ──────────────────────────────────────────────────────────────
+async function loadSops() {
+  try { state.sops = await api('GET', '/api/sops') || []; }
+  catch (_) { state.sops = []; }
+  renderHomeList();
+  renderSidebarList();
 }
 
 function goHome() {
-  currentSop = null;
-  show('screen-home');
+  state.currentSop = null;
   loadSops();
-}
-
-/* =========================================================
-   Data loading
-   ========================================================= */
-async function loadSops() {
-  try {
-    sops = await api('GET', '/api/sops') || [];
-  } catch (e) {
-    sops = [];
-    toast(e.message);
-  }
-  renderHome();
-}
-
-function renderHome() {
-  const host = document.getElementById('homeDocs');
-  if (!sops.length) {
-    host.innerHTML = `
-      <div class="empty-state">
-        <div class="big">📄</div>
-        <div>No documents yet.</div>
-        <p style="margin-top:6px">Tap <strong>+ New SOP</strong> to capture your first procedure.</p>
-      </div>`;
-    return;
-  }
-  const groups = groupByDate(sops);
-  let html = '';
-  for (const [label, items] of Object.entries(groups)) {
-    if (!items.length) continue;
-    html += `<div class="section-label">${label}</div><div class="doc-list">`;
-    for (const s of items) html += docCard(s);
-    html += `</div>`;
-  }
-  host.innerHTML = html;
-}
-
-function docCard(s) {
-  const status = s.status === 'done' ? 'done' : 'draft';
-  const title = esc(s.part_name || 'Untitled SOP');
-  const sub = [s.part_no, s.doc_no].filter(Boolean).map(esc).join(' · ') || 'No part details';
-  return `
-    <div class="doc-card" onclick="openSop('${s.id}')">
-      <span class="status-dot ${status}" title="${status}"></span>
-      <div class="doc-main">
-        <div class="doc-title">${title}</div>
-        <div class="doc-sub">${sub}</div>
-      </div>
-      <span class="doc-time">${fmtTime(s.updated_at || s.created_at)}</span>
-      <span class="doc-del" onclick="event.stopPropagation(); deleteSop('${s.id}')" title="Delete">🗑</span>
-    </div>`;
-}
-
-function esc(str) {
-  return String(str == null ? '' : str)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-/* =========================================================
-   Create / open / delete
-   ========================================================= */
-async function newSop() {
-  showNewSopModal();
-}
-
-function showNewSopModal() {
-  const back = document.createElement('div');
-  back.className = 'modal-backdrop';
-  back.innerHTML = `
-    <div class="modal">
-      <h3>New SOP</h3>
-      <div class="meta-field"><label>Part No</label><input id="nPartNo" placeholder="e.g. 36611"></div>
-      <div class="meta-field"><label>Part Name</label><input id="nPartName" placeholder="e.g. Tastic Luminate Heat Module"></div>
-      <div class="meta-field"><label>Doc No</label><input id="nDocNo" placeholder="e.g. A0866"></div>
-      <div class="modal-actions">
-        <button class="btn btn-grey" id="nCancel">Cancel</button>
-        <button class="btn btn-red" id="nCreate">Create</button>
-      </div>
-    </div>`;
-  document.body.appendChild(back);
-  back.querySelector('#nPartName').focus();
-  const close = () => back.remove();
-  back.addEventListener('click', e => { if (e.target === back) close(); });
-  back.querySelector('#nCancel').onclick = close;
-  back.querySelector('#nCreate').onclick = async () => {
-    const payload = {
-      part_no: back.querySelector('#nPartNo').value.trim(),
-      part_name: back.querySelector('#nPartName').value.trim(),
-      doc_no: back.querySelector('#nDocNo').value.trim(),
-    };
-    let created;
-    try {
-      created = await api('POST', '/api/sops', payload);
-    } catch (e) { toast(e.message); return; }
-    close();
-    await loadSops();
-    // Branch by device: mobile → capture, desktop → editor
-    if (MOBILE()) {
-      openCapture(created.id);
-    } else {
-      openSop(created.id);
-    }
-  };
+  showScreen('home');
 }
 
 async function openSop(id) {
   try {
-    currentSop = await api('GET', '/api/sops/' + id);
-  } catch (e) { toast(e.message); return; }
-  if (!currentSop.steps) currentSop.steps = [];
-  currentSop.steps.sort((a, b) => (a.index || 0) - (b.index || 0));
-  if (MOBILE()) {
-    openCaptureFromSop();
-  } else {
-    show('screen-editor');
-    renderEditor();
-    renderEditorList();
-  }
+    let sop = await api('GET', '/api/sops/' + id);
+    if (!sop.steps) sop.steps = [];
+    sop.steps.sort((a, b) => (a.index || 0) - (b.index || 0));
+    state.currentSop = sop;
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      if (!sop.steps.length) sop.steps.push({ id: uuid(), index: 0, image: null, text: '', annotations: [] });
+      state.captureIndex = 0;
+      showScreen('capture');
+      renderCaptureScreen();
+    } else {
+      showScreen('editor');
+      renderEditorScreen();
+    }
+  } catch (e) { toast(e.message); }
 }
 
 async function deleteSop(id) {
   if (!confirm('Delete this SOP? This cannot be undone.')) return;
   try {
     await api('DELETE', '/api/sops/' + id);
-  } catch (e) { toast(e.message); return; }
-  toast('Deleted', 'success');
-  if (currentSop && currentSop.id === id) goHome();
-  else loadSops();
+    toast('Deleted', 'success');
+    if (state.currentSop?.id === id) goHome(); else loadSops();
+  } catch (e) { toast(e.message); }
 }
 
-/* =========================================================
-   Persistence (debounced PUT)
-   ========================================================= */
-function queueSave() {
-  if (!currentSop) return;
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveNow, 800);
+// ── Modal ─────────────────────────────────────────────────────────────────
+function openModal() {
+  $('modal-part-no').value = '';
+  $('modal-part-name').value = '';
+  $('modal-doc-no').value = '';
+  $('modal-overlay').style.display = 'flex';
+  setTimeout(() => $('modal-part-no').focus(), 50);
 }
 
-async function saveNow() {
-  if (!currentSop) return;
-  const payload = {
-    part_no: currentSop.part_no,
-    part_name: currentSop.part_name,
-    doc_no: currentSop.doc_no,
-    status: currentSop.status,
-    steps: currentSop.steps.map((s, i) => ({
-      index: i,
-      image: s.image || null,
-      text: s.text || '',
-      annotations: s.annotations || [],
-    })),
-  };
+function closeModal() { $('modal-overlay').style.display = 'none'; }
+
+async function createSop() {
   try {
-    const updated = await api('PUT', '/api/sops/' + currentSop.id, payload);
-    if (updated && updated.updated_at) currentSop.updated_at = updated.updated_at;
-  } catch (e) {
-    toast('Save failed: ' + e.message);
-  }
+    const created = await api('POST', '/api/sops', {
+      part_no: $('modal-part-no').value.trim(),
+      part_name: $('modal-part-name').value.trim(),
+      doc_no: $('modal-doc-no').value.trim(),
+    });
+    closeModal();
+    await loadSops();
+    openSop(created.id);
+  } catch (e) { toast(e.message); }
 }
 
-/* =========================================================
-   EDITOR (desktop)
-   ========================================================= */
-function renderEditor() {
-  if (!currentSop) return;
-  document.getElementById('editorTitle').textContent =
-    currentSop.part_name ? currentSop.part_name : 'Untitled SOP';
-  document.getElementById('fPartNo').value = currentSop.part_no || '';
-  document.getElementById('fPartName').value = currentSop.part_name || '';
-  document.getElementById('fDocNo').value = currentSop.doc_no || '';
+// ── Date grouping ─────────────────────────────────────────────────────────
+function computeGroups(items) {
+  const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+  const g = [{ label: 'Today', items: [] }, { label: 'This week', items: [] }, { label: 'Earlier', items: [] }];
+  for (const s of items) {
+    const d = new Date(s.updated_at || s.created_at || 0);
+    g[d >= today ? 0 : d >= weekAgo ? 1 : 2].items.push(s);
+  }
+  return g.filter(x => x.items.length);
+}
+
+// ── Home ──────────────────────────────────────────────────────────────────
+function renderHomeList() {
+  const list = $('home-list'), empty = $('home-empty');
+  if (!state.sops.length) { empty.style.display = 'block'; list.innerHTML = ''; return; }
+  empty.style.display = 'none';
+  list.innerHTML = computeGroups(state.sops).map(g => `
+    <div style="font-size:11px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.2px;margin:28px 0 10px;">${esc(g.label)}</div>
+    <div style="display:flex;flex-direction:column;gap:7px;">
+      ${g.items.map(s => `
+        <div class="doc-card" data-id="${esc(s.id)}" style="background:#FFFFFF;border:1px solid #EBEBEB;border-radius:8px;padding:15px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color 0.12s;">
+          <div style="width:9px;height:9px;border-radius:50%;background:${s.status==='done'?'#2E9E4F':'#BBBBBB'};flex-shrink:0;"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1A1A1A;">${esc(s.part_name||'Untitled SOP')}</div>
+            <div style="color:#9B9B9B;font-size:13px;margin-top:2px;">${esc([s.part_no,s.doc_no].filter(Boolean).join(' · ')||'No part details')}</div>
+          </div>
+          <span style="color:#AAAAAA;font-size:12px;flex-shrink:0;margin-right:4px;">${esc(fmtTime(s.updated_at||s.created_at))}</span>
+          <button class="trash-btn" data-del="${esc(s.id)}" style="color:#C0C0C0;font-size:15px;padding:4px 6px;border-radius:4px;flex-shrink:0;transition:all 0.1s;" title="Delete">&#128465;</button>
+        </div>`).join('')}
+    </div>`).join('');
+  list.querySelectorAll('.doc-card').forEach(card => {
+    card.addEventListener('click', e => { if (e.target.closest('.trash-btn')) return; openSop(card.dataset.id); });
+  });
+  list.querySelectorAll('.trash-btn').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); deleteSop(btn.dataset.del); });
+  });
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────
+function renderSidebarList() {
+  const container = $('sidebar-list');
+  if (!container) return;
+  const q = state.editorSearch.toLowerCase().trim();
+  const filtered = q ? state.sops.filter(s => [s.part_no,s.part_name,s.doc_no].filter(Boolean).join(' ').toLowerCase().includes(q)) : state.sops;
+  container.innerHTML = computeGroups(filtered).map(g => `
+    <div style="font-size:10px;font-weight:700;color:#AAAAAA;text-transform:uppercase;letter-spacing:1.2px;padding:12px 10px 5px;">${esc(g.label)}</div>
+    ${g.items.map(s => {
+      const active = state.currentSop?.id === s.id;
+      return `<div class="sidebar-item" data-id="${esc(s.id)}" style="padding:10px 12px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:10px;border-left:${active?'3px solid #CC0000':'3px solid transparent'};background:${active?'#F5F5F5':'transparent'};transition:background 0.1s;">
+        <div style="width:8px;height:8px;border-radius:50%;background:${s.status==='done'?'#2E9E4F':'#BBBBBB'};flex-shrink:0;"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1A1A1A;">${esc(s.part_name||'Untitled SOP')}</div>
+          <div style="color:#AAAAAA;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px;">${esc([s.part_no,s.doc_no].filter(Boolean).join(' · ')||'No details')}</div>
+        </div>
+      </div>`;
+    }).join('')}`).join('');
+  container.querySelectorAll('.sidebar-item').forEach(item => {
+    item.addEventListener('click', () => openSop(item.dataset.id));
+  });
+}
+
+// ── Editor ────────────────────────────────────────────────────────────────
+function renderEditorScreen() {
+  const sop = state.currentSop;
+  if (!sop) return;
+  $('editor-title').textContent = sop.part_name || 'Untitled SOP';
+  $('field-part-no').value = sop.part_no || '';
+  $('field-part-name').value = sop.part_name || '';
+  $('field-doc-no').value = sop.doc_no || '';
   updateStatusToggle();
   renderEditorSteps();
+  renderSidebarList();
 }
 
 function updateStatusToggle() {
-  const done = currentSop && currentSop.status === 'done';
-  document.getElementById('stDraft').classList.toggle('active', !done);
-  document.getElementById('stDone').classList.toggle('active', done);
-}
-
-function setStatus(status) {
-  if (!currentSop) return;
-  currentSop.status = status;
-  updateStatusToggle();
-  queueSave();
-}
-
-function onMetaInput() {
-  if (!currentSop) return;
-  currentSop.part_no = document.getElementById('fPartNo').value;
-  currentSop.part_name = document.getElementById('fPartName').value;
-  currentSop.doc_no = document.getElementById('fDocNo').value;
-  document.getElementById('editorTitle').textContent = currentSop.part_name || 'Untitled SOP';
-  queueSave();
+  const done = state.currentSop?.status === 'done';
+  $('status-draft-btn').style.background = done ? '#FFFFFF' : '#6B6B6B';
+  $('status-draft-btn').style.color = done ? '#9B9B9B' : '#FFFFFF';
+  $('status-done-btn').style.background = done ? '#2E9E4F' : '#FFFFFF';
+  $('status-done-btn').style.color = done ? '#FFFFFF' : '#9B9B9B';
 }
 
 function renderEditorSteps() {
-  const host = document.getElementById('editorSteps');
-  const steps = currentSop.steps;
-  let html = '';
-  steps.forEach((s, i) => {
-    const imgInner = s.image
-      ? `<img src="${s.image}" alt="Step ${i + 1}"><div class="img-overlay">Click to replace</div>`
-      : `<div class="img-hint">Click to add photo</div>`;
-    html += `
-      <div class="step-cell">
-        <div class="step-head">
-          <span>STEP ${i + 1}</span>
-          <span class="del-step" onclick="deleteStep(${i})" title="Remove step">✕</span>
-        </div>
-        <div class="step-img" onclick="pickEditorImage(${i})">${imgInner}</div>
-        <div class="step-text" contenteditable="true" data-ph="Describe this step…"
-             oninput="onStepTextInput(${i}, this.innerText)">${esc(s.text || '')}</div>
-      </div>`;
+  const sop = state.currentSop;
+  if (!sop) return;
+  const grid = $('editor-steps-grid');
+  grid.innerHTML = sop.steps.map((s, i) => `
+    <div style="border:1px solid #EBEBEB;border-radius:7px;overflow:hidden;display:flex;flex-direction:column;background:#FFFFFF;">
+      <div style="background:#1A1A1A;color:#FFFFFF;font-size:11px;font-weight:700;letter-spacing:0.8px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;">
+        <span>STEP ${i+1}</span>
+        <button class="step-del" data-i="${i}" style="color:#555;font-size:13px;padding:2px 4px;line-height:1;transition:color 0.1s;" title="Remove">&#10005;</button>
+      </div>
+      <div class="step-photo" data-i="${i}" style="aspect-ratio:4/3;background:#F5F5F5;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:background 0.1s;">
+        ${s.image ? `<img src="${esc(s.image)}" style="width:100%;height:100%;object-fit:contain;display:block;" alt="">` : `<div style="color:#BBBBBB;font-size:12px;text-align:center;line-height:1.6;">Click to<br>add photo</div>`}
+      </div>
+      <textarea class="step-text" data-i="${i}" placeholder="Describe this step…" style="padding:10px;font-size:13px;line-height:1.45;min-height:68px;border:none;resize:none;color:#1A1A1A;width:100%;background:transparent;">${esc(s.text||'')}</textarea>
+    </div>`).join('') +
+    `<div class="add-step-cell" style="border:1px dashed #E0E0E0;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-weight:600;font-size:14px;min-height:120px;cursor:pointer;transition:all 0.12s;">+ Add step</div>`;
+
+  grid.querySelectorAll('.step-photo').forEach(el => el.addEventListener('click', () => pickEditorImage(+el.dataset.i)));
+  grid.querySelectorAll('.step-del').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); deleteStep(+btn.dataset.i); });
+    btn.addEventListener('mouseover', () => btn.style.color = '#CC0000');
+    btn.addEventListener('mouseout', () => btn.style.color = '#555');
   });
-  html += `<div class="add-step-cell" onclick="addStep()">+ Add step</div>`;
-  host.innerHTML = html;
+  grid.querySelectorAll('.step-text').forEach(ta => {
+    ta.addEventListener('input', () => { sop.steps[+ta.dataset.i].text = ta.value; queueSave(); });
+    ta.addEventListener('focus', () => { ta.style.background = '#FFFCF5'; ta.style.outline = 'none'; });
+    ta.addEventListener('blur', () => { ta.style.background = 'transparent'; });
+  });
+  grid.querySelector('.add-step-cell').addEventListener('click', addStep);
 }
 
-function onStepTextInput(i, text) {
-  if (!currentSop || !currentSop.steps[i]) return;
-  currentSop.steps[i].text = text;
+function setStatus(status) {
+  if (!state.currentSop) return;
+  state.currentSop.status = status;
+  updateStatusToggle();
   queueSave();
 }
 
 function addStep() {
-  if (!currentSop) return;
-  currentSop.steps.push({ id: uuid(), index: currentSop.steps.length, image: null, text: '', annotations: [] });
+  if (!state.currentSop) return;
+  const steps = state.currentSop.steps;
+  steps.push({ id: uuid(), index: steps.length, image: null, text: '', annotations: [] });
   renderEditorSteps();
   queueSave();
 }
 
 function deleteStep(i) {
-  if (!currentSop) return;
-  if (!confirm('Remove step ' + (i + 1) + '?')) return;
-  currentSop.steps.splice(i, 1);
+  if (!state.currentSop || !confirm(`Remove step ${i+1}?`)) return;
+  state.currentSop.steps.splice(i, 1);
   renderEditorSteps();
   queueSave();
 }
 
-let editorImgTargetIndex = null;
 function pickEditorImage(i) {
-  editorImgTargetIndex = i;
-  const input = document.getElementById('editorImgInput');
-  input.value = '';
-  input.click();
-}
-document.getElementById('editorImgInput').addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file || editorImgTargetIndex === null) return;
-  try {
-    const dataUrl = await fileToDataUrl(file);
-    currentSop.steps[editorImgTargetIndex].image = dataUrl;
-    renderEditorSteps();
-    queueSave();
-  } catch (err) { toast('Could not load image'); }
-});
-
-function renderEditorList() {
-  const host = document.getElementById('editorList');
-  const q = (document.getElementById('editorSearch').value || '').toLowerCase().trim();
-  let items = sops;
-  if (q) {
-    items = sops.filter(s =>
-      [s.part_no, s.part_name, s.doc_no].filter(Boolean).join(' ').toLowerCase().includes(q));
-  }
-  if (!items.length) {
-    host.innerHTML = `<div style="padding:20px;color:var(--grey);font-size:13px;text-align:center">No documents.</div>`;
-    return;
-  }
-  const groups = groupByDate(items);
-  let html = '';
-  for (const [label, arr] of Object.entries(groups)) {
-    if (!arr.length) continue;
-    html += `<div class="list-group-label">${label}</div>`;
-    for (const s of arr) {
-      const active = currentSop && currentSop.id === s.id ? ' active' : '';
-      const status = s.status === 'done' ? 'done' : 'draft';
-      html += `
-        <div class="list-item${active}" onclick="openSop('${s.id}')">
-          <span class="status-dot ${status}"></span>
-          <div class="li-main">
-            <div class="li-title">${esc(s.part_name || 'Untitled SOP')}</div>
-            <div class="li-sub">${esc([s.part_no, s.doc_no].filter(Boolean).join(' · ') || 'No details')}</div>
-          </div>
-        </div>`;
-    }
-  }
-  host.innerHTML = html;
+  _editorImgIdx = i;
+  const inp = $('editor-img-input');
+  inp.value = ''; inp.click();
 }
 
-/* =========================================================
-   Generate .docx
-   ========================================================= */
 async function generateDocx() {
-  if (!currentSop) return;
-  const btn = document.getElementById('downloadBtn');
-  const orig = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Generating…';
+  const sop = state.currentSop;
+  if (!sop) return;
+  const btn = $('download-btn');
+  btn.textContent = 'Generating…'; btn.disabled = true;
   try {
-    await saveNow(); // make sure server has latest
-    const res = await api('POST', '/api/sops/' + currentSop.id + '/generate');
+    await saveNow();
+    const res = await api('POST', '/api/sops/' + sop.id + '/generate');
     const blob = await res.blob();
-    const fname = (currentSop.doc_no || currentSop.part_no || 'SOP') + '.docx';
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = fname;
+    a.href = url; a.download = (sop.doc_no || sop.part_no || 'SOP') + '.docx';
     document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
     toast('Document downloaded', 'success');
-  } catch (e) {
-    toast('Generate failed: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = orig;
-  }
+    sop.status = 'done'; updateStatusToggle();
+  } catch (e) { toast('Generate failed: ' + e.message); }
+  finally { btn.textContent = '↓ Download .docx'; btn.disabled = false; }
 }
 
-/* =========================================================
-   CAPTURE (mobile)
-   ========================================================= */
-function openCapture(id) {
-  api('GET', '/api/sops/' + id).then(s => {
-    currentSop = s;
-    if (!currentSop.steps) currentSop.steps = [];
-    currentSop.steps.sort((a, b) => (a.index || 0) - (b.index || 0));
-    openCaptureFromSop();
-  }).catch(e => toast(e.message));
-}
+// ── Capture ───────────────────────────────────────────────────────────────
+function renderCaptureScreen() {
+  const sop = state.currentSop;
+  if (!sop) return;
+  const idx = state.captureIndex;
+  $('cap-step-num').textContent = idx + 1;
+  $('cap-step-total').textContent = '/ ' + sop.steps.length;
+  $('cap-prev-btn').disabled = idx === 0;
+  $('cap-prev-btn').style.opacity = idx === 0 ? '0.4' : '1';
+  $('cap-next-btn').textContent = idx >= sop.steps.length - 1 ? 'New step ›' : 'Next ›';
 
-function openCaptureFromSop() {
-  if (!currentSop.steps.length) {
-    currentSop.steps.push({ id: uuid(), index: 0, image: null, text: '', annotations: [] });
-  }
-  captureIndex = 0;
-  show('screen-capture');
-  initCanvas();
-  loadCaptureStep();
-}
-
-function leaveCapture() {
-  // bake & save current step before leaving
-  commitCaptureStep();
-  saveNow();
-  goHome();
-}
-
-function finishCapture() {
-  commitCaptureStep();
-  saveNow();
-  toast('Saved', 'success');
-  goHome();
-}
-
-function renderStepDots() {
-  const host = document.getElementById('capStepDots');
-  let html = '';
-  currentSop.steps.forEach((s, i) => {
-    const cls = ['step-dot'];
-    if (i === captureIndex) cls.push('active');
-    if (s.image || (s.text && s.text.trim())) cls.push('filled');
-    html += `<button class="${cls.join(' ')}" onclick="jumpStep(${i})">${i + 1}</button>`;
-  });
-  html += `<button class="step-dot step-dot-add" onclick="captureAddStep()">+</button>`;
-  host.innerHTML = html;
-  document.getElementById('capStepNum').textContent = captureIndex + 1;
-}
-
-function jumpStep(i) {
-  if (i === captureIndex) return;
-  commitCaptureStep();
-  captureIndex = i;
-  loadCaptureStep();
-}
-
-function loadCaptureStep() {
-  const step = currentSop.steps[captureIndex];
-  renderStepDots();
-  document.getElementById('capNote').value = step.text || '';
-  annotations = Array.isArray(step.annotations) ? step.annotations.slice() : [];
-  currentDraw = null;
-  setTool(activeTool);
-
-  if (step.image) {
-    // load baked image as the base (annotations already in it OR re-overlay)
-    loadPhotoForCanvas(step.image, () => {
-      // If annotations were stored separately, redraw them; otherwise image already baked.
-      redraw();
+  const row = $('cap-dots-row'), addDot = $('cap-add-dot');
+  row.querySelectorAll('.step-dot').forEach(d => d.remove());
+  sop.steps.forEach((s, i) => {
+    const active = i === idx, filled = !!(s.image || s.text?.trim());
+    const btn = document.createElement('button');
+    btn.className = 'step-dot';
+    btn.textContent = i + 1;
+    Object.assign(btn.style, {
+      width: '30px', height: '30px', borderRadius: '50%',
+      border: `2px solid ${active ? RED : filled ? '#1A1A1A' : '#E0E0E0'}`,
+      background: active ? RED : filled ? '#1A1A1A' : '#FFFFFF',
+      color: (active || filled) ? '#FFFFFF' : '#9B9B9B',
+      fontSize: '12px', fontWeight: '700', display: 'flex', alignItems: 'center',
+      justifyContent: 'center', flexShrink: '0', transition: 'all 0.12s', cursor: 'pointer',
     });
-    showCanvas(true);
-  } else {
-    photoImg = null;
-    showCanvas(false);
-  }
+    btn.addEventListener('click', () => jumpStep(i));
+    row.insertBefore(btn, addDot);
+  });
+}
+
+function setActiveTool(tool) {
+  state.activeTool = tool;
+  ['arrow', 'circle', 'label'].forEach(t => {
+    const btn = $('tool-' + t), active = t === tool;
+    btn.style.background = active ? RED : '#FFFFFF';
+    btn.style.color = active ? '#FFFFFF' : '#2C2C2C';
+    btn.style.borderColor = active ? RED : '#E0E0E0';
+  });
 }
 
 function showCanvas(hasPhoto) {
-  document.getElementById('captureCanvas').classList.toggle('hidden', !hasPhoto);
-  document.getElementById('capPlaceholder').style.display = hasPhoto ? 'none' : 'flex';
-  document.getElementById('capToolbar').style.display = hasPhoto ? 'flex' : 'none';
-  document.getElementById('capReplaceRow').style.display = hasPhoto ? 'flex' : 'none';
+  $('cap-canvas').style.display = hasPhoto ? 'block' : 'none';
+  $('cap-placeholder').style.display = hasPhoto ? 'none' : 'flex';
+  $('cap-toolbar').style.display = hasPhoto ? 'flex' : 'none';
+  $('cap-replace-row').style.display = hasPhoto ? 'flex' : 'none';
 }
 
-function onNoteInput(val) {
-  if (!currentSop) return;
-  currentSop.steps[captureIndex].text = val;
-  renderStepDots();
-  queueSave();
+function commitCaptureStep() {
+  const sop = state.currentSop;
+  if (!sop) return;
+  const i = state.captureIndex, noteEl = $('cap-note');
+  const text = noteEl ? noteEl.value : sop.steps[i]?.text || '';
+  if (_photoImg && _canvas) {
+    redrawCanvas();
+    try { sop.steps[i] = { ...sop.steps[i], text, image: _canvas.toDataURL('image/jpeg', 0.9), annotations: _annotations.slice() }; } catch (_) {}
+  } else {
+    sop.steps[i] = { ...sop.steps[i], text };
+  }
 }
 
-/* ---- photo selection ---- */
-function fileToDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result);
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
+function loadCaptureStep() {
+  const sop = state.currentSop;
+  if (!sop) return;
+  const step = sop.steps[state.captureIndex];
+  if (!step) return;
+  _annotations = step.annotations ? step.annotations.slice() : [];
+  _currentDraw = null;
+  const noteEl = $('cap-note');
+  if (noteEl) noteEl.value = step.text || '';
+  if (step.image) {
+    loadPhotoForCanvas(step.image, () => { showCanvas(true); redrawCanvas(); });
+  } else { _photoImg = null; showCanvas(false); }
+  renderCaptureScreen();
 }
 
-async function onPhotoSelected(ev) {
-  const file = ev.target.files[0];
-  if (!file) return;
-  ev.target.value = '';
-  let dataUrl;
-  try { dataUrl = await fileToDataUrl(file); }
-  catch (e) { toast('Could not load photo'); return; }
-  annotations = [];
-  currentDraw = null;
-  loadPhotoForCanvas(dataUrl, () => {
-    showCanvas(true);
-    redraw();
-    // store the raw photo now; baked version saved on commit
-    currentSop.steps[captureIndex].image = dataUrl;
-    currentSop.steps[captureIndex].annotations = [];
-    renderStepDots();
-    queueSave();
-  });
+function jumpStep(i) {
+  if (i === state.captureIndex) return;
+  commitCaptureStep(); state.captureIndex = i; loadCaptureStep();
 }
 
+function capturePrev() {
+  if (state.captureIndex === 0) return;
+  commitCaptureStep(); state.captureIndex--; loadCaptureStep();
+}
+
+function captureNext() {
+  const sop = state.currentSop;
+  if (!sop) return;
+  commitCaptureStep();
+  if (state.captureIndex < sop.steps.length - 1) {
+    state.captureIndex++;
+  } else {
+    sop.steps.push({ id: uuid(), index: sop.steps.length, image: null, text: '', annotations: [] });
+    state.captureIndex = sop.steps.length - 1;
+  }
+  saveNow(); loadCaptureStep();
+}
+
+function captureAddStep() {
+  const sop = state.currentSop;
+  if (!sop) return;
+  commitCaptureStep();
+  sop.steps.push({ id: uuid(), index: sop.steps.length, image: null, text: '', annotations: [] });
+  state.captureIndex = sop.steps.length - 1;
+  saveNow(); loadCaptureStep();
+}
+
+function finishCapture() { commitCaptureStep(); saveNow(); toast('Saved', 'success'); goHome(); }
+function leaveCapture() { commitCaptureStep(); saveNow(); goHome(); }
+
+// ── Canvas ────────────────────────────────────────────────────────────────
 function loadPhotoForCanvas(src, cb) {
   const img = new Image();
-  img.onload = () => {
-    photoImg = img;
-    sizeCanvasToPhoto();
-    if (cb) cb();
-  };
-  img.onerror = () => { toast('Image failed to load'); };
+  img.onload = () => { _photoImg = img; sizeCanvas(); if (cb) cb(); };
+  img.onerror = () => toast('Image failed to load');
   img.src = src;
 }
 
-function sizeCanvasToPhoto() {
-  if (!photoImg || !canvas) return;
-  // Fit canvas into the photo-area width while keeping the photo aspect ratio.
-  const maxW = Math.min(document.getElementById('capPhotoArea').clientWidth || 360, 900);
-  const ratio = photoImg.height / photoImg.width;
-  let w = maxW;
-  let h = Math.round(w * ratio);
-  // cap height so very tall portraits don't dominate the screen
+function sizeCanvas() {
+  if (!_photoImg || !_canvas) return;
+  const area = $('cap-photo-area'), maxW = Math.min(area?.clientWidth || 360, 900);
+  const ratio = _photoImg.height / _photoImg.width;
+  let w = maxW, h = Math.round(w * ratio);
   const maxH = Math.round(window.innerHeight * 0.5);
   if (h > maxH) { h = maxH; w = Math.round(h / ratio); }
-  canvas.width = w;
-  canvas.height = h;
-  canvas.style.width = w + 'px';
-  canvas.style.height = h + 'px';
+  _canvas.width = w; _canvas.height = h;
+  _canvas.style.width = w + 'px'; _canvas.style.height = h + 'px';
 }
 
-/* =========================================================
-   Canvas annotation engine
-   ========================================================= */
-function initCanvas() {
-  canvas = document.getElementById('captureCanvas');
-  ctx = canvas.getContext('2d');
-  // bind once
-  if (canvas._bound) return;
-  canvas._bound = true;
-
-  canvas.addEventListener('mousedown', e => startDraw(eventPos(e)));
-  canvas.addEventListener('mousemove', e => moveDraw(eventPos(e)));
-  window.addEventListener('mouseup', e => endDraw());
-
-  canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(eventPos(e)); }, { passive: false });
-  canvas.addEventListener('touchmove', e => { e.preventDefault(); moveDraw(eventPos(e)); }, { passive: false });
-  canvas.addEventListener('touchend', e => { e.preventDefault(); endDraw(); }, { passive: false });
-}
-
-function eventPos(e) {
-  const rect = canvas.getBoundingClientRect();
-  const src = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]) || e;
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-  return {
-    x: (src.clientX - rect.left) * scaleX,
-    y: (src.clientY - rect.top) * scaleY,
+function bindCanvasEvents() {
+  if (!_canvas) return;
+  _canvas._bound = true;
+  const pos = e => {
+    const r = _canvas.getBoundingClientRect();
+    const s = e.touches?.[0] || e.changedTouches?.[0] || e;
+    return { x: (s.clientX - r.left) * (_canvas.width / r.width), y: (s.clientY - r.top) * (_canvas.height / r.height) };
   };
-}
-
-function setTool(tool) {
-  activeTool = tool;
-  document.querySelectorAll('#capToolbar .tool-btn[data-tool]').forEach(b => {
-    b.classList.toggle('active', b.dataset.tool === tool);
-  });
+  _canvas.addEventListener('mousedown', e => startDraw(pos(e)));
+  _canvas.addEventListener('mousemove', e => moveDraw(pos(e)));
+  window.addEventListener('mouseup', endDraw);
+  _canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(pos(e)); }, { passive: false });
+  _canvas.addEventListener('touchmove', e => { e.preventDefault(); moveDraw(pos(e)); }, { passive: false });
+  _canvas.addEventListener('touchend', e => { e.preventDefault(); endDraw(); }, { passive: false });
 }
 
 function startDraw(pos) {
-  if (!photoImg) return;
-  if (activeTool === 'label') {
+  if (!_photoImg) return;
+  if (state.activeTool === 'label') {
     const text = prompt('Label text:');
-    if (text && text.trim()) {
-      annotations.push({ type: 'label', x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y, label: text.trim(), color: ANNOT_COLOR });
-      persistAnnotations();
-      redraw();
-    }
+    if (text?.trim()) { _annotations.push({ type: 'label', x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y, label: text.trim(), color: RED }); persistAnnotations(); redrawCanvas(); }
     return;
   }
-  drawing = true;
-  currentDraw = { type: activeTool, x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y, label: '', color: ANNOT_COLOR };
+  _drawing = true;
+  _currentDraw = { type: state.activeTool, x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y, label: '', color: RED };
 }
 
 function moveDraw(pos) {
-  if (!drawing || !currentDraw) return;
-  currentDraw.x2 = pos.x;
-  currentDraw.y2 = pos.y;
-  redraw();
+  if (!_drawing || !_currentDraw) return;
+  _currentDraw.x2 = pos.x; _currentDraw.y2 = pos.y; redrawCanvas();
 }
 
 function endDraw() {
-  if (!drawing || !currentDraw) { drawing = false; return; }
-  drawing = false;
-  // discard near-zero drags
-  const dx = currentDraw.x2 - currentDraw.x1;
-  const dy = currentDraw.y2 - currentDraw.y1;
-  if (Math.hypot(dx, dy) > 4) {
-    annotations.push(currentDraw);
-    persistAnnotations();
-  }
-  currentDraw = null;
-  redraw();
+  if (!_drawing || !_currentDraw) { _drawing = false; return; }
+  _drawing = false;
+  if (Math.hypot(_currentDraw.x2 - _currentDraw.x1, _currentDraw.y2 - _currentDraw.y1) > 4) { _annotations.push(_currentDraw); persistAnnotations(); }
+  _currentDraw = null; redrawCanvas();
 }
 
 function persistAnnotations() {
-  if (!currentSop) return;
-  currentSop.steps[captureIndex].annotations = annotations.slice();
-  renderStepDots();
-  queueSave();
+  if (state.currentSop) { state.currentSop.steps[state.captureIndex].annotations = _annotations.slice(); queueSave(); }
 }
 
-function undoAnnotation() {
-  if (!annotations.length) return;
-  annotations.pop();
-  persistAnnotations();
-  redraw();
-}
-
+function undoAnnotation() { if (!_annotations.length) return; _annotations.pop(); persistAnnotations(); redrawCanvas(); }
 function clearAnnotations() {
-  if (!annotations.length) return;
+  if (!_annotations.length) return;
   if (!confirm('Clear all annotations on this photo?')) return;
-  annotations = [];
-  persistAnnotations();
-  redraw();
+  _annotations = []; persistAnnotations(); redrawCanvas();
 }
 
-function redraw() {
-  if (!ctx || !canvas) return;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (photoImg) ctx.drawImage(photoImg, 0, 0, canvas.width, canvas.height);
-  for (const a of annotations) drawAnnotation(a);
-  if (currentDraw) drawAnnotation(currentDraw);
+function redrawCanvas() {
+  if (!_ctx || !_canvas) return;
+  _ctx.clearRect(0, 0, _canvas.width, _canvas.height);
+  if (_photoImg) _ctx.drawImage(_photoImg, 0, 0, _canvas.width, _canvas.height);
+  [..._annotations, ...(_currentDraw ? [_currentDraw] : [])].forEach(a => drawAnnotation(a));
 }
 
 function drawAnnotation(a) {
+  const ctx = _ctx;
   ctx.save();
-  ctx.strokeStyle = a.color || ANNOT_COLOR;
-  ctx.fillStyle = a.color || ANNOT_COLOR;
-  ctx.lineWidth = 3;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-
-  if (a.type === 'arrow') {
-    drawArrow(a.x1, a.y1, a.x2, a.y2);
-  } else if (a.type === 'circle') {
-    drawEllipse(a.x1, a.y1, a.x2, a.y2);
-  } else if (a.type === 'label') {
-    drawLabel(a.x1, a.y1, a.label || '');
-  }
+  ctx.strokeStyle = ctx.fillStyle = a.color || RED;
+  ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (a.type === 'arrow') drawArrow(a.x1, a.y1, a.x2, a.y2);
+  else if (a.type === 'circle') drawEllipse(a.x1, a.y1, a.x2, a.y2);
+  else if (a.type === 'label') drawLabel(a.x1, a.y1, a.label || '');
   ctx.restore();
 }
 
 function drawArrow(x1, y1, x2, y2) {
-  const headLen = 14;
-  const angle = Math.atan2(y2 - y1, x2 - x1);
-  // shaft
-  ctx.beginPath();
-  ctx.moveTo(x1, y1);
-  ctx.lineTo(x2, y2);
-  ctx.stroke();
-  // head (filled triangle)
-  ctx.beginPath();
-  ctx.moveTo(x2, y2);
-  ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6), y2 - headLen * Math.sin(angle - Math.PI / 6));
-  ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6), y2 - headLen * Math.sin(angle + Math.PI / 6));
-  ctx.closePath();
-  ctx.fill();
+  const hlen = 14, angle = Math.atan2(y2 - y1, x2 - x1);
+  _ctx.beginPath(); _ctx.moveTo(x1, y1); _ctx.lineTo(x2, y2); _ctx.stroke();
+  _ctx.beginPath();
+  _ctx.moveTo(x2, y2);
+  _ctx.lineTo(x2 - hlen * Math.cos(angle - Math.PI/6), y2 - hlen * Math.sin(angle - Math.PI/6));
+  _ctx.lineTo(x2 - hlen * Math.cos(angle + Math.PI/6), y2 - hlen * Math.sin(angle + Math.PI/6));
+  _ctx.closePath(); _ctx.fill();
 }
 
 function drawEllipse(x1, y1, x2, y2) {
-  const cx = (x1 + x2) / 2;
-  const cy = (y1 + y2) / 2;
-  const rx = Math.abs(x2 - x1) / 2;
-  const ry = Math.abs(y2 - y1) / 2;
+  const cx = (x1+x2)/2, cy = (y1+y2)/2, rx = Math.abs(x2-x1)/2, ry = Math.abs(y2-y1)/2;
   if (rx < 1 || ry < 1) return;
-  ctx.beginPath();
-  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-  ctx.stroke();
+  _ctx.beginPath(); _ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2); _ctx.stroke();
 }
 
 function drawLabel(x, y, text) {
-  const padX = 6, padY = 4;
-  ctx.font = '600 15px Inter, sans-serif';
-  ctx.textBaseline = 'top';
-  const metrics = ctx.measureText(text);
-  const w = metrics.width + padX * 2;
-  const h = 15 + padY * 2;
-  // background
-  ctx.fillStyle = '#FFFFFF';
-  ctx.strokeStyle = ANNOT_COLOR;
-  ctx.lineWidth = 2;
-  roundRect(x, y, w, h, 4);
-  ctx.fill();
-  ctx.stroke();
-  // text
-  ctx.fillStyle = '#1A1A1A';
-  ctx.fillText(text, x + padX, y + padY);
-}
-
-function roundRect(x, y, w, h, r) {
+  const ctx = _ctx, padX = 6, padY = 4;
+  ctx.font = '600 14px Inter, sans-serif'; ctx.textBaseline = 'top';
+  const w = ctx.measureText(text).width + padX*2, h = 14 + padY*2;
+  ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = RED; ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
+  if (ctx.roundRect) ctx.roundRect(x, y, w, h, 4); else ctx.rect(x, y, w, h);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#1A1A1A'; ctx.fillText(text, x + padX, y + padY);
 }
 
-/* Bake the annotated canvas into a JPEG and store on the step. */
-function commitCaptureStep() {
-  if (!currentSop) return;
-  const step = currentSop.steps[captureIndex];
-  step.text = document.getElementById('capNote').value;
-  if (photoImg && canvas) {
-    redraw();
-    try {
-      step.image = canvas.toDataURL('image/jpeg', 0.9);
-      // annotations remain stored as data too (in case re-render is wanted)
-      step.annotations = annotations.slice();
-    } catch (e) { /* tainted canvas — keep original */ }
-  }
+function onPhotoSelected(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    _annotations = []; _currentDraw = null;
+    loadPhotoForCanvas(reader.result, () => {
+      showCanvas(true); redrawCanvas();
+      if (state.currentSop) {
+        const s = state.currentSop.steps[state.captureIndex];
+        s.image = reader.result; s.annotations = [];
+        queueSave();
+      }
+    });
+  };
+  reader.readAsDataURL(file);
 }
 
-/* ---- capture navigation ---- */
-function capturePrev() {
-  if (captureIndex === 0) return;
-  commitCaptureStep();
-  captureIndex--;
-  loadCaptureStep();
-}
+// ── Wire up events ────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Home
+  $('home-new-btn').addEventListener('click', openModal);
 
-function captureNext() {
-  commitCaptureStep();
-  if (captureIndex < currentSop.steps.length - 1) {
-    captureIndex++;
-  } else {
-    // create a new step
-    currentSop.steps.push({ id: uuid(), index: currentSop.steps.length, image: null, text: '', annotations: [] });
-    captureIndex = currentSop.steps.length - 1;
-  }
-  saveNow();
-  loadCaptureStep();
-}
+  // Modal
+  $('modal-overlay').addEventListener('click', e => { if (e.target === $('modal-overlay')) closeModal(); });
+  $('modal-cancel').addEventListener('click', closeModal);
+  $('modal-create').addEventListener('click', createSop);
+  ['modal-part-no','modal-part-name','modal-doc-no'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') createSop(); }));
 
-function captureAddStep() {
-  commitCaptureStep();
-  currentSop.steps.push({ id: uuid(), index: currentSop.steps.length, image: null, text: '', annotations: [] });
-  captureIndex = currentSop.steps.length - 1;
-  saveNow();
-  loadCaptureStep();
-}
-
-/* update prev/next button labels */
-function updateCaptureNav() {
-  document.getElementById('capPrevBtn').disabled = captureIndex === 0;
-  const next = document.getElementById('capNextBtn');
-  next.textContent = captureIndex < currentSop.steps.length - 1 ? 'Next ›' : 'New step ›';
-}
-
-/* hook nav update into step load */
-const _loadCaptureStep = loadCaptureStep;
-loadCaptureStep = function () { _loadCaptureStep(); updateCaptureNav(); };
-
-/* =========================================================
-   PWA service worker
-   ========================================================= */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/static/sw.js').catch(() => {/* offline support optional */});
+  // Capture
+  $('cap-back-btn').addEventListener('click', leaveCapture);
+  $('cap-done-btn').addEventListener('click', finishCapture);
+  $('cap-prev-btn').addEventListener('click', capturePrev);
+  $('cap-next-btn').addEventListener('click', captureNext);
+  $('cap-addstep-btn').addEventListener('click', captureAddStep);
+  $('cap-add-dot').addEventListener('click', captureAddStep);
+  $('cap-camera-input').addEventListener('change', e => onPhotoSelected(e.target.files[0]));
+  $('cap-upload-input').addEventListener('change', e => onPhotoSelected(e.target.files[0]));
+  $('cap-replace-input').addEventListener('change', e => onPhotoSelected(e.target.files[0]));
+  $('cap-note').addEventListener('input', () => {
+    if (state.currentSop) { state.currentSop.steps[state.captureIndex].text = $('cap-note').value; queueSave(); }
   });
-}
 
-/* keep canvas sized on rotation/resize while capturing */
-window.addEventListener('resize', () => {
-  if (document.getElementById('screen-capture').classList.contains('active') && photoImg) {
-    sizeCanvasToPhoto();
-    redraw();
+  // Annotation tools
+  ['arrow','circle','label'].forEach(t => $('tool-'+t).addEventListener('click', () => setActiveTool(t)));
+  $('tool-undo').addEventListener('click', undoAnnotation);
+  $('tool-clear').addEventListener('click', clearAnnotations);
+
+  // Editor
+  $('sidebar-logo').addEventListener('click', goHome);
+  $('editor-home-btn').addEventListener('click', goHome);
+  $('sidebar-new-btn').addEventListener('click', openModal);
+  $('sidebar-search').addEventListener('input', () => { state.editorSearch = $('sidebar-search').value; renderSidebarList(); });
+  $('status-draft-btn').addEventListener('click', () => setStatus('draft'));
+  $('status-done-btn').addEventListener('click', () => setStatus('done'));
+  $('download-btn').addEventListener('click', generateDocx);
+
+  $('field-part-no').addEventListener('input', () => {
+    if (!state.currentSop) return;
+    state.currentSop.part_no = $('field-part-no').value; queueSave();
+  });
+  $('field-part-name').addEventListener('input', () => {
+    if (!state.currentSop) return;
+    state.currentSop.part_name = $('field-part-name').value;
+    $('editor-title').textContent = $('field-part-name').value || 'Untitled SOP';
+    queueSave();
+  });
+  $('field-doc-no').addEventListener('input', () => {
+    if (!state.currentSop) return;
+    state.currentSop.doc_no = $('field-doc-no').value; queueSave();
+  });
+
+  $('editor-img-input').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file || _editorImgIdx == null) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      state.currentSop.steps[_editorImgIdx].image = reader.result;
+      renderEditorSteps(); queueSave();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  window.addEventListener('resize', () => {
+    if (state.screen === 'capture' && _photoImg) { sizeCanvas(); redrawCanvas(); }
+  });
+
+  // Boot
+  showScreen('home');
+  loadSops();
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/static/sw.js').catch(() => {}));
   }
 });
-
-/* =========================================================
-   Boot
-   ========================================================= */
-loadSops();
-setTool('arrow');
 </script>
 </body>
 </html>
