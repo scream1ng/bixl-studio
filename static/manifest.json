@@ -1,12 +1,12 @@
 {
-  "name": "IXL | Studio",
-  "short_name": "Studio",
-  "description": "IXL Group manufacturing documentation platform",
+  "name": "IXL Studio",
+  "short_name": "IXL Studio",
+  "description": "Manufacturing documentation platform — SOP generator",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "any",
-  "theme_color": "#1A1A1A",
   "background_color": "#1A1A1A",
+  "theme_color": "#1A1A1A",
+  "orientation": "any",
   "icons": [
     {
       "src": "/static/icon-192.png",
@@ -20,7 +20,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "categories": ["productivity", "utilities"],
-  "lang": "en-AU"
+  ]
 }
