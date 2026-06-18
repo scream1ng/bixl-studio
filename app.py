@@ -16,6 +16,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 
 from modules.sop.fill import fill_sop as _fill_sop
+from modules.label import step_to_wireframe, step_to_mesh_and_edges
 
 app = Flask(__name__)
 
@@ -328,6 +329,67 @@ def generate_sop(sop_id: str):
             "application/vnd.openxmlformats-officedocument"
             ".wordprocessingml.document"
         ),
+    )
+
+
+# ── Label module ─────────────────────────────────────────────────────────────
+
+@app.route("/api/label/preview", methods=["POST"])
+def label_preview():
+    """Return STL (base64) + edges JSON for Three.js viewer."""
+    f = request.files.get("file")
+    if not f:
+        return jsonify({"error": "no file"}), 400
+    step_bytes = f.read()
+    filename = f.filename or "part.step"
+    try:
+        stl_bytes, edges = step_to_mesh_and_edges(step_bytes, filename)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 502
+    return jsonify({
+        "stl": base64.b64encode(stl_bytes).decode(),
+        "edges": edges,
+    })
+
+
+@app.route("/api/label/generate", methods=["POST"])
+def label_generate():
+    """Generate wireframe JPG from STEP + camera params, return as image/jpeg."""
+    f = request.files.get("file")
+    if not f:
+        return jsonify({"error": "no file"}), 400
+    step_bytes = f.read()
+    filename = f.filename or "part.step"
+
+    def _float(key):
+        v = request.form.get(key)
+        return float(v) if v is not None else None
+
+    def _vec(prefix):
+        x, y, z = _float(f"{prefix}_x"), _float(f"{prefix}_y"), _float(f"{prefix}_z")
+        return (x, y, z) if None not in (x, y, z) else None
+
+    try:
+        jpg = step_to_wireframe(
+            step_bytes,
+            filename=filename,
+            view=request.form.get("view", "isometric"),
+            line_px=int(request.form.get("line_px", 3)),
+            label_cm=float(request.form.get("label_cm", 26.0)),
+            dpi=int(request.form.get("dpi", 300)),
+            eye=_vec("eye"),
+            right=_vec("right"),
+            target=_vec("target"),
+            fov_deg=_float("fov_deg"),
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 502
+
+    return send_file(
+        io.BytesIO(jpg),
+        mimetype="image/jpeg",
+        as_attachment=True,
+        download_name=f"{filename.rsplit('.', 1)[0]}_label.jpg",
     )
 
 
