@@ -12,6 +12,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+    }
+  }
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; overflow: hidden; }
@@ -102,10 +110,10 @@
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
         <span style="font-size:9px;font-weight:700;color:#2E9E4F;background:rgba(46,158,79,0.15);padding:3px 7px;border-radius:20px;flex-shrink:0;letter-spacing:0.3px;">LIVE</span>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
-        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+        <span style="font-size:9px;font-weight:700;color:#2E9E4F;background:rgba(46,158,79,0.15);padding:3px 7px;border-radius:20px;flex-shrink:0;letter-spacing:0.3px;">LIVE</span>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
@@ -141,14 +149,14 @@
           </div>
           <span style="font-size:11px;font-weight:700;color:#2E9E4F;background:#E7F4EB;padding:4px 9px;border-radius:20px;flex-shrink:0;">&#9679; LIVE</span>
         </div>
-        <!-- Label soon -->
-        <div style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;opacity:0.5;">
-          <div style="width:44px;height:44px;border-radius:12px;background:#E8E6E2;color:#A8A8A8;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LB</div>
+        <!-- Label live -->
+        <div class="module-card" id="landing-label-card" onclick="enterLabel()" style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow 0.12s;">
+          <div style="width:44px;height:44px;border-radius:12px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LB</div>
           <div style="flex:1;min-width:0;">
             <div style="font-size:15px;font-weight:700;color:#1A1A1A;">Label</div>
             <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">Part labels</div>
           </div>
-          <span style="font-size:10px;font-weight:700;color:#8A8A8A;border:1px solid #D4D2CE;padding:4px 8px;border-radius:20px;flex-shrink:0;">SOON</span>
+          <span style="font-size:11px;font-weight:700;color:#2E9E4F;background:#E7F4EB;padding:4px 9px;border-radius:20px;flex-shrink:0;">&#9679; LIVE</span>
         </div>
         <!-- ICL soon -->
         <div style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;opacity:0.5;">
@@ -189,10 +197,10 @@
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;">SOP</div><div style="font-size:11px;color:#9A9A9A;">Operating procedures</div></div>
         <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
-        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+        <span style="font-size:9px;font-weight:700;color:#2E9E4F;background:rgba(46,158,79,0.15);padding:3px 7px;border-radius:20px;flex-shrink:0;letter-spacing:0.3px;">LIVE</span>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
@@ -250,10 +258,10 @@
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;">SOP</div><div style="font-size:11px;color:#9A9A9A;">Operating procedures</div></div>
         <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
-        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+        <span style="font-size:9px;font-weight:700;color:#2E9E4F;background:rgba(46,158,79,0.15);padding:3px 7px;border-radius:20px;flex-shrink:0;letter-spacing:0.3px;">LIVE</span>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
@@ -306,6 +314,93 @@
         <div id="editor-steps-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;"></div>
       </div>
     </div>
+  </main>
+</div>
+
+<!-- ═══════════════════ LABEL ═══════════════════ -->
+<div id="screen-label" class="screen">
+
+  <aside class="shell-rail">
+    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">
+      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
+      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
+      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
+    </div>
+    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <div class="rail-item" onclick="enterSop()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;">Label</div><div style="font-size:11px;color:#9A9A9A;">Part labels</div></div>
+        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
+        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.2;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">MLB / PFC</div><div style="font-size:11px;color:#6E6E6E;">BOM &amp; flow</div></div>
+        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="shell-panel">
+    <!-- header -->
+    <div style="padding:26px 28px 20px;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
+      <div style="min-width:0;flex:1;">
+        <button onclick="goLanding()" class="editor-home-lnk" style="font-size:12px;font-weight:500;color:#999;padding:0 0 8px;display:block;transition:color 0.1s;">&#8249; Home</button>
+        <h2 id="lb-part-name" style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Label</h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;padding-top:20px;">
+        <label style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
+          <span style="font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">Line</span>
+          <select id="lb-line-px" style="padding:5px 8px;border:1px solid #E0E0E0;border-radius:7px;font-size:13px;color:#1A1A1A;background:#fff;cursor:pointer;">
+            <option value="2">2px</option>
+            <option value="3" selected>3px</option>
+            <option value="4">4px</option>
+            <option value="5">5px</option>
+          </select>
+        </label>
+        <label style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
+          <span style="font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">Size</span>
+          <select id="lb-label-cm" style="padding:5px 8px;border:1px solid #E0E0E0;border-radius:7px;font-size:13px;color:#1A1A1A;background:#fff;cursor:pointer;">
+            <option value="10">10 cm</option>
+            <option value="15">15 cm</option>
+            <option value="20">20 cm</option>
+            <option value="26" selected>26 cm</option>
+          </select>
+        </label>
+        <label style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
+          <span style="font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">DPI</span>
+          <select id="lb-dpi" style="padding:5px 8px;border:1px solid #E0E0E0;border-radius:7px;font-size:13px;color:#1A1A1A;background:#fff;cursor:pointer;">
+            <option value="150">150</option>
+            <option value="300" selected>300</option>
+          </select>
+        </label>
+        <button id="lb-generate-btn" class="btn-red" style="background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;transition:background 0.1s;opacity:0.4;cursor:not-allowed;margin-top:18px;" disabled>&#8595; Generate JPG</button>
+      </div>
+    </div>
+    <!-- body: drop zone / viewer -->
+    <div id="label-body" style="flex:1;overflow:hidden;position:relative;min-height:0;">
+      <div id="label-dropzone" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;cursor:pointer;" onclick="document.getElementById('lb-file-input').click()">
+        <div style="width:100%;max-width:360px;border:2px dashed rgba(0,0,0,0.15);border-radius:16px;padding:48px 32px;text-align:center;background:#fff;display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <svg width="48" height="48" fill="none" stroke="#AAAAAA" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
+          <div style="font-size:15px;font-weight:700;color:#1A1A1A;">Drop a STEP file here</div>
+          <div style="font-size:13px;color:#7A7A7A;">or click to browse &nbsp;&bull;&nbsp; .step / .stp</div>
+        </div>
+      </div>
+      <div id="label-mount" style="display:none;position:absolute;inset:0;"></div>
+      <div id="label-status" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;pointer-events:none;z-index:10;">
+        <div id="label-status-inner" style="background:rgba(255,255,255,0.93);border-radius:12px;padding:16px 24px;font-size:14px;font-weight:600;color:#1A1A1A;text-align:center;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,0.1);"></div>
+      </div>
+    </div>
+    <input type="file" id="lb-file-input" accept=".step,.stp" style="display:none;">
   </main>
 </div>
 
@@ -385,11 +480,11 @@
         <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:#fff;">SOP</div></div>
         <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
       </button>
-      <div style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;">
+      <button id="drawer-label" onclick="enterLabel();closeDrawer();" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;text-align:left;width:100%;transition:background 0.1s;">
         <div style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">LB</div>
         <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#C8C8C8;">Label</div></div>
-        <span style="font-size:8.5px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:2px 6px;border-radius:20px;">SOON</span>
-      </div>
+        <span style="font-size:8.5px;font-weight:700;color:#2E9E4F;background:rgba(46,158,79,0.15);padding:2px 6px;border-radius:20px;">LIVE</span>
+      </button>
       <div style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;">
         <div style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;flex-shrink:0;">ICL</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div></div>
@@ -691,6 +786,10 @@ function goHome() {
 function enterSop() {
   loadSops();
   showScreen('home');
+}
+
+function enterLabel() {
+  showScreen('label');
 }
 
 async function openSop(id) {
@@ -1356,6 +1455,294 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('load', () => navigator.serviceWorker.register('/static/sw.js').catch(() => {}));
   }
 });
+</script>
+
+<script type="module">
+console.log('[label] module start');
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
+
+const MAX_SEGMENTS = 60000;
+
+const _lb = {
+  file: null,
+  status: 'idle',
+  renderer: null,
+  scene: null,
+  camera: null,
+  controls: null,
+  linMat: null,
+  modelCenter: new THREE.Vector3(),
+  modelScale: 1,
+  animId: 0,
+  resizeHandler: null,
+};
+
+function _lbShow(which) {
+  const dz = document.getElementById('label-dropzone');
+  const mt = document.getElementById('label-mount');
+  const st = document.getElementById('label-status');
+  if (dz) dz.style.display = which === 'drop' ? 'flex' : 'none';
+  if (mt) mt.style.display = which === 'mount' ? 'block' : 'none';
+  if (st) st.style.display = 'none';
+}
+
+function _lbStatus(msg) {
+  const el = document.getElementById('label-status');
+  const inner = document.getElementById('label-status-inner');
+  if (!el || !inner) return;
+  if (msg) { inner.textContent = msg; el.style.display = 'flex'; }
+  else { el.style.display = 'none'; }
+}
+
+function _lbSetBtn(on) {
+  const btn = document.getElementById('lb-generate-btn');
+  if (!btn) return;
+  btn.disabled = !on;
+  btn.style.opacity = on ? '1' : '0.4';
+  btn.style.cursor = on ? 'pointer' : 'not-allowed';
+}
+
+function _lbCleanup() {
+  cancelAnimationFrame(_lb.animId);
+  if (_lb.resizeHandler) { window.removeEventListener('resize', _lb.resizeHandler); _lb.resizeHandler = null; }
+  if (_lb.controls) { _lb.controls.dispose(); _lb.controls = null; }
+  if (_lb.scene) {
+    _lb.scene.traverse(obj => {
+      if (obj.geometry) obj.geometry.dispose();
+      const m = obj.material;
+      if (m) { if (Array.isArray(m)) m.forEach(x => x.dispose()); else m.dispose(); }
+    });
+    _lb.scene = null;
+  }
+  if (_lb.renderer) {
+    const mt = document.getElementById('label-mount');
+    if (mt && mt.contains(_lb.renderer.domElement)) mt.removeChild(_lb.renderer.domElement);
+    _lb.renderer.dispose();
+    _lb.renderer = null;
+  }
+  _lb.camera = null; _lb.linMat = null;
+  _lb.modelCenter.set(0, 0, 0); _lb.modelScale = 1;
+}
+
+async function _lbLoad(file) {
+  _lb.file = file;
+  _lb.status = 'loading';
+  _lbCleanup();
+  _lbShow('mount');
+  _lbStatus('Loading ' + file.name + '…');
+  _lbSetBtn(false);
+
+  const title = document.getElementById('lb-part-name');
+  if (title) title.textContent = file.name.replace(/\.[^.]+$/, '');
+
+  const form = new FormData();
+  form.append('file', file);
+
+  let data;
+  try {
+    const res = await fetch('/api/label/preview', { method: 'POST', body: form });
+    if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error(j.error || 'Server error ' + res.status); }
+    data = await res.json();
+  } catch (e) {
+    _lb.status = 'error';
+    _lbShow('drop');
+    _lbStatus('');
+    if (window.toast) window.toast('Preview failed: ' + e.message);
+    return;
+  }
+
+  const edgesData = data.edges || [];
+  const bin = atob(data.stl);
+  const buf = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+  const stlBlob = new Blob([buf], { type: 'model/stl' });
+
+  const mount = document.getElementById('label-mount');
+  if (!mount) return;
+
+  const width = mount.clientWidth || 600, height = mount.clientHeight || 600;
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(width, height);
+  renderer.setClearColor(0xffffff, 1);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  mount.appendChild(renderer.domElement);
+  _lb.renderer = renderer;
+
+  const scene = new THREE.Scene();
+  _lb.scene = scene;
+
+  const camera = new THREE.PerspectiveCamera(45, width / height, 0.001, 1e6);
+  camera.up.set(0, 0, 1); // Z-up matches STEP/OCC coordinate system
+  _lb.camera = camera;
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  _lb.controls = controls;
+
+  const stlUrl = URL.createObjectURL(stlBlob);
+  new STLLoader().load(stlUrl, (geo) => {
+    URL.revokeObjectURL(stlUrl);
+
+    geo.computeBoundingBox();
+    const box = geo.boundingBox;
+    if (!box) { geo.dispose(); _lbStatus('Could not read model bounds'); return; }
+
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const maxDim = Math.max(size.x, size.y, size.z) || 1;
+    const scale = 100 / maxDim;
+    _lb.modelCenter.copy(center);
+    _lb.modelScale = scale;
+
+    geo.translate(-center.x, -center.y, -center.z);
+    geo.scale(scale, scale, scale);
+
+    // depth pre-pass so edges occlude hidden lines
+    scene.add(Object.assign(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+      colorWrite: false, depthWrite: true, depthTest: true,
+      polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
+    })), { renderOrder: 0 }));
+    scene.add(Object.assign(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+      color: 0xffffff, depthWrite: false,
+      polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
+    })), { renderOrder: 1 }));
+
+    // edge overlay
+    let totalSeg = 0;
+    for (const pl of edgesData) totalSeg += Math.max(0, pl.length - 1);
+
+    if (totalSeg > 0 && totalSeg <= MAX_SEGMENTS) {
+      const pos = new Float32Array(totalSeg * 6);
+      let ptr = 0;
+      for (const pl of edgesData) {
+        for (let i = 0; i < pl.length - 1; i++) {
+          const [x1,y1,z1] = pl[i], [x2,y2,z2] = pl[i+1];
+          pos[ptr++]=(x1-center.x)*scale; pos[ptr++]=(y1-center.y)*scale; pos[ptr++]=(z1-center.z)*scale;
+          pos[ptr++]=(x2-center.x)*scale; pos[ptr++]=(y2-center.y)*scale; pos[ptr++]=(z2-center.z)*scale;
+        }
+      }
+      const linGeo = new LineSegmentsGeometry();
+      linGeo.setPositions(pos);
+      const linMat = new LineMaterial({
+        color: 0x000000, linewidth: 2, worldUnits: false,
+        depthTest: true, depthWrite: false, depthFunc: THREE.LessEqualDepth,
+        resolution: new THREE.Vector2(width, height),
+      });
+      _lb.linMat = linMat;
+      const lines = new LineSegments2(linGeo, linMat);
+      lines.renderOrder = 2;
+      scene.add(lines);
+    }
+
+    camera.position.set(80, 80, 80);
+    controls.target.set(0, 0, 0);
+    controls.update();
+
+    _lb.status = 'viewing';
+    _lbStatus('');
+    _lbSetBtn(true);
+
+    const onResize = () => {
+      const w = mount.clientWidth || 600, h = mount.clientHeight || 600;
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      if (_lb.linMat) _lb.linMat.resolution.set(w, h);
+    };
+    _lb.resizeHandler = onResize;
+    window.addEventListener('resize', onResize);
+
+    const tick = () => { _lb.animId = requestAnimationFrame(tick); controls.update(); renderer.render(scene, camera); };
+    tick();
+  });
+}
+
+async function _lbGenerate() {
+  if (!_lb.file || !_lb.camera || _lb.status !== 'viewing') return;
+  _lb.status = 'generating';
+  _lbSetBtn(false);
+
+  const cam = _lb.camera, ctrl = _lb.controls;
+  const scale = _lb.modelScale, center = _lb.modelCenter;
+
+  // Convert Three.js camera space → model space for OCC
+  const eye = cam.position.clone().divideScalar(scale).add(center);
+  const tgt = ctrl.target.clone().divideScalar(scale).add(center);
+  const right = new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld, 0);
+  const focus = cam.position.distanceTo(ctrl.target) / scale;
+
+  const linePx = parseInt(document.getElementById('lb-line-px').value, 10) || 3;
+  const labelCm = parseFloat(document.getElementById('lb-label-cm').value) || 26;
+  const dpi = parseInt(document.getElementById('lb-dpi').value, 10) || 300;
+
+  const form = new FormData();
+  form.append('file', _lb.file);
+  form.append('line_px', linePx);
+  form.append('label_cm', labelCm);
+  form.append('dpi', dpi);
+  form.append('focus', focus);
+  form.append('fov_deg', cam.fov);
+  form.append('eye_x', eye.x); form.append('eye_y', eye.y); form.append('eye_z', eye.z);
+  form.append('right_x', right.x); form.append('right_y', right.y); form.append('right_z', right.z);
+  form.append('target_x', tgt.x); form.append('target_y', tgt.y); form.append('target_z', tgt.z);
+
+  try {
+    const res = await fetch('/api/label/generate', { method: 'POST', body: form });
+    if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error(j.error || 'Server error ' + res.status); }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = _lb.file.name.replace(/\.[^.]+$/, '') + '_label.jpg';
+    a.click();
+    URL.revokeObjectURL(url);
+    if (window.toast) window.toast('Label generated', 'success');
+  } catch (e) {
+    if (window.toast) window.toast('Generate failed: ' + e.message);
+  }
+
+  _lb.status = 'viewing';
+  _lbSetBtn(true);
+}
+
+// Wire up events (module is deferred — DOM is ready)
+const lbBody = document.getElementById('label-body');
+const lbInp = document.getElementById('lb-file-input');
+const lbBtn = document.getElementById('lb-generate-btn');
+
+if (lbInp) lbInp.addEventListener('change', e => { const f = e.target.files[0]; if (f) _lbLoad(f); e.target.value = ''; });
+if (lbBtn) lbBtn.addEventListener('click', _lbGenerate);
+
+if (lbBody) {
+  lbBody.addEventListener('dragover', e => {
+    e.preventDefault();
+    const dz = document.getElementById('label-dropzone');
+    if (dz) dz.style.borderColor = '#CC0000';
+  });
+  lbBody.addEventListener('dragleave', () => {
+    const dz = document.getElementById('label-dropzone');
+    if (dz) dz.style.borderColor = '';
+  });
+  lbBody.addEventListener('drop', e => {
+    e.preventDefault();
+    const dz = document.getElementById('label-dropzone');
+    if (dz) dz.style.borderColor = '';
+    const f = e.dataTransfer.files[0];
+    if (!f) return;
+    const ext = f.name.split('.').pop().toLowerCase();
+    if (!['step','stp'].includes(ext)) { if (window.toast) window.toast('Only .step / .stp files accepted'); return; }
+    _lbLoad(f);
+  });
+}
 </script>
 </body>
 </html>
