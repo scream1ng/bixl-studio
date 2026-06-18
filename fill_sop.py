@@ -198,20 +198,29 @@ def _fill_page_table(table, page_steps, base_index: int) -> None:
             if step.get("text"):
                 add_text_to_cell(text_cell, step["text"])
         else:
-            # Empty step: clear the heading so the blank cell is not a placeholder.
+            # Empty step: clear heading, image, and text so copied content doesn't bleed through.
             set_heading_text(heading_cell, "")
+            _clear_cell(image_cell)
+            _clear_cell(text_cell)
 
 
 def _append_page_break_and_table(doc, source_table):
     """Add a page break, then a deep copy of source_table, return the new table."""
-    break_para = doc.add_paragraph()
-    run = break_para.add_run()
+    body = doc.element.body
+    children = list(body)
+    sectPr = body.find(qn("w:sectPr"))
+    insert_idx = children.index(sectPr) if sectPr is not None else len(children)
+
+    break_para = OxmlElement("w:p")
+    run_el = OxmlElement("w:r")
     br = OxmlElement("w:br")
     br.set(qn("w:type"), "page")
-    run._r.append(br)
+    run_el.append(br)
+    break_para.append(run_el)
+    body.insert(insert_idx, break_para)
 
     new_tbl = copy.deepcopy(source_table._tbl)
-    doc.element.body.append(new_tbl)
+    body.insert(insert_idx + 1, new_tbl)
     from docx.table import Table
     return Table(new_tbl, doc)
 
