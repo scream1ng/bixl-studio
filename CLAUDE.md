@@ -208,17 +208,17 @@ Phases 1–2 alone give a working desktop tool. Phase 3 adds mobile capture.
 
 ## Status
 
-- [x] `fill_sop.py` — fills template, images in correct cells, text in correct cells
+- [x] `modules/sop/fill.py` — dynamic fill engine, 12 pre-built templates (A3/A4 × landscape/portrait × 1/2/4/6/8 steps)
 - [x] Image scaling constrained by height — output stays one page, any aspect ratio
 - [x] Vertical centre of images in cells (`w:vAlign`)
 - [x] Header part no/name + footer doc no — split-run replacement working
+- [x] Flask API + DB (SQLite default, Postgres via `DATABASE_URL`)
+- [x] Railway deploy (Procfile, requirements.txt, gunicorn, `/healthz`)
+- [x] Web app editor — document list, SOP editor, format/steps-per-page picker, Download .docx
+- [x] Phone capture PWA — installable, capture flow (photo + annotation + note), step reorder, manifest + service worker
+- [x] Annotation strategy — baked-in (arrows/circles drawn on canvas, exported as JPEG)
 - [ ] Empty-cell heading removal (blank "STEP N" for unused steps, ≤8)
 - [ ] Multi-page support (>8 steps → duplicate table on new page, STEP 9+)
-- [ ] Flask API + DB
-- [ ] Railway deploy (Procfile, requirements, gunicorn, health check)
-- [ ] Web app editor (list + two-panel)
-- [ ] Phone capture PWA (manifest, service worker, annotation tools)
-- [ ] Annotation strategy finalised (baked-in vs native Word shapes)
 
 ---
 
@@ -232,6 +232,7 @@ Phases 1–2 alone give a working desktop tool. Phase 3 adds mobile capture.
 
 ## Reference assets
 
-- `fill_sop.py` — the working fill engine (drop into the repo as the starting core).
-- `SOP_Template_A3.docx` — the real IXL template. Treat as read-only source of truth for layout.
-- `docs/concept.html` — stakeholder-facing concept deck (reference only, not part of the build).
+- `modules/sop/fill.py` — the fill engine. Entry point: `fill_sop(steps, part_no, part_name, doc_no, format_key, steps_per_page)`.
+- `docx/sop/templates/` — 12 pre-built `.docx` fill templates (source of truth for layout).
+- `docx/sop/source/` — blank IXL master templates (reference only, do not fill directly).
+- `dev/` — debug/generation scripts, not deployed.

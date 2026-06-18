@@ -9,8 +9,9 @@ from PIL import Image, ImageDraw, ImageFont
 import os
 
 HERE    = os.path.dirname(os.path.abspath(__file__))
-LOGO    = os.path.join(HERE, "static", "IXL-white.png")
-OUT_DIR = os.path.join(HERE, "static")
+ROOT    = os.path.dirname(HERE)
+LOGO    = os.path.join(ROOT, "static", "IXL-white.png")
+OUT_DIR = os.path.join(ROOT, "static")
 
 BG     = (26, 26, 26, 255)    # #1A1A1A
 WHITE  = (255, 255, 255, 255)
@@ -24,14 +25,14 @@ def create_icon(size: int) -> Image.Image:
     # --- load & scale IXL logo ---
     logo = Image.open(LOGO).convert("RGBA")
     lw, lh = logo.size                        # 232 × 104
-    target_w = int(size * 0.62)               # 62% of icon width
+    target_w = int(size * 0.55)               # 55% of icon width
     scale    = target_w / lw
     new_lw   = target_w
     new_lh   = int(lh * scale)
     logo     = logo.resize((new_lw, new_lh), Image.LANCZOS)
 
     # --- fonts ---
-    sz_studio = int(size * 0.11)
+    sz_studio = int(size * 0.20)
     try:
         f_studio = ImageFont.truetype(FONT_BOLD, sz_studio)
     except OSError:

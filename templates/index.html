@@ -129,44 +129,44 @@
     </div>
     <div style="max-width:780px;">
 
-      <h1 style="font-size:26px;font-weight:800;letter-spacing:-0.4px;color:#1A1A1A;max-width:480px;line-height:1.22;">One workspace for the factory floor.</h1>
-      <p style="color:#6B6B6B;font-size:14px;margin-top:9px;max-width:480px;">Pick a module to get started. More tools are landing soon.</p>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:32px;">
+      <h1 style="font-size:26px;font-weight:800;letter-spacing:-0.4px;color:#1A1A1A;line-height:1.22;text-align:center;">One workspace for the factory floor.</h1>
+      <p style="color:#6B6B6B;font-size:14px;margin-top:8px;text-align:center;">Choose a tool to get started.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:28px;">
         <!-- SOP live -->
-        <div class="module-card" id="landing-sop-card" style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;transition:border-color 0.12s,box-shadow 0.12s;">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div style="width:44px;height:44px;border-radius:11px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;">SOP</div>
-            <span style="font-size:11px;font-weight:700;color:#2E9E4F;background:#E7F4EB;padding:4px 9px;border-radius:20px;">● LIVE</span>
+        <div class="module-card" id="landing-sop-card" style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow 0.12s;">
+          <div style="width:44px;height:44px;border-radius:12px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:15px;font-weight:700;color:#1A1A1A;">SOP</div>
+            <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">Operating procedures</div>
           </div>
-          <div>
-            <div style="font-size:16px;font-weight:700;color:#1A1A1A;">Standard Operating Procedures</div>
-            <p style="color:#7A7A7A;font-size:13px;margin-top:4px;line-height:1.5;">Capture photos, annotate steps, generate the Word document.</p>
-          </div>
-          <button id="landing-open-sop" class="btn-red" style="align-self:flex-start;background:#CC0000;color:#fff;padding:9px 18px;border-radius:7px;font-size:13.5px;font-weight:600;transition:background 0.1s;">Open SOP ›</button>
+          <span style="font-size:11px;font-weight:700;color:#2E9E4F;background:#E7F4EB;padding:4px 9px;border-radius:20px;flex-shrink:0;">&#9679; LIVE</span>
         </div>
-        <!-- LB -->
-        <div style="background:#FBFAF8;border:1px solid rgba(0,0,0,0.06);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div style="width:44px;height:44px;border-radius:11px;background:#ECEAE6;color:#B4B0A8;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LB</div>
-            <span style="font-size:10px;font-weight:700;color:#A0A0A0;background:#EFEDE9;padding:4px 8px;border-radius:20px;">SOON</span>
+        <!-- Label soon -->
+        <div style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;opacity:0.5;">
+          <div style="width:44px;height:44px;border-radius:12px;background:#E8E6E2;color:#A8A8A8;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LB</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:15px;font-weight:700;color:#1A1A1A;">Label</div>
+            <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">Part labels</div>
           </div>
-          <div><div style="font-size:16px;font-weight:700;color:#B0ACA4;">Label</div><p style="color:#B4B0A8;font-size:13px;margin-top:4px;line-height:1.5;">Design and print part labels.</p></div>
+          <span style="font-size:10px;font-weight:700;color:#8A8A8A;border:1px solid #D4D2CE;padding:4px 8px;border-radius:20px;flex-shrink:0;">SOON</span>
         </div>
-        <!-- ICL -->
-        <div style="background:#FBFAF8;border:1px solid rgba(0,0,0,0.06);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div style="width:44px;height:44px;border-radius:11px;background:#ECEAE6;color:#B4B0A8;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">ICL</div>
-            <span style="font-size:10px;font-weight:700;color:#A0A0A0;background:#EFEDE9;padding:4px 8px;border-radius:20px;">SOON</span>
+        <!-- ICL soon -->
+        <div style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;opacity:0.5;">
+          <div style="width:44px;height:44px;border-radius:12px;background:#E8E6E2;color:#A8A8A8;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">ICL</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:15px;font-weight:700;color:#1A1A1A;">Inspection Checklist</div>
+            <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">Quality checks</div>
           </div>
-          <div><div style="font-size:16px;font-weight:700;color:#B0ACA4;">Inspection Checklist</div><p style="color:#B4B0A8;font-size:13px;margin-top:4px;line-height:1.5;">Quality inspection checklists.</p></div>
+          <span style="font-size:10px;font-weight:700;color:#8A8A8A;border:1px solid #D4D2CE;padding:4px 8px;border-radius:20px;flex-shrink:0;">SOON</span>
         </div>
-        <!-- MLB -->
-        <div style="background:#FBFAF8;border:1px solid rgba(0,0,0,0.06);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div style="width:44px;height:44px;border-radius:11px;background:#ECEAE6;color:#B4B0A8;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.3;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
-            <span style="font-size:10px;font-weight:700;color:#A0A0A0;background:#EFEDE9;padding:4px 8px;border-radius:20px;">SOON</span>
+        <!-- MLB soon -->
+        <div style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;opacity:0.5;">
+          <div style="width:44px;height:44px;border-radius:12px;background:#E8E6E2;color:#A8A8A8;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">MLB</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:15px;font-weight:700;color:#1A1A1A;">MLB / PFC</div>
+            <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">BOM &amp; flow</div>
           </div>
-          <div><div style="font-size:16px;font-weight:700;color:#B0ACA4;">MLB / PFC</div><p style="color:#B4B0A8;font-size:13px;margin-top:4px;line-height:1.5;">Multi-level BOM and process flow charts.</p></div>
+          <span style="font-size:10px;font-weight:700;color:#8A8A8A;border:1px solid #D4D2CE;padding:4px 8px;border-radius:20px;flex-shrink:0;">SOON</span>
         </div>
       </div>
     </div>
@@ -324,22 +324,23 @@
   <div id="cap-dots-row" style="display:flex;gap:7px;padding:10px 16px;overflow-x:auto;flex-shrink:0;align-items:center;border-bottom:1px solid rgba(0,0,0,0.06);">
     <button id="cap-add-dot" style="width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(0,0,0,0.15);color:#AAAAAA;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;background:transparent;">+</button>
   </div>
+  <div id="cap-reorder-row" style="display:none;flex-shrink:0;padding:7px 16px;border-bottom:1px solid rgba(0,0,0,0.06);">
+    <div style="display:flex;gap:8px;">
+      <button id="cap-move-back" style="flex:1;padding:7px 10px;border-radius:9px;background:#fff;border:1px solid rgba(0,0,0,0.1);font-size:12px;font-weight:600;color:#2C2C2C;">&#8592; Move step earlier</button>
+      <button id="cap-move-fwd" style="flex:1;padding:7px 10px;border-radius:9px;background:#fff;border:1px solid rgba(0,0,0,0.1);font-size:12px;font-weight:600;color:#2C2C2C;">Move step later &#8594;</button>
+    </div>
+  </div>
 
   <div style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px;">
     <div id="cap-photo-area" style="position:relative;background:#E8E7E3;border-radius:14px;min-height:210px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
       <div id="cap-placeholder" style="text-align:center;padding:32px 20px;display:flex;flex-direction:column;gap:13px;align-items:center;">
         <div style="font-size:38px;opacity:0.18;line-height:1;">📷</div>
         <p style="color:#6B6B6B;font-size:13px;">No photo for this step yet</p>
-        <div style="display:flex;gap:10px;">
-          <label class="btn-red" style="background:#CC0000;color:#fff;padding:9px 18px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background 0.1s;">
-            Take photo
+            <label style="background:#fff;color:#2C2C2C;padding:9px 18px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid rgba(0,0,0,0.1);display:inline-flex;align-items:center;gap:6px;">
+              Upload
+              <input id="cap-upload-input" type="file" accept="image/*" style="display:none;">
+            </label>
             <input id="cap-camera-input" type="file" accept="image/*" capture="environment" style="display:none;">
-          </label>
-          <label style="background:#fff;color:#2C2C2C;padding:9px 18px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid rgba(0,0,0,0.1);display:inline-flex;align-items:center;gap:6px;">
-            Upload
-            <input id="cap-upload-input" type="file" accept="image/*" style="display:none;">
-          </label>
-        </div>
       </div>
       <canvas id="cap-canvas" style="display:none;max-width:100%;touch-action:none;"></canvas>
     </div>
@@ -347,17 +348,10 @@
     <div id="cap-toolbar" style="display:none;gap:7px;">
       <button id="tool-arrow" class="ann-tool" style="flex:1;min-width:56px;padding:9px 4px;border:2px solid #CC0000;border-radius:11px;background:#CC0000;color:#fff;font-size:12px;font-weight:600;text-align:center;transition:all 0.1s;">&#8599; Arrow</button>
       <button id="tool-circle" class="ann-tool" style="flex:1;min-width:56px;padding:9px 4px;border:1px solid rgba(0,0,0,0.1);border-radius:11px;background:#fff;color:#2C2C2C;font-size:12px;font-weight:600;text-align:center;transition:all 0.1s;">&#9711; Circle</button>
-      <button id="tool-label" class="ann-tool" style="flex:1;min-width:56px;padding:9px 4px;border:1px solid rgba(0,0,0,0.1);border-radius:11px;background:#fff;color:#2C2C2C;font-size:12px;font-weight:600;text-align:center;transition:all 0.1s;">A Label</button>
       <button id="tool-undo" style="flex:1;min-width:56px;padding:9px 4px;border:1px solid rgba(0,0,0,0.1);border-radius:11px;background:#fff;color:#6B6B6B;font-size:12px;font-weight:600;text-align:center;transition:background 0.1s;">&#8634; Undo</button>
       <button id="tool-clear" style="flex:1;min-width:56px;padding:9px 4px;border:1px solid rgba(0,0,0,0.1);border-radius:11px;background:#fff;color:#6B6B6B;font-size:12px;font-weight:600;text-align:center;transition:background 0.1s;">&#10005; Clear</button>
     </div>
 
-    <div id="cap-replace-row" style="display:none;">
-      <label style="background:#fff;color:#2C2C2C;padding:7px 14px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid rgba(0,0,0,0.1);display:inline-flex;align-items:center;gap:6px;">
-        Replace photo
-        <input id="cap-replace-input" type="file" accept="image/*" capture="environment" style="display:none;">
-      </label>
-    </div>
 
     <div style="display:flex;flex-direction:column;gap:6px;">
       <label style="font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1px;">Step description</label>
@@ -367,15 +361,15 @@
 
   <div style="display:flex;gap:8px;padding:11px 16px max(22px, env(safe-area-inset-bottom));border-top:1px solid rgba(0,0,0,0.07);flex-shrink:0;">
     <button id="cap-prev-btn" style="flex:1;background:#fff;color:#2C2C2C;border:1px solid rgba(0,0,0,0.1);padding:12px 14px;border-radius:12px;font-size:13px;font-weight:600;">&#8249; Prev</button>
-    <button id="cap-addstep-btn" class="btn-black" style="flex:1;background:#1A1A1A;color:#fff;padding:12px 14px;border-radius:12px;font-size:13px;font-weight:600;transition:background 0.1s;">+ Add</button>
-    <button id="cap-next-btn" class="btn-red" style="flex:1;background:#CC0000;color:#fff;padding:12px 14px;border-radius:12px;font-size:13px;font-weight:600;transition:background 0.1s;">Next &#8250;</button>
+        <label class="btn-black" style="flex:1;background:#1A1A1A;color:#fff;padding:12px 14px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.1s;">Take photo<input id="cap-camera-input-bar" type="file" accept="image/*" capture="environment" style="display:none;"></label>
+        <button id="cap-next-btn" class="btn-red" style="flex:1;background:#CC0000;color:#fff;padding:12px 14px;border-radius:12px;font-size:13px;font-weight:600;transition:background 0.1s;">Next &#8250;</button>
   </div>
 </div>
 
 <!-- ═══════════════════ DRAWER (mobile) ═══════════════════ -->
 <div id="drawer-overlay" style="display:none;position:fixed;inset:0;z-index:400;">
   <div id="drawer-scrim" style="position:absolute;inset:0;background:rgba(0,0,0,0.45);animation:fadeIn 0.15s ease;"></div>
-  <aside style="position:absolute;left:10px;top:44px;bottom:14px;width:250px;background:#161616;box-shadow:6px 0 28px rgba(0,0,0,0.4);border-radius:18px;display:flex;flex-direction:column;padding:18px 12px 14px;animation:slideInLeft 0.22s ease;overflow:hidden;">
+  <aside style="position:absolute;left:10px;top:14px;bottom:14px;width:250px;background:#161616;box-shadow:6px 0 28px rgba(0,0,0,0.4);border-radius:18px;display:flex;flex-direction:column;padding:18px 12px 14px;animation:slideInLeft 0.22s ease;overflow:hidden;">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px 18px;">
       <div style="display:flex;align-items:center;gap:9px;">
         <img src="/static/IXL-white.png" style="height:24px;width:auto;" alt="IXL">
@@ -996,6 +990,11 @@ function renderCaptureScreen() {
   $('cap-step-total').textContent = '/ ' + sop.steps.length;
   $('cap-prev-btn').disabled = idx === 0;
   $('cap-prev-btn').style.opacity = idx === 0 ? '0.4' : '1';
+  $('cap-reorder-row').style.display = sop.steps.length > 1 ? 'block' : 'none';
+  $('cap-move-back').disabled = idx === 0;
+  $('cap-move-back').style.opacity = idx === 0 ? '0.35' : '1';
+  $('cap-move-fwd').disabled = idx >= sop.steps.length - 1;
+  $('cap-move-fwd').style.opacity = idx >= sop.steps.length - 1 ? '0.35' : '1';
   $('cap-next-btn').textContent = idx >= sop.steps.length - 1 ? 'New step ›' : 'Next ›';
 
   const row = $('cap-dots-row'), addDot = $('cap-add-dot');
@@ -1020,7 +1019,7 @@ function renderCaptureScreen() {
 
 function setActiveTool(tool) {
   state.activeTool = tool;
-  ['arrow', 'circle', 'label'].forEach(t => {
+  ['arrow', 'circle'].forEach(t => {
     const btn = $('tool-' + t), active = t === tool;
     btn.style.background = active ? RED : '#fff';
     btn.style.color = active ? '#fff' : '#2C2C2C';
@@ -1033,7 +1032,7 @@ function showCanvas(hasPhoto) {
   $('cap-canvas').style.display = hasPhoto ? 'block' : 'none';
   $('cap-placeholder').style.display = hasPhoto ? 'none' : 'flex';
   $('cap-toolbar').style.display = hasPhoto ? 'flex' : 'none';
-  $('cap-replace-row').style.display = hasPhoto ? 'flex' : 'none';
+
 }
 
 function commitCaptureStep() {
@@ -1087,6 +1086,24 @@ function captureNext() {
   saveNow(); loadCaptureStep();
 }
 
+function moveStepBack() {
+  const sop = state.currentSop; const idx = state.captureIndex;
+  if (!sop || idx === 0) return;
+  commitCaptureStep();
+  [sop.steps[idx-1], sop.steps[idx]] = [sop.steps[idx], sop.steps[idx-1]];
+  sop.steps.forEach((s,i) => s.index = i);
+  state.captureIndex = idx - 1;
+  saveNow(); loadCaptureStep();
+}
+function moveStepForward() {
+  const sop = state.currentSop; const idx = state.captureIndex;
+  if (!sop || idx >= sop.steps.length - 1) return;
+  commitCaptureStep();
+  [sop.steps[idx+1], sop.steps[idx]] = [sop.steps[idx], sop.steps[idx+1]];
+  sop.steps.forEach((s,i) => s.index = i);
+  state.captureIndex = idx + 1;
+  saveNow(); loadCaptureStep();
+}
 function captureAddStep() {
   const sop = state.currentSop;
   if (!sop) return;
@@ -1258,7 +1275,6 @@ function onPhotoSelected(file) {
 
 document.addEventListener('DOMContentLoaded', () => {
   // Landing
-  $('landing-open-sop').addEventListener('click', enterSop);
   $('landing-sop-card').addEventListener('click', enterSop);
 
   // Home (mobile)
@@ -1281,17 +1297,20 @@ document.addEventListener('DOMContentLoaded', () => {
   $('cap-done-btn').addEventListener('click', finishCapture);
   $('cap-prev-btn').addEventListener('click', capturePrev);
   $('cap-next-btn').addEventListener('click', captureNext);
-  $('cap-addstep-btn').addEventListener('click', captureAddStep);
+  $('cap-move-back').addEventListener('click', moveStepBack);
+  $('cap-move-fwd').addEventListener('click', moveStepForward);
+
   $('cap-add-dot').addEventListener('click', captureAddStep);
   $('cap-camera-input').addEventListener('change', e => onPhotoSelected(e.target.files[0]));
+  $('cap-camera-input-bar').addEventListener('change', e => onPhotoSelected(e.target.files[0]));
   $('cap-upload-input').addEventListener('change', e => onPhotoSelected(e.target.files[0]));
-  $('cap-replace-input').addEventListener('change', e => onPhotoSelected(e.target.files[0]));
+
   $('cap-note').addEventListener('input', () => {
     if (state.currentSop) { state.currentSop.steps[state.captureIndex].text = $('cap-note').value; queueSave(); }
   });
 
   // Annotation tools
-  ['arrow','circle','label'].forEach(t => $('tool-'+t).addEventListener('click', () => setActiveTool(t)));
+  ['arrow','circle'].forEach(t => $('tool-'+t).addEventListener('click', () => setActiveTool(t)));
   $('tool-undo').addEventListener('click', undoAnnotation);
   $('tool-clear').addEventListener('click', clearAnnotations);
 
