@@ -14,7 +14,7 @@ from flask import Flask, jsonify, render_template, request, send_file, send_from
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 
-from fill_sop import fill_sop as _fill_sop
+from modules.sop.fill import fill_sop as _fill_sop
 
 app = Flask(__name__)
 
@@ -29,7 +29,7 @@ app.config["MAX_CONTENT_LENGTH"] = 64 * 1024 * 1024  # 64 MB
 
 db = SQLAlchemy(app)
 
-TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "SOP_Template_A3.docx")
+
 
 
 def _sha256(data_url: str) -> str:
@@ -53,6 +53,8 @@ class SOP(db.Model):
     part_name = db.Column(db.Text, nullable=False, default="")
     doc_no = db.Column(db.Text, nullable=False, default="")
     status = db.Column(db.String(16), nullable=False, default="draft")
+    format_key = db.Column(db.String(32), nullable=False, default="a3-landscape")
+    steps_per_page = db.Column(db.Integer, nullable=False, default=8)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     steps = db.relationship(
@@ -67,6 +69,8 @@ class SOP(db.Model):
             "part_name": self.part_name,
             "doc_no": self.doc_no,
             "status": self.status,
+            "format_key": self.format_key,
+            "steps_per_page": self.steps_per_page,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
         }
@@ -179,6 +183,8 @@ def create_sop():
         part_no=data.get("part_no", ""),
         part_name=data.get("part_name", ""),
         doc_no=data.get("doc_no", ""),
+        format_key=data.get("format_key", "a3-landscape"),
+        steps_per_page=int(data.get("steps_per_page", 8)),
     )
     db.session.add(sop)
     db.session.commit()
@@ -204,7 +210,7 @@ def update_sop(sop_id: str):
             "server": sop.to_dict(include_steps=True),
         }), 409
 
-    for field in ("part_no", "part_name", "doc_no", "status"):
+    for field in ("part_no", "part_name", "doc_no", "status", "format_key", "steps_per_page"):
         if field in data:
             setattr(sop, field, data[field])
 
@@ -289,7 +295,8 @@ def generate_sop(sop_id: str):
         part_no=sop.part_no or "",
         part_name=sop.part_name or "",
         doc_no=sop.doc_no or "",
-        template_path=TEMPLATE_PATH,
+        format_key=sop.format_key or "a3-landscape",
+        steps_per_page=sop.steps_per_page or 8,
     )
 
     sop.status = "done"

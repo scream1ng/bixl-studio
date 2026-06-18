@@ -1,30 +1,26 @@
-"""
-fill_sop.py — Fill the IXL SOP A3 Word template with step images and text.
-
-This is the core document engine for BIXL Studio. It opens the real IXL
-template (preserving border, logo, PPE icons, header and footer) and injects
-an image + description into the correct table cells for each step.
+﻿"""
+fill_sop.py — Fill IXL SOP Word template with step images and text.
 
 Entry point:
-    fill_sop(steps, part_no, part_name, doc_no, template_path, output_path)
+    fill_sop(steps, part_no, part_name, doc_no,
+             format_key="a3-landscape", steps_per_page=8,
+             template_path=None, output_path=None)
 
-`steps` is a list of dicts of any length:
-    {"image": <path or bytes>, "text": "description"}
+steps is a list of dicts: {"image": path|bytes, "text": str}
 
-Behaviour:
-  - 8 steps per page (two blocks of four).
-  - Unused cells on a page are left blank AND their "STEP N" heading is cleared.
-  - More than 8 steps -> additional pages are appended (STEP 9, 10, ...),
-    each a duplicate of the template table after a page break.
-  - Images scale to fit the cell by the tighter of width/height so they never
-    overflow the row onto a second page; portrait and landscape both work.
-  - Images are vertically centred in their cell.
-  - Header part number/name and footer doc number are replaced even though the
-    template stores them split across multiple runs.
+Template selection:
+  Picks from docx/sop/templates/{format_key}__{steps_per_page}steps.docx.
+  Pass template_path to override.
 
-See CLAUDE.md for the full template structure and rules.
+Template layout:
+  Each page table repeats (heading / image / text) blocks.
+  Grid (cols x n_blocks) is inferred from the table dimensions.
+  Row pattern per block i: heading=i*3, image=i*3+1, text=i*3+2.
+
+Multi-page:
+  Steps beyond template capacity: deep-copy template table after page break,
+  continue step numbering, blank headings for unfilled trailing slots.
 """
-
 from __future__ import annotations
 
 import copy
@@ -39,28 +35,47 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from PIL import Image as PILImage
 
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+TEMPLATE_DIR = os.path.join(ROOT, "docx", "sop", "templates")
 
-# ── Template layout constants ───────────────────────────────────────────────
-# The body table has 6 rows. Steps map to cells as follows (per page):
-#   Row 0: STEP 1-4 headings      Row 3: STEP 5-8 headings
-#   Row 1: image cells 1-4        Row 4: image cells 5-8
-#   Row 2: text cells 1-4         Row 5: text cells 5-8
-HEADING_ROWS = (0, 3)
-IMAGE_ROWS = (1, 4)
-TEXT_ROWS = (2, 5)
-STEPS_PER_PAGE = 8
-COLS = 4
-
-IMG_MAX_WIDTH_CM = 12.5
-IMG_MAX_HEIGHT_CM = 5.5
+IMG_PADDING_CM = 0.18   # vertical breathing room inside image cell
 BODY_FONT = "Century Gothic"
 BODY_PT = 11
 
 
-# ── Cell helpers ────────────────────────────────────────────────────────────
+# Template helpers
+
+def _template_path(format_key: str, steps_per_page: int) -> str:
+    return os.path.join(TEMPLATE_DIR, f"{format_key}__{steps_per_page}steps.docx")
+
+
+def _infer_grid(table) -> tuple[int, int]:
+    """Return (cols, n_blocks) from a fill-template table."""
+    return len(table.columns), len(table.rows) // 3
+
+
+def _col_width_cm(table, col: int) -> float:
+    tc = table.rows[0].cells[col]._tc
+    tcPr = tc.find(qn("w:tcPr"))
+    if tcPr is not None:
+        tcW = tcPr.find(qn("w:tcW"))
+        if tcW is not None:
+            return int(tcW.get(qn("w:w"))) / 1440 * 2.54
+    return 12.0
+
+
+def _image_row_height_cm(table, block: int) -> float:
+    trPr = table.rows[block * 3 + 1]._tr.find(qn("w:trPr"))
+    if trPr is not None:
+        trH = trPr.find(qn("w:trHeight"))
+        if trH is not None:
+            return int(trH.get(qn("w:val"))) / 1440 * 2.54
+    return 5.5
+
+
+# Cell helpers
 
 def _clear_cell(cell) -> None:
-    """Remove every paragraph except the first, and empty the first's runs."""
     for p in cell.paragraphs[1:]:
         p._element.getparent().remove(p._element)
     for run in list(cell.paragraphs[0].runs):
@@ -68,7 +83,6 @@ def _clear_cell(cell) -> None:
 
 
 def _set_cell_vertical_align(cell, align: str = "center") -> None:
-    """Set vertical alignment on a cell via its tcPr XML."""
     tcPr = cell._tc.get_or_add_tcPr()
     for existing in tcPr.findall(qn("w:vAlign")):
         tcPr.remove(existing)
@@ -84,16 +98,15 @@ def _open_image(image: Union[str, bytes]) -> PILImage.Image:
 
 
 def _image_source(image: Union[str, bytes]):
-    """Return something python-docx add_picture accepts (path or BytesIO)."""
     if isinstance(image, (bytes, bytearray)):
         return io.BytesIO(image)
     return image
 
 
 def add_image_to_cell(cell, image: Union[str, bytes],
-                      max_width_cm: float = IMG_MAX_WIDTH_CM,
-                      max_height_cm: float = IMG_MAX_HEIGHT_CM) -> None:
-    """Insert an image scaled to fit the cell, horizontally + vertically centred."""
+                      max_width_cm: float = 12.0,
+                      max_height_cm: float = 5.5) -> None:
+    """Insert image scaled to fit cell, horizontally + vertically centred."""
     img = _open_image(image)
     w, h = img.size
     scale = min(max_width_cm / w, max_height_cm / h)
@@ -108,7 +121,6 @@ def add_image_to_cell(cell, image: Union[str, bytes],
 
 
 def add_text_to_cell(cell, text: str) -> None:
-    """Insert a description into a cell with the template body font."""
     _clear_cell(cell)
     para = cell.paragraphs[0]
     para.alignment = WD_ALIGN_PARAGRAPH.LEFT
@@ -118,7 +130,7 @@ def add_text_to_cell(cell, text: str) -> None:
 
 
 def set_heading_text(cell, text: str) -> None:
-    """Set or blank the 'STEP N' heading run, preserving its formatting."""
+    """Set or blank STEP N heading run, preserving existing formatting."""
     para = cell.paragraphs[0]
     if para.runs:
         first = para.runs[0]
@@ -130,12 +142,11 @@ def set_heading_text(cell, text: str) -> None:
         run.font.name = BODY_FONT
 
 
-# ── Header / footer field replacement (handles split runs) ──────────────────
+# Header / footer field replacement (handles split runs)
 
 def _replace_paragraph_text(para, new_text: str) -> None:
-    """Replace all runs in a paragraph with one run, keeping the first run's format."""
     if not para.runs:
-        run = para.add_run(new_text)
+        para.add_run(new_text)
         return
     first = para.runs[0]
     rPr = first._r.find(qn("w:rPr"))
@@ -152,7 +163,7 @@ def _replace_paragraph_text(para, new_text: str) -> None:
 
 
 def set_part_title(doc, part_no: str, part_name: str) -> None:
-    """Header table, row 1, cell 2: '<part_no> - <part_name>'."""
+    """Header table row 1 cell 2: '<part_no> - <part_name>'."""
     header = doc.sections[0].header
     if not header.tables:
         return
@@ -162,7 +173,7 @@ def set_part_title(doc, part_no: str, part_name: str) -> None:
 
 
 def set_doc_number(doc, doc_no: str) -> None:
-    """Footer table, row 0, cell 0: '<doc_no>'."""
+    """Footer table row 0 cell 0: '<doc_no>'."""
     footer = doc.sections[0].footer
     if not footer.tables:
         return
@@ -170,35 +181,37 @@ def set_doc_number(doc, doc_no: str) -> None:
     _replace_paragraph_text(para, doc_no)
 
 
-# ── Page table handling ─────────────────────────────────────────────────────
+# Page table fill
 
-def _fill_page_table(table, page_steps, base_index: int) -> None:
-    """Fill one 6-row table with up to 8 steps; blank unused headings.
+def _fill_page_table(table, page_steps: list, base_index: int) -> None:
+    """Fill one template table. Blank heading for any unfilled trailing slot."""
+    cols, n_blocks = _infer_grid(table)
+    steps_per_page = cols * n_blocks
 
-    page_steps: list of up to 8 step dicts (may contain None / empty entries).
-    base_index: step number of the first cell on this page minus 1
-                (page 1 -> 0, page 2 -> 8, ...).
-    """
-    for slot in range(STEPS_PER_PAGE):
-        block = slot // COLS          # 0 for steps 1-4, 1 for steps 5-8
-        col = slot % COLS
+    for slot in range(steps_per_page):
+        block = slot // cols
+        col = slot % cols
         step_no = base_index + slot + 1
+
+        heading_cell = table.rows[block * 3].cells[col]
+        image_cell = table.rows[block * 3 + 1].cells[col]
+        text_cell = table.rows[block * 3 + 2].cells[col]
 
         step = page_steps[slot] if slot < len(page_steps) else None
         has_content = bool(step and (step.get("image") or step.get("text")))
 
-        heading_cell = table.rows[HEADING_ROWS[block]].cells[col]
-        image_cell = table.rows[IMAGE_ROWS[block]].cells[col]
-        text_cell = table.rows[TEXT_ROWS[block]].cells[col]
-
         if has_content:
             set_heading_text(heading_cell, f"STEP {step_no}")
             if step.get("image"):
-                add_image_to_cell(image_cell, step["image"])
+                cw = _col_width_cm(table, col) - 0.2
+                rh = _image_row_height_cm(table, block) - IMG_PADDING_CM * 2
+                add_image_to_cell(image_cell, step["image"],
+                                  max_width_cm=cw, max_height_cm=rh)
             if step.get("text"):
                 add_text_to_cell(text_cell, step["text"])
         else:
             # Empty step: clear heading, image, and text so copied content doesn't bleed through.
+
             set_heading_text(heading_cell, "")
             _clear_cell(image_cell)
             _clear_cell(text_cell)
@@ -213,6 +226,7 @@ def _append_page_break_and_table(doc, source_table):
 
     break_para = OxmlElement("w:p")
     run_el = OxmlElement("w:r")
+
     br = OxmlElement("w:br")
     br.set(qn("w:type"), "page")
     run_el.append(br)
@@ -225,41 +239,44 @@ def _append_page_break_and_table(doc, source_table):
     return Table(new_tbl, doc)
 
 
-# ── Public entry point ──────────────────────────────────────────────────────
+# Public entry point
 
 def fill_sop(steps,
              part_no: str,
              part_name: str,
              doc_no: str,
-             template_path: str,
+             format_key: str = "a3-landscape",
+             steps_per_page: int = 8,
+             template_path: Optional[str] = None,
              output_path: Optional[str] = None) -> Union[str, bytes]:
-    """Fill the SOP template and save (or return) the .docx.
+    """Fill the SOP template and return bytes or save to output_path.
 
     Args:
         steps: list of {"image": path|bytes, "text": str}, any length.
         part_no, part_name, doc_no: header/footer values.
-        template_path: path to SOP_Template_A3.docx (read-only source).
-        output_path: where to write the .docx. If None, returns bytes.
-
-    Returns:
-        output_path if given, else the .docx as bytes.
+        format_key: "a3-landscape", "a3-portrait", "a4-landscape", "a4-portrait".
+        steps_per_page: 1, 2, 4, 6, or 8 (must match an available template).
+        template_path: override auto-selected template.
+        output_path: save location; if None returns bytes.
     """
+    if template_path is None:
+        template_path = _template_path(format_key, steps_per_page)
+
     doc = Document(template_path)
     first_table = doc.tables[0]
+    cols, n_blocks = _infer_grid(first_table)
+    spp = cols * n_blocks
 
-    # Page 1
-    _fill_page_table(first_table, steps[:STEPS_PER_PAGE], base_index=0)
+    _fill_page_table(first_table, steps[:spp], base_index=0)
 
-    # Additional pages for steps beyond 8
     page = 1
-    while page * STEPS_PER_PAGE < len(steps):
-        start = page * STEPS_PER_PAGE
-        page_steps = steps[start:start + STEPS_PER_PAGE]
+    while page * spp < len(steps):
+        start = page * spp
+        page_steps = steps[start:start + spp]
         new_table = _append_page_break_and_table(doc, first_table)
         _fill_page_table(new_table, page_steps, base_index=start)
         page += 1
 
-    # Header / footer fields
     set_part_title(doc, part_no, part_name)
     set_doc_number(doc, doc_no)
 
@@ -273,7 +290,6 @@ def fill_sop(steps,
 
 
 if __name__ == "__main__":
-    # Smoke test: fill with placeholder images if run directly.
     import tempfile
     from PIL import Image, ImageDraw
 
@@ -286,9 +302,7 @@ if __name__ == "__main__":
         im.save(p)
         demo_steps.append({"image": p, "text": f"Description for step {i + 1}."})
 
-    here = os.path.dirname(os.path.abspath(__file__))
-    template = os.path.join(here, "SOP_Template_A3.docx")
     out = os.path.join(tmp, "demo_output.docx")
     fill_sop(demo_steps, "36611", "Tastic Luminate Heat Module", "A0866",
-             template_path=template, output_path=out)
+             format_key="a3-landscape", steps_per_page=8, output_path=out)
     print("Wrote", out)

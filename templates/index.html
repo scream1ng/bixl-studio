@@ -426,6 +426,14 @@
         <label style="font-size:11px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">Doc No</label>
         <input id="modal-doc-no" placeholder="e.g. A0866" style="padding:12px;border:1px solid #E0E0E0;border-radius:10px;font-size:14px;color:#1A1A1A;width:100%;transition:border-color 0.1s;">
       </div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <label style="font-size:11px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">Format</label>
+        <div id="modal-format-tiles" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <label style="font-size:11px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">Steps per page</label>
+        <div id="modal-spp-tiles" style="display:flex;gap:8px;"></div>
+      </div>
     </div>
     <div style="display:flex;gap:10px;">
       <button id="modal-cancel" style="flex:1;background:#fff;color:#2C2C2C;border:1px solid rgba(0,0,0,0.12);padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;transition:background 0.1s;">Cancel</button>
@@ -447,6 +455,21 @@ const state = {
   captureIndex: 0,
   activeTool: 'arrow',
   editorSearch: '',
+  modalFormat: 'a3-landscape',
+  modalSpp: 8,
+};
+
+const FORMAT_STEPS = {
+  'a3-landscape': [1, 2, 4, 8],
+  'a3-portrait':  [1, 2, 4, 6],
+  'a4-landscape': [1, 2],
+  'a4-portrait':  [1, 2],
+};
+const FORMAT_DEFAULT_SPP = {
+  'a3-landscape': 8,
+  'a3-portrait':  6,
+  'a4-landscape': 2,
+  'a4-portrait':  2,
 };
 
 const RS = 3;
@@ -709,9 +732,53 @@ async function deleteSop(id) {
   } catch (e) { toast(e.message); }
 }
 
+const MODAL_FORMATS = [
+  { key: 'a3-landscape', label: 'A3 Landscape', w: 30, h: 21 },
+  { key: 'a3-portrait',  label: 'A3 Portrait',  w: 21, h: 30 },
+  { key: 'a4-landscape', label: 'A4 Landscape', w: 28, h: 20 },
+  { key: 'a4-portrait',  label: 'A4 Portrait',  w: 20, h: 28 },
+];
+
+function renderModalTiles() {
+  const fmt = $('modal-format-tiles');
+  if (fmt) {
+    fmt.innerHTML = MODAL_FORMATS.map(f => {
+      const sel = state.modalFormat === f.key;
+      return `<button onclick="setModalFormat('${f.key}')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px 8px;border-radius:10px;border:${sel ? '2px solid #1A1A1A' : '1px solid #E0E0E0'};background:${sel ? '#1A1A1A' : '#fff'};cursor:pointer;transition:all 0.1s;">
+        <div style="width:${f.w}px;height:${f.h}px;border:2px solid ${sel ? '#fff' : '#AAAAAA'};border-radius:2px;"></div>
+        <span style="font-size:11px;font-weight:600;color:${sel ? '#fff' : '#555'};text-align:center;line-height:1.3;">${f.label}</span>
+      </button>`;
+    }).join('');
+  }
+  const spp = $('modal-spp-tiles');
+  if (spp) {
+    const opts = FORMAT_STEPS[state.modalFormat] || [8];
+    spp.innerHTML = opts.map(n => {
+      const sel = state.modalSpp === n;
+      return `<button onclick="setModalSpp(${n})" style="flex:1;padding:9px 4px;border-radius:8px;border:${sel ? '2px solid #1A1A1A' : '1px solid #E0E0E0'};background:${sel ? '#1A1A1A' : '#fff'};color:${sel ? '#fff' : '#555'};font-size:13px;font-weight:600;cursor:pointer;transition:all 0.1s;">${n}</button>`;
+    }).join('');
+  }
+}
+
+function setModalFormat(key) {
+  state.modalFormat = key;
+  const opts = FORMAT_STEPS[key] || [8];
+  const def = FORMAT_DEFAULT_SPP[key] || opts[opts.length - 1];
+  state.modalSpp = opts.includes(state.modalSpp) ? state.modalSpp : def;
+  renderModalTiles();
+}
+
+function setModalSpp(n) {
+  state.modalSpp = n;
+  renderModalTiles();
+}
+
 function openModal() {
   $('modal-part-name').value = '';
   $('modal-doc-no').value = '';
+  state.modalFormat = 'a3-landscape';
+  state.modalSpp = 8;
+  renderModalTiles();
   $('modal-overlay').style.display = 'flex';
   setTimeout(() => $('modal-part-name').focus(), 50);
 }
@@ -724,6 +791,8 @@ async function createSop() {
       part_no: '',
       part_name: $('modal-part-name').value.trim(),
       doc_no: $('modal-doc-no').value.trim(),
+      format_key: state.modalFormat,
+      steps_per_page: state.modalSpp,
     });
     closeModal();
     await loadSops();
