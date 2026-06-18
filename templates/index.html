@@ -1027,13 +1027,11 @@ function captureAddStep() {
   saveNow(); loadCaptureStep();
 }
 
-async function finishCapture() {
+function finishCapture() {
   commitCaptureStep();
-  queueSave();
-  clearTimeout(_saveTimer);  // don't wait out the debounce on an explicit finish
-  const ok = await flushSaves();
-  if (ok) toast('Saved', 'success');
-  else toast('Saved locally — will sync when back online');
+  _dirty = true;
+  clearTimeout(_saveTimer);
+  runSaveLoop();  // kick off immediately without blocking navigation
   goHome();
 }
 function leaveCapture() { commitCaptureStep(); queueSave(); goHome(); }
@@ -1151,18 +1149,39 @@ function drawLabel(x, y, text, s = 1) {
   ctx.fillStyle = '#1A1A1A'; ctx.fillText(text, x + padX, y + padY);
 }
 
+// Compress before storing — docx cells are ~5.5 cm tall so 1400px longest
+// side is ample for print quality. Prevents uploading raw 4–6 MB phone photos.
+function compressDataUrl(dataUrl, maxPx, quality, cb) {
+  const img = new Image();
+  img.onload = () => {
+    let w = img.width, h = img.height;
+    if (w > maxPx || h > maxPx) {
+      const scale = maxPx / Math.max(w, h);
+      w = Math.round(w * scale); h = Math.round(h * scale);
+    }
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    c.getContext('2d').drawImage(img, 0, 0, w, h);
+    cb(c.toDataURL('image/jpeg', quality));
+  };
+  img.onerror = () => cb(dataUrl);  // fall back to original if decode fails
+  img.src = dataUrl;
+}
+
 function onPhotoSelected(file) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = () => {
-    _annotations = []; _currentDraw = null;
-    loadPhotoForCanvas(reader.result, () => {
-      showCanvas(true); redrawCanvas();
-      if (state.currentSop) {
-        const s = state.currentSop.steps[state.captureIndex];
-        s.image = reader.result; s.annotations = [];
-        queueSave();
-      }
+    compressDataUrl(reader.result, 1400, 0.82, compressed => {
+      _annotations = []; _currentDraw = null;
+      loadPhotoForCanvas(compressed, () => {
+        showCanvas(true); redrawCanvas();
+        if (state.currentSop) {
+          const s = state.currentSop.steps[state.captureIndex];
+          s.image = compressed; s.annotations = [];
+          queueSave();
+        }
+      });
     });
   };
   reader.readAsDataURL(file);
