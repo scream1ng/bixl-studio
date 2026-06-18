@@ -1027,13 +1027,11 @@ function captureAddStep() {
   saveNow(); loadCaptureStep();
 }
 
-async function finishCapture() {
+function finishCapture() {
   commitCaptureStep();
-  queueSave();
-  clearTimeout(_saveTimer);  // don't wait out the debounce on an explicit finish
-  const ok = await flushSaves();
-  if (ok) toast('Saved', 'success');
-  else toast('Saved locally — will sync when back online');
+  _dirty = true;
+  clearTimeout(_saveTimer);
+  runSaveLoop();  // kick off immediately without blocking navigation
   goHome();
 }
 function leaveCapture() { commitCaptureStep(); queueSave(); goHome(); }
