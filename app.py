@@ -146,6 +146,18 @@ def _migrate():
 with app.app_context():
     db.create_all()
     _migrate()
+    # Add columns introduced after initial schema
+    with db.engine.connect() as _conn:
+        _is_pg = db.engine.dialect.name == "postgresql"
+        for _stmt in (
+            "ALTER TABLE sops ADD COLUMN format_key TEXT NOT NULL DEFAULT 'a3-landscape'",
+            "ALTER TABLE sops ADD COLUMN steps_per_page INTEGER NOT NULL DEFAULT 8",
+        ):
+            try:
+                _conn.execute(text(_stmt))
+                _conn.commit()
+            except Exception:
+                pass
 
 
 # ── Health check ──────────────────────────────────────────────────────────────
