@@ -12,6 +12,7 @@ from datetime import datetime
 
 from flask import Flask, jsonify, render_template, request, send_file, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 
 from fill_sop import fill_sop as _fill_sop
 
@@ -98,8 +99,49 @@ class Step(db.Model):
         }
 
 
+def _migrate():
+    """Migrate steps.image → image_blobs + steps.image_hash if needed."""
+    is_sqlite = db.engine.dialect.name == "sqlite"
+    with db.engine.connect() as conn:
+        # Detect columns on the steps table.
+        if is_sqlite:
+            rows = conn.execute(text("PRAGMA table_info(steps)")).fetchall()
+            cols = {r[1] for r in rows}
+        else:
+            rows = conn.execute(text(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_name = 'steps'"
+            )).fetchall()
+            cols = {r[0] for r in rows}
+
+        if "image" in cols and "image_hash" not in cols:
+            conn.execute(text("ALTER TABLE steps ADD COLUMN image_hash VARCHAR(64)"))
+
+            # Migrate existing image blobs.
+            existing = conn.execute(
+                text("SELECT id, image FROM steps WHERE image IS NOT NULL")
+            ).fetchall()
+            for row in existing:
+                img_hash = hashlib.sha256(row[1].encode("utf-8")).hexdigest()
+                if is_sqlite:
+                    conn.execute(text(
+                        "INSERT OR IGNORE INTO image_blobs (hash, data) VALUES (:h, :d)"
+                    ), {"h": img_hash, "d": row[1]})
+                else:
+                    conn.execute(text(
+                        "INSERT INTO image_blobs (hash, data) VALUES (:h, :d) "
+                        "ON CONFLICT DO NOTHING"
+                    ), {"h": img_hash, "d": row[1]})
+                conn.execute(
+                    text("UPDATE steps SET image_hash = :h WHERE id = :id"),
+                    {"h": img_hash, "id": row[0]},
+                )
+            conn.commit()
+
+
 with app.app_context():
     db.create_all()
+    _migrate()
 
 
 # ── Health check ──────────────────────────────────────────────────────────────
