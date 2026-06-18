@@ -359,6 +359,10 @@
       </div>
       <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;padding-top:20px;">
         <label style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
+          <span style="font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">Filename</span>
+          <input id="lb-filename" type="text" placeholder="label_name" style="padding:5px 8px;border:1px solid #E0E0E0;border-radius:7px;font-size:13px;color:#1A1A1A;background:#fff;width:150px;">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
           <span style="font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">Line</span>
           <select id="lb-line-px" style="padding:5px 8px;border:1px solid #E0E0E0;border-radius:7px;font-size:13px;color:#1A1A1A;background:#fff;cursor:pointer;">
             <option value="2">2px</option>
@@ -1539,6 +1543,8 @@ async function _lbLoad(file) {
 
   const title = document.getElementById('lb-part-name');
   if (title) title.textContent = file.name.replace(/\.[^.]+$/, '');
+  const fnInp = document.getElementById('lb-filename');
+  if (fnInp && !fnInp.value) fnInp.value = file.name.replace(/\.[^.]+$/, '') + '_label';
 
   const form = new FormData();
   form.append('file', file);
@@ -1578,7 +1584,8 @@ async function _lbLoad(file) {
   const scene = new THREE.Scene();
   _lb.scene = scene;
 
-  const camera = new THREE.PerspectiveCamera(45, width / height, 0.001, 1e6);
+  const _lbOrthoD = 80;
+  const camera = new THREE.OrthographicCamera(-_lbOrthoD, _lbOrthoD, _lbOrthoD, -_lbOrthoD, 0.001, 1e6);
   camera.up.set(0, 0, 1); // Z-up matches STEP/OCC coordinate system
   _lb.camera = camera;
 
@@ -1654,12 +1661,16 @@ async function _lbLoad(file) {
 
     const onResize = () => {
       const w = mount.clientWidth || 600, h = mount.clientHeight || 600;
-      camera.aspect = w / h; camera.updateProjectionMatrix();
+      const a = w / h;
+      camera.left = -_lbOrthoD * a; camera.right = _lbOrthoD * a;
+      camera.top = _lbOrthoD; camera.bottom = -_lbOrthoD;
+      camera.updateProjectionMatrix();
       renderer.setSize(w, h);
       if (_lb.linMat) _lb.linMat.resolution.set(w, h);
     };
     _lb.resizeHandler = onResize;
     window.addEventListener('resize', onResize);
+    onResize(); // apply correct aspect ratio immediately
 
     const tick = () => { _lb.animId = requestAnimationFrame(tick); controls.update(); renderer.render(scene, camera); };
     tick();
@@ -1675,10 +1686,10 @@ async function _lbGenerate() {
   const scale = _lb.modelScale, center = _lb.modelCenter;
 
   // Convert Three.js camera space → model space for OCC
+  cam.updateMatrixWorld();
   const eye = cam.position.clone().divideScalar(scale).add(center);
   const tgt = ctrl.target.clone().divideScalar(scale).add(center);
   const right = new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld, 0);
-  const focus = cam.position.distanceTo(ctrl.target) / scale;
 
   const linePx = parseInt(document.getElementById('lb-line-px').value, 10) || 3;
   const labelCm = parseFloat(document.getElementById('lb-label-cm').value) || 26;
@@ -1689,8 +1700,6 @@ async function _lbGenerate() {
   form.append('line_px', linePx);
   form.append('label_cm', labelCm);
   form.append('dpi', dpi);
-  form.append('focus', focus);
-  form.append('fov_deg', cam.fov);
   form.append('eye_x', eye.x); form.append('eye_y', eye.y); form.append('eye_z', eye.z);
   form.append('right_x', right.x); form.append('right_y', right.y); form.append('right_z', right.z);
   form.append('target_x', tgt.x); form.append('target_y', tgt.y); form.append('target_z', tgt.z);
@@ -1702,7 +1711,9 @@ async function _lbGenerate() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = _lb.file.name.replace(/\.[^.]+$/, '') + '_label.jpg';
+    const fnInpG = document.getElementById('lb-filename');
+    const dlName = (fnInpG && fnInpG.value.trim()) ? fnInpG.value.trim() : _lb.file.name.replace(/\.[^.]+$/, '') + '_label';
+    a.download = dlName.endsWith('.jpg') ? dlName : dlName + '.jpg';
     a.click();
     URL.revokeObjectURL(url);
     if (window.toast) window.toast('Label generated', 'success');
