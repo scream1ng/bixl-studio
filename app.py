@@ -7,6 +7,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import uuid
 from datetime import datetime
 
@@ -315,9 +316,9 @@ def generate_sop(sop_id: str):
     sop.updated_at = datetime.utcnow()
     db.session.commit()
 
-    safe_part = (sop.part_no or "draft").replace(" ", "_")
-    safe_doc = (sop.doc_no or "v1").replace(" ", "_")
-    filename = f"SOP_{safe_part}_{safe_doc}.docx"
+    parts = [p for p in [sop.doc_no, sop.part_name] if p]
+    raw = " - ".join(parts) if parts else "SOP"
+    filename = re.sub(r'[\\/:*?"<>|]', "_", raw) + ".docx"
 
     return send_file(
         io.BytesIO(docx_bytes),

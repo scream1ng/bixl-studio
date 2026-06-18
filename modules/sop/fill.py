@@ -218,25 +218,26 @@ def _fill_page_table(table, page_steps: list, base_index: int) -> None:
 
 
 def _append_page_break_and_table(doc, source_table):
-    """Add a page break, then a deep copy of source_table, return the new table."""
+    """Deep-copy source_table into body before sectPr, force it onto a new page."""
     body = doc.element.body
     children = list(body)
     sectPr = body.find(qn("w:sectPr"))
     insert_idx = children.index(sectPr) if sectPr is not None else len(children)
 
-    break_para = OxmlElement("w:p")
-    run_el = OxmlElement("w:r")
-
-    br = OxmlElement("w:br")
-    br.set(qn("w:type"), "page")
-    run_el.append(br)
-    break_para.append(run_el)
-    body.insert(insert_idx, break_para)
-
     new_tbl = copy.deepcopy(source_table._tbl)
-    body.insert(insert_idx + 1, new_tbl)
+    body.insert(insert_idx, new_tbl)
     from docx.table import Table
-    return Table(new_tbl, doc)
+    table = Table(new_tbl, doc)
+
+    # Force page break before this table via the first heading cell's paragraph.
+    # A separate break paragraph can strand on the last page and push the table
+    # one page further than expected.
+    first_para = table.rows[0].cells[0].paragraphs[0]
+    pPr = first_para._p.get_or_add_pPr()
+    for old in pPr.findall(qn("w:pageBreakBefore")):
+        pPr.remove(old)
+    pPr.append(OxmlElement("w:pageBreakBefore"))
+    return table
 
 
 # Public entry point

@@ -817,8 +817,8 @@ function renderHomeList() {
         <div class="doc-card" data-id="${esc(s.id)}" style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s;">
           <span style="width:9px;height:9px;border-radius:50%;background:${s.status==='done'?'#2E9E4F':'#BBBBBB'};flex-shrink:0;"></span>
           <div style="flex:1;min-width:0;">
-            <div style="font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1A1A1A;">${esc(s.part_name||'Untitled SOP')}</div>
-            <div style="color:#9B9B9B;font-size:12px;margin-top:1px;">${esc([s.doc_no].filter(Boolean).join(' · ')||(s.part_no||'No details'))}</div>
+            <div style="font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1A1A1A;">${esc(s.doc_no||'No Doc No')}</div>
+            <div style="color:#9B9B9B;font-size:12px;margin-top:1px;">${esc(s.part_name||'Untitled SOP')}</div>
           </div>
           <span style="color:#CCC;font-size:16px;flex-shrink:0;">&#8250;</span>
           <button class="trash-btn" data-del="${esc(s.id)}" style="color:#C8C8C8;font-size:14px;padding:3px 5px;border-radius:4px;flex-shrink:0;transition:color 0.1s;" title="Delete">&#128465;</button>
@@ -844,8 +844,8 @@ function renderSidebarList() {
       return `<div class="sidebar-item rail-item" data-id="${esc(s.id)}" style="display:flex;align-items:center;gap:11px;padding:8px 11px;border-radius:9px;cursor:pointer;transition:background 0.1s;${active?'background:#242424;':''}">
         <span style="width:8px;height:8px;border-radius:50%;background:${s.status==='done'?'#2E9E4F':'#666'};flex-shrink:0;"></span>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:12.5px;font-weight:${active?'600':'500'};color:${active?'#fff':'#C8C8C8'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(s.part_name||'Untitled SOP')}</div>
-          <div style="color:#6E6E6E;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px;">${esc([s.doc_no].filter(Boolean).join(' · ')||(s.part_no||''))}</div>
+          <div style="font-size:12.5px;font-weight:${active?'600':'500'};color:${active?'#fff':'#C8C8C8'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(s.doc_no||'No Doc No')}</div>
+          <div style="color:#6E6E6E;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px;">${esc(s.part_name||'Untitled SOP')}</div>
         </div>
       </div>`;
     }).join('')}`).join('');
@@ -857,7 +857,7 @@ function renderSidebarList() {
 function renderEditorScreen() {
   const sop = state.currentSop;
   if (!sop) return;
-  $('editor-title').textContent = sop.part_name || 'Untitled SOP';
+  $('editor-title').textContent = [sop.doc_no, sop.part_name].filter(Boolean).join(' - ') || 'Untitled SOP';
   $('field-part-name').value = sop.part_name || '';
   $('field-doc-no').value = sop.doc_no || '';
   updateStatusToggle();
@@ -973,7 +973,7 @@ async function generateDocx() {
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = (sop.doc_no || sop.part_no || 'SOP') + '.docx';
+    a.href = url; a.download = [sop.doc_no, sop.part_name].filter(Boolean).join(' - ').replace(/[\\/:*?"<>|]/g, '_') + '.docx' || 'SOP.docx';
     document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
     toast('Document downloaded', 'success');
