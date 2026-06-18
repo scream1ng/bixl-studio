@@ -217,8 +217,13 @@ Phases 1–2 alone give a working desktop tool. Phase 3 adds mobile capture.
 - [x] Web app editor — document list, SOP editor, format/steps-per-page picker, Download .docx
 - [x] Phone capture PWA — installable, capture flow (photo + annotation + note), step reorder, manifest + service worker
 - [x] Annotation strategy — baked-in (arrows/circles drawn on canvas, exported as JPEG)
+- [x] Label module — Three.js STEP viewer, wireframe JPG export (canvas render, exact angle match)
+- [x] Label three-column editor UI — preview panel + settings panel + recent labels sidebar
+- [x] Label history page (`screen-label-list`) — grouped list (Today/This week/Earlier), thumbnail, delete, same format as SOP home
+- [x] Label mobile layout — 44vh preview cap, settings panel full-width below, Browse file + greyed Take Photo buttons, mobile header with hamburger
 - [ ] Empty-cell heading removal (blank "STEP N" for unused steps, ≤8)
 - [ ] Multi-page support (>8 steps → duplicate table on new page, STEP 9+)
+- [ ] Label: Take Photo mode (mobile capture → label, currently greyed out)
 
 ---
 

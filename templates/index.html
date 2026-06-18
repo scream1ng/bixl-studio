@@ -58,6 +58,8 @@
       .shell-rail { display: none !important; }
       .shell-panel { border-radius: 0; flex: 1; min-height: 0; }
       .dt-only { display: none !important; }
+      #lb-preview-panel { flex: none; height: 44vh; min-height: 220px; border-radius: 0; }
+      #lb-settings-panel { width: 100%; flex: 1; border-radius: 0; overflow-y: auto; min-height: 0; }
     }
     @media (min-width: 768px) {
       .mb-only { display: none !important; }
@@ -246,6 +248,69 @@
   </main>
 </div>
 
+<!-- ═══════════════════ LABEL LIST ═══════════════════ -->
+<div id="screen-label-list" class="screen">
+
+  <aside class="shell-rail">
+    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">
+      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
+      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
+      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
+    </div>
+    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <div class="rail-item" onclick="enterSop()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;">Label</div><div style="font-size:11px;color:#9A9A9A;">Part labels</div></div>
+        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
+        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.2;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">MLB / PFC</div><div style="font-size:11px;color:#6E6E6E;">BOM &amp; flow</div></div>
+        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="shell-panel">
+    <!-- mobile header -->
+    <header class="mb-only" style="height:58px;display:flex;align-items:center;padding:0 18px;flex-shrink:0;">
+      <button onclick="openDrawer()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex-shrink:0;">
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+      </button>
+      <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Label</span>
+      <button onclick="enterLabelNew()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;color:#CC0000;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
+    </header>
+    <!-- desktop header -->
+    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
+      <div style="max-width:780px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
+        <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Part labels</h1>
+        <button onclick="enterLabelNew()" style="background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;transition:background 0.1s;">+ New Label</button>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
+      <div style="max-width:780px;margin:0 auto;">
+        <div id="lb-list-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
+          <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No labels yet</div>
+          <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New Label</strong> to generate your first label.</p>
+        </div>
+        <div id="lb-list-items"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
 <!-- ═══════════════════ EDITOR ═══════════════════ -->
 <div id="screen-editor" class="screen">
 
@@ -324,19 +389,20 @@
 <!-- ═══════════════════ LABEL ═══════════════════ -->
 <div id="screen-label" class="screen">
 
-  <aside class="shell-rail">
-    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">
+  <!-- Left: module nav + recent labels -->
+  <aside class="shell-rail" style="display:flex;flex-direction:column;">
+    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;flex-shrink:0;">
       <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
       <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
       <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
     </div>
-    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>
-    <div style="display:flex;flex-direction:column;gap:5px;">
+    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;flex-shrink:0;">PRODUCTS</div>
+    <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
       <div class="rail-item" onclick="enterSop()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;">
+      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;cursor:pointer;transition:background 0.1s;">
         <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;">Label</div><div style="font-size:11px;color:#9A9A9A;">Part labels</div></div>
         <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
@@ -352,55 +418,28 @@
         <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
       </div>
     </div>
+    <!-- Recent labels -->
+    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:22px 10px 8px;flex-shrink:0;">RECENT LABELS</div>
+    <div id="lb-recent-list" style="flex:1;overflow-y:auto;min-height:0;padding:0 2px;"></div>
   </aside>
 
-  <main class="shell-panel">
-    <!-- header -->
-    <div style="padding:26px 28px 20px;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
-      <div style="min-width:0;flex:1;">
-        <button onclick="goLanding()" class="editor-home-lnk" style="font-size:12px;font-weight:500;color:#999;padding:0 0 8px;display:block;transition:color 0.1s;">&#8249; Home</button>
-        <h2 id="lb-part-name" style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Label</h2>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;padding-top:20px;">
-        <label style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
-          <span style="font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">Filename</span>
-          <input id="lb-filename" type="text" placeholder="label_name" style="padding:5px 8px;border:1px solid #E0E0E0;border-radius:7px;font-size:13px;color:#1A1A1A;background:#fff;width:150px;">
-        </label>
-        <label style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
-          <span style="font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">Line</span>
-          <select id="lb-line-px" style="padding:5px 8px;border:1px solid #E0E0E0;border-radius:7px;font-size:13px;color:#1A1A1A;background:#fff;cursor:pointer;">
-            <option value="2">2px</option>
-            <option value="3" selected>3px</option>
-            <option value="4">4px</option>
-            <option value="5">5px</option>
-          </select>
-        </label>
-        <label style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
-          <span style="font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">Size</span>
-          <select id="lb-label-cm" style="padding:5px 8px;border:1px solid #E0E0E0;border-radius:7px;font-size:13px;color:#1A1A1A;background:#fff;cursor:pointer;">
-            <option value="10">10 cm</option>
-            <option value="15">15 cm</option>
-            <option value="20">20 cm</option>
-            <option value="26" selected>26 cm</option>
-          </select>
-        </label>
-        <label style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
-          <span style="font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">DPI</span>
-          <select id="lb-dpi" style="padding:5px 8px;border:1px solid #E0E0E0;border-radius:7px;font-size:13px;color:#1A1A1A;background:#fff;cursor:pointer;">
-            <option value="150">150</option>
-            <option value="300" selected>300</option>
-          </select>
-        </label>
-        <button id="lb-generate-btn" class="btn-red" style="background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;transition:background 0.1s;opacity:0.4;cursor:not-allowed;margin-top:18px;" disabled>&#8595; Generate JPG</button>
-      </div>
+  <!-- Center: preview panel -->
+  <div id="lb-preview-panel" style="flex:1;min-width:0;display:flex;flex-direction:column;background:#F5F4F1;border-radius:18px;overflow:hidden;">
+    <!-- preview top bar -->
+    <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);">
+      <span style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;">LABEL PREVIEW</span>
+      <span id="lb-dims-display" style="font-size:11px;color:#9A9A9A;"></span>
     </div>
-    <!-- body: drop zone / viewer -->
+    <!-- viewer body -->
     <div id="label-body" style="flex:1;overflow:hidden;position:relative;min-height:0;">
-      <div id="label-dropzone" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;cursor:pointer;" onclick="document.getElementById('lb-file-input').click()">
-        <div style="width:100%;max-width:360px;border:2px dashed rgba(0,0,0,0.15);border-radius:16px;padding:48px 32px;text-align:center;background:#fff;display:flex;flex-direction:column;align-items:center;gap:12px;">
-          <svg width="48" height="48" fill="none" stroke="#AAAAAA" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
+      <div id="label-dropzone" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;">
+        <div style="width:100%;max-width:340px;border:2px dashed rgba(0,0,0,0.13);border-radius:16px;padding:40px 28px;text-align:center;background:#fff;display:flex;flex-direction:column;align-items:center;gap:14px;">
+          <svg width="44" height="44" fill="none" stroke="#BBBBBB" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
           <div style="font-size:15px;font-weight:700;color:#1A1A1A;">Drop a STEP file here</div>
-          <div style="font-size:13px;color:#7A7A7A;">or click to browse &nbsp;&bull;&nbsp; .step / .stp</div>
+          <div style="display:flex;gap:10px;width:100%;">
+            <button onclick="document.getElementById('lb-file-input').click()" style="flex:1;padding:10px 0;border-radius:10px;background:#1A1A1A;color:#fff;font-size:13px;font-weight:600;">Browse file</button>
+            <button disabled style="flex:1;padding:10px 0;border-radius:10px;background:#F0F0F0;color:#BBBBBB;font-size:13px;font-weight:600;cursor:not-allowed;" title="Coming soon">Take Photo</button>
+          </div>
         </div>
       </div>
       <div id="label-mount" style="display:none;position:absolute;inset:0;"></div>
@@ -408,8 +447,83 @@
         <div id="label-status-inner" style="background:rgba(255,255,255,0.93);border-radius:12px;padding:16px 24px;font-size:14px;font-weight:600;color:#1A1A1A;text-align:center;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,0.1);"></div>
       </div>
     </div>
-    <input type="file" id="lb-file-input" accept=".step,.stp" style="display:none;">
-  </main>
+    <!-- info bar (shown after load) -->
+    <div id="lb-info-bar" style="display:none;padding:9px 20px;flex-shrink:0;border-top:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;">
+      <span id="lb-info-left" style="font-size:11px;color:#9A9A9A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40%;"></span>
+      <span id="lb-info-center" style="font-size:12px;font-weight:700;color:#1A1A1A;letter-spacing:0.3px;"></span>
+      <span style="width:40%;"></span>
+    </div>
+    <!-- footer bar (shown after load) -->
+    <div id="lb-footer-bar" style="display:none;padding:10px 20px;flex-shrink:0;border-top:1px solid rgba(0,0,0,0.07);background:#ECEAE7;display:flex;align-items:center;justify-content:space-between;">
+      <button id="lb-copy-btn" style="padding:6px 16px;border-radius:8px;background:#fff;border:1px solid rgba(0,0,0,0.1);font-size:13px;font-weight:600;color:#1A1A1A;cursor:pointer;">Copy</button>
+      <span id="lb-footer-name" style="font-size:12px;color:#9A9A9A;"></span>
+    </div>
+  </div>
+
+  <!-- Right: settings panel -->
+  <div id="lb-settings-panel" style="width:260px;flex-shrink:0;background:#F5F4F1;border-radius:18px;display:flex;flex-direction:column;padding:20px 18px;overflow:hidden;">
+    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;margin-bottom:20px;flex-shrink:0;">SETTINGS</div>
+
+    <!-- STEP / Photo toggle -->
+    <div style="display:flex;background:#E8E7E3;border-radius:9px;padding:3px;margin-bottom:20px;flex-shrink:0;">
+      <button id="lb-type-step" style="flex:1;padding:6px 0;border-radius:7px;font-size:13px;font-weight:700;background:#1A1A1A;color:#fff;transition:all 0.1s;">STEP</button>
+      <button id="lb-type-photo" style="flex:1;padding:6px 0;border-radius:7px;font-size:13px;font-weight:600;background:transparent;color:#6B6B6B;transition:all 0.1s;cursor:not-allowed;opacity:0.5;" title="Coming soon">Photo</button>
+    </div>
+
+    <!-- file chip (shown when file loaded) -->
+    <div id="lb-file-chip" style="display:none;background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:14px;flex-shrink:0;border:1px solid rgba(0,0,0,0.06);">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:#CC0000;flex-shrink:0;"></div>
+        <div style="min-width:0;">
+          <div id="lb-chip-name" style="font-size:13px;font-weight:600;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+          <div style="font-size:11px;color:#9A9A9A;">STEP source file</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- drop hint (shown when no file) -->
+    <div id="lb-settings-drop" style="background:#fff;border:2px dashed rgba(0,0,0,0.12);border-radius:10px;padding:14px;text-align:center;margin-bottom:14px;cursor:pointer;flex-shrink:0;" onclick="document.getElementById('lb-file-input').click()">
+      <div style="font-size:13px;font-weight:600;color:#1A1A1A;margin-bottom:3px;">Drop STEP file</div>
+      <div style="font-size:11px;color:#7A7A7A;">.step / .stp · or click to browse</div>
+    </div>
+
+    <!-- line thickness -->
+    <div style="margin-bottom:16px;flex-shrink:0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1px;">LINE THICKNESS</span>
+        <span id="lb-line-val" style="font-size:12px;font-weight:700;color:#1A1A1A;background:#fff;padding:2px 8px;border-radius:6px;border:1px solid #E8E7E3;">3</span>
+      </div>
+      <input type="range" id="lb-line-px" min="1" max="8" value="3" style="width:100%;accent-color:#CC0000;cursor:pointer;">
+    </div>
+
+    <!-- part name -->
+    <div style="margin-bottom:14px;flex-shrink:0;">
+      <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1px;margin-bottom:6px;">PART NAME</div>
+      <input id="lb-part-name" type="text" placeholder="e.g. BRACKET-001" style="width:100%;padding:8px 10px;border:1px solid #E0E0E0;border-radius:8px;font-size:13px;color:#1A1A1A;background:#fff;box-sizing:border-box;">
+    </div>
+
+    <!-- long side + DPI -->
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-shrink:0;">
+      <div style="flex:1;">
+        <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1px;margin-bottom:6px;">LONG SIDE (MM)</div>
+        <input id="lb-label-cm" type="number" value="26" min="5" max="500" style="width:100%;padding:8px 10px;border:1px solid #E0E0E0;border-radius:8px;font-size:13px;color:#1A1A1A;background:#fff;box-sizing:border-box;">
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1px;margin-bottom:6px;">DPI</div>
+        <input id="lb-dpi" type="number" value="300" min="72" max="600" style="width:100%;padding:8px 10px;border:1px solid #E0E0E0;border-radius:8px;font-size:13px;color:#1A1A1A;background:#fff;box-sizing:border-box;">
+      </div>
+    </div>
+
+    <div style="flex:1;min-height:0;"></div>
+
+    <!-- Export + New -->
+    <div style="display:flex;gap:8px;flex-shrink:0;">
+      <button id="lb-generate-btn" style="flex:1;background:#CC0000;color:#fff;padding:11px 0;border-radius:8px;font-size:14px;font-weight:700;opacity:0.4;cursor:not-allowed;transition:opacity 0.1s;" disabled>Export label</button>
+      <button id="lb-new-btn" style="padding:11px 16px;border-radius:8px;font-size:14px;font-weight:600;background:#fff;border:1px solid rgba(0,0,0,0.1);color:#1A1A1A;cursor:pointer;">New</button>
+    </div>
+  </div>
+
+  <input type="file" id="lb-file-input" accept=".step,.stp" style="display:none;">
 </div>
 
 <!-- ═══════════════════ CAPTURE ═══════════════════ -->
@@ -797,6 +911,12 @@ function enterSop() {
 }
 
 function enterLabel() {
+  if (window._lbListRender) window._lbListRender();
+  showScreen('label-list');
+}
+
+function enterLabelNew() {
+  if (window._lbNew) window._lbNew();
   showScreen('label');
 }
 
@@ -1479,6 +1599,7 @@ const MAX_SEGMENTS = 60000;
 const _lb = {
   file: null,
   status: 'idle',
+  lastDataURL: null,
   renderer: null,
   scene: null,
   camera: null,
@@ -1545,10 +1666,8 @@ async function _lbLoad(file) {
   _lbStatus('Loading ' + file.name + '…');
   _lbSetBtn(false);
 
-  const title = document.getElementById('lb-part-name');
-  if (title) title.textContent = file.name.replace(/\.[^.]+$/, '');
-  const fnInp = document.getElementById('lb-filename');
-  if (fnInp && !fnInp.value) fnInp.value = file.name.replace(/\.[^.]+$/, '') + '_label';
+  const partInp = document.getElementById('lb-part-name');
+  if (partInp && !partInp.value) partInp.value = file.name.replace(/\.[^.]+$/, '');
 
   const form = new FormData();
   form.append('file', file);
@@ -1663,6 +1782,24 @@ async function _lbLoad(file) {
     _lbStatus('');
     _lbSetBtn(true);
 
+    // Update settings panel + info/footer bars
+    const chipEl = document.getElementById('lb-file-chip');
+    const chipName = document.getElementById('lb-chip-name');
+    const settDrop = document.getElementById('lb-settings-drop');
+    const infoBar = document.getElementById('lb-info-bar');
+    const footerBar = document.getElementById('lb-footer-bar');
+    if (chipEl) chipEl.style.display = 'block';
+    if (chipName) chipName.textContent = file.name;
+    if (settDrop) settDrop.style.display = 'none';
+    if (infoBar) { infoBar.style.display = 'flex'; }
+    if (footerBar) { footerBar.style.display = 'flex'; }
+    const infoLeft = document.getElementById('lb-info-left');
+    if (infoLeft) infoLeft.textContent = 'ISO · ' + file.name;
+    const infoCenter = document.getElementById('lb-info-center');
+    const partVal = document.getElementById('lb-part-name');
+    if (infoCenter) infoCenter.textContent = (partVal && partVal.value) || '';
+    _lbUpdateDims();
+
     const onResize = () => {
       const w = mount.clientWidth || 600, h = mount.clientHeight || 600;
       const a = w / h;
@@ -1681,52 +1818,191 @@ async function _lbLoad(file) {
   });
 }
 
+// Returns dataURL at export resolution, restores renderer/camera to screen size.
+async function _lbRenderCanvas() {
+  const labelMm = parseFloat(document.getElementById('lb-label-cm')?.value) || 26;
+  const dpi = parseInt(document.getElementById('lb-dpi')?.value, 10) || 300;
+  const exportPx = Math.round((labelMm / 25.4) * dpi);
+  const renderer = _lb.renderer, camera = _lb.camera, scene = _lb.scene;
+  const mount = document.getElementById('label-mount');
+  const vw = mount.clientWidth || 600, vh = mount.clientHeight || 600;
+  const savedCam = { left: camera.left, right: camera.right, top: camera.top, bottom: camera.bottom };
+  const halfH = camera.top / camera.zoom;
+  camera.left = -halfH; camera.right = halfH;
+  camera.top = halfH; camera.bottom = -halfH;
+  camera.updateProjectionMatrix();
+  if (_lb.linMat) _lb.linMat.resolution.set(exportPx, exportPx);
+  renderer.setPixelRatio(1);
+  renderer.setSize(exportPx, exportPx);
+  renderer.render(scene, camera);
+  const dataURL = renderer.domElement.toDataURL('image/jpeg', 1.0);
+  Object.assign(camera, savedCam);
+  camera.updateProjectionMatrix();
+  renderer.setPixelRatio(window.devicePixelRatio || 1);
+  renderer.setSize(vw, vh);
+  if (_lb.linMat) _lb.linMat.resolution.set(vw, vh);
+  renderer.render(scene, camera);
+  return dataURL;
+}
+
 async function _lbGenerate() {
   if (!_lb.file || !_lb.camera || _lb.status !== 'viewing') return;
   _lb.status = 'generating';
   _lbSetBtn(false);
-
-  const cam = _lb.camera, ctrl = _lb.controls;
-  const scale = _lb.modelScale, center = _lb.modelCenter;
-
-  // Convert Three.js camera space → model space for OCC
-  cam.updateMatrixWorld();
-  const eye = cam.position.clone().divideScalar(scale).add(center);
-  const tgt = ctrl.target.clone().divideScalar(scale).add(center);
-  const right = new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld, 0);
-
-  const linePx = parseInt(document.getElementById('lb-line-px').value, 10) || 3;
-  const labelCm = parseFloat(document.getElementById('lb-label-cm').value) || 26;
-  const dpi = parseInt(document.getElementById('lb-dpi').value, 10) || 300;
-
-  const form = new FormData();
-  form.append('file', _lb.file);
-  form.append('line_px', linePx);
-  form.append('label_cm', labelCm);
-  form.append('dpi', dpi);
-  form.append('eye_x', eye.x); form.append('eye_y', eye.y); form.append('eye_z', eye.z);
-  form.append('right_x', right.x); form.append('right_y', right.y); form.append('right_z', right.z);
-  form.append('target_x', tgt.x); form.append('target_y', tgt.y); form.append('target_z', tgt.z);
-
   try {
-    const res = await fetch('/api/label/generate', { method: 'POST', body: form });
-    if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error(j.error || 'Server error ' + res.status); }
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
+    const dataURL = await _lbRenderCanvas();
+    _lb.lastDataURL = dataURL;
+    const partInpG = document.getElementById('lb-part-name');
+    const partNameVal = (partInpG && partInpG.value.trim()) || '';
+    const rawName = partNameVal || _lb.file.name.replace(/\.[^.]+$/, '') + '_label';
+    const dlName = rawName.endsWith('.jpg') ? rawName : rawName + '.jpg';
     const a = document.createElement('a');
-    a.href = url;
-    const fnInpG = document.getElementById('lb-filename');
-    const dlName = (fnInpG && fnInpG.value.trim()) ? fnInpG.value.trim() : _lb.file.name.replace(/\.[^.]+$/, '') + '_label';
-    a.download = dlName.endsWith('.jpg') ? dlName : dlName + '.jpg';
+    a.href = dataURL;
+    a.download = dlName;
     a.click();
-    URL.revokeObjectURL(url);
-    if (window.toast) window.toast('Label generated', 'success');
+    const ftrName = document.getElementById('lb-footer-name');
+    if (ftrName) ftrName.textContent = dlName;
+    const mm1 = parseFloat(document.getElementById('lb-label-cm')?.value) || 26;
+    const dpi1 = parseInt(document.getElementById('lb-dpi')?.value, 10) || 300;
+    const thumb = await _lbMakeThumb(dataURL, 60);
+    _lbSaveRecent(dlName, mm1, dpi1, partNameVal, thumb);
+    if (window.toast) window.toast('Label exported', 'success');
   } catch (e) {
-    if (window.toast) window.toast('Generate failed: ' + e.message);
+    if (window.toast) window.toast('Export failed: ' + e.message);
   }
-
   _lb.status = 'viewing';
   _lbSetBtn(true);
+}
+
+async function _lbCopy() {
+  if (!_lb.file || !_lb.camera || (_lb.status !== 'viewing' && _lb.status !== 'idle')) return;
+  try {
+    const dataURL = _lb.lastDataURL || await _lbRenderCanvas();
+    _lb.lastDataURL = dataURL;
+    const res = await fetch(dataURL);
+    const blob = await res.blob();
+    await navigator.clipboard.write([new ClipboardItem({'image/jpeg': blob})]);
+    if (window.toast) window.toast('Copied to clipboard', 'success');
+  } catch (e) {
+    if (window.toast) window.toast('Copy failed: ' + (e.message || 'Clipboard API unavailable'));
+  }
+}
+
+function _lbNew() {
+  _lbCleanup();
+  _lb.file = null;
+  _lb.status = 'idle';
+  _lb.lastDataURL = null;
+  _lbShow('drop');
+  _lbStatus('');
+  _lbSetBtn(false);
+  const chip = document.getElementById('lb-file-chip');
+  const settDrop2 = document.getElementById('lb-settings-drop');
+  const infoBar2 = document.getElementById('lb-info-bar');
+  const footerBar2 = document.getElementById('lb-footer-bar');
+  if (chip) chip.style.display = 'none';
+  if (settDrop2) settDrop2.style.display = 'block';
+  if (infoBar2) infoBar2.style.display = 'none';
+  if (footerBar2) footerBar2.style.display = 'none';
+  const partInp2 = document.getElementById('lb-part-name');
+  if (partInp2) partInp2.value = '';
+}
+
+function _lbUpdateDims() {
+  const mm = parseFloat(document.getElementById('lb-label-cm')?.value) || 26;
+  const dpi = parseInt(document.getElementById('lb-dpi')?.value, 10) || 300;
+  const px = Math.round((mm / 25.4) * dpi);
+  const el = document.getElementById('lb-dims-display');
+  if (el) el.textContent = mm + ' mm · ' + px + ' px · ' + dpi + ' DPI';
+}
+
+function _lbSaveRecent(name, sizeMm, dpi, partName, thumb) {
+  const recent = JSON.parse(localStorage.getItem('lb-recent') || '[]');
+  const id = Date.now().toString();
+  const filtered = recent.filter(r => r.name !== name);
+  filtered.unshift({ id, name, partName: partName || '', sizeMm, dpi, ts: Date.now(), thumb: thumb || null });
+  localStorage.setItem('lb-recent', JSON.stringify(filtered.slice(0, 20)));
+  _lbRenderRecent();
+}
+
+function _lbMakeThumb(dataURL, size) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      c.getContext('2d').drawImage(img, 0, 0, size, size);
+      resolve(c.toDataURL('image/jpeg', 0.75));
+    };
+    img.onerror = () => resolve(null);
+    img.src = dataURL;
+  });
+}
+
+function _lbListRender() {
+  const list = document.getElementById('lb-list-items');
+  const empty = document.getElementById('lb-list-empty');
+  if (!list) return;
+  const recent = JSON.parse(localStorage.getItem('lb-recent') || '[]');
+  if (!recent.length) {
+    if (empty) empty.style.display = 'block';
+    list.innerHTML = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+  const groups = [{ label: 'Today', items: [] }, { label: 'This week', items: [] }, { label: 'Earlier', items: [] }];
+  for (const r of recent) {
+    const d = new Date(r.ts || 0);
+    groups[d >= today ? 0 : d >= weekAgo ? 1 : 2].items.push(r);
+  }
+  list.innerHTML = groups.filter(g => g.items.length).map(g => `
+    <div style="font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.1px;margin:20px 0 8px;">${esc(g.label)}</div>
+    <div style="display:flex;flex-direction:column;gap:7px;">
+      ${g.items.map(r => {
+        const displayName = r.partName || r.name || 'Untitled';
+        const sub = [r.name, r.sizeMm ? r.sizeMm + ' mm' : '', r.dpi ? r.dpi + ' DPI' : ''].filter(Boolean).join(' · ');
+        const thumb = r.thumb
+          ? `<img src="${r.thumb}" style="width:38px;height:38px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid rgba(0,0,0,0.06);">`
+          : `<div style="width:38px;height:38px;border-radius:8px;background:#F0F0F0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#C0C0C0;">LB</div>`;
+        return `<div style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:11px 14px;display:flex;align-items:center;gap:12px;">
+          ${thumb}
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1A1A1A;">${esc(displayName)}</div>
+            <div style="color:#9B9B9B;font-size:12px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(sub)}</div>
+          </div>
+          <button onclick="lbDeleteLabel('${esc(r.id || String(r.ts))}')" style="color:#C8C8C8;font-size:14px;padding:4px 6px;border-radius:6px;flex-shrink:0;transition:color 0.1s;" title="Delete" onmouseenter="this.style.color='#CC0000'" onmouseleave="this.style.color='#C8C8C8'">&#128465;</button>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+function lbDeleteLabel(id) {
+  const recent = JSON.parse(localStorage.getItem('lb-recent') || '[]');
+  localStorage.setItem('lb-recent', JSON.stringify(recent.filter(r => String(r.id || r.ts) !== String(id))));
+  _lbListRender();
+  _lbRenderRecent();
+}
+
+function _lbRenderRecent() {
+  const list = document.getElementById('lb-recent-list');
+  if (!list) return;
+  const recent = JSON.parse(localStorage.getItem('lb-recent') || '[]');
+  if (!recent.length) {
+    list.innerHTML = '<div style="padding:12px 8px;font-size:11px;color:#4A4A4A;text-align:center;">No recent labels</div>';
+    return;
+  }
+  list.innerHTML = recent.map(r => {
+    const active = _lb.file && _lb.file.name === r.name;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;${active ? 'background:#2A2A2A;' : ''}">
+      <div style="width:7px;height:7px;border-radius:2px;background:${active ? '#CC0000' : '#444'};flex-shrink:0;"></div>
+      <div style="min-width:0;">
+        <div style="font-size:12px;font-weight:600;color:${active ? '#fff' : '#B8B8B8'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.name}</div>
+        <div style="font-size:10px;color:#5A5A5A;">${r.sizeMm} mm · ${r.dpi} DPI</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // Wire up events (module is deferred — DOM is ready)
@@ -1737,6 +2013,49 @@ const lbBtn = document.getElementById('lb-generate-btn');
 if (lbInp) lbInp.addEventListener('change', e => { const f = e.target.files[0]; if (f) _lbLoad(f); e.target.value = ''; });
 if (lbBtn) lbBtn.addEventListener('click', _lbGenerate);
 
+// Copy + New buttons
+const lbCopyBtn = document.getElementById('lb-copy-btn');
+const lbNewBtn = document.getElementById('lb-new-btn');
+if (lbCopyBtn) lbCopyBtn.addEventListener('click', _lbCopy);
+if (lbNewBtn) lbNewBtn.addEventListener('click', _lbNew);
+
+// Line thickness slider display
+const lbLineSlider = document.getElementById('lb-line-px');
+if (lbLineSlider) lbLineSlider.addEventListener('input', e => {
+  const v = document.getElementById('lb-line-val');
+  if (v) v.textContent = e.target.value;
+});
+
+// Dims update on settings change
+['lb-label-cm', 'lb-dpi'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', _lbUpdateDims);
+});
+
+// Part name → update info center
+const lbPartInput = document.getElementById('lb-part-name');
+if (lbPartInput) lbPartInput.addEventListener('input', e => {
+  const ic = document.getElementById('lb-info-center');
+  if (ic) ic.textContent = e.target.value;
+});
+
+// Settings drop: drag-and-drop
+const lbSettDrop = document.getElementById('lb-settings-drop');
+if (lbSettDrop) {
+  lbSettDrop.addEventListener('dragover', e => { e.preventDefault(); lbSettDrop.style.borderColor = '#CC0000'; });
+  lbSettDrop.addEventListener('dragleave', () => { lbSettDrop.style.borderColor = ''; });
+  lbSettDrop.addEventListener('drop', e => {
+    e.preventDefault();
+    lbSettDrop.style.borderColor = '';
+    const f = e.dataTransfer.files[0];
+    if (!f) return;
+    const ext = f.name.split('.').pop().toLowerCase();
+    if (!['step','stp'].includes(ext)) { if (window.toast) window.toast('Only .step / .stp files accepted'); return; }
+    _lbLoad(f);
+  });
+}
+
+// Center drop zone drag-and-drop
 if (lbBody) {
   lbBody.addEventListener('dragover', e => {
     e.preventDefault();
@@ -1758,6 +2077,15 @@ if (lbBody) {
     _lbLoad(f);
   });
 }
+
+// Init dims display and recent list
+_lbUpdateDims();
+_lbRenderRecent();
+
+// Expose to main script (module scope is not global)
+window._lbListRender = _lbListRender;
+window._lbNew = _lbNew;
+window.lbDeleteLabel = lbDeleteLabel;
 </script>
 </body>
 </html>
