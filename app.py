@@ -105,6 +105,31 @@ class Step(db.Model):
         }
 
 
+class Label(db.Model):
+    """One generated/exported label. Keeps only the export JPG (content-addressed)."""
+    __tablename__ = "labels"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = db.Column(db.Text, nullable=False, default="")
+    part_name = db.Column(db.Text, nullable=False, default="")
+    size_mm = db.Column(db.Float, nullable=False, default=26.0)
+    dpi = db.Column(db.Integer, nullable=False, default=300)
+    image_hash = db.Column(db.String(64), db.ForeignKey("image_blobs.hash"), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    blob = db.relationship("ImageBlob", lazy="joined")
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "part_name": self.part_name,
+            "size_mm": self.size_mm,
+            "dpi": self.dpi,
+            "created_at": self.created_at.isoformat(),
+        }
+
+
 def _migrate():
     """Migrate steps.image → image_blobs + steps.image_hash if needed."""
     is_sqlite = db.engine.dialect.name == "sqlite"
@@ -391,6 +416,60 @@ def label_generate():
         as_attachment=True,
         download_name=f"{filename.rsplit('.', 1)[0]}_label.jpg",
     )
+
+
+# ── Label history (exported JPGs) ─────────────────────────────────────────────
+
+@app.route("/api/labels", methods=["GET"])
+def list_labels():
+    rows = Label.query.order_by(Label.created_at.desc()).all()
+    return jsonify([l.to_dict() for l in rows])
+
+
+@app.route("/api/labels", methods=["POST"])
+def create_label():
+    d = request.get_json(silent=True) or {}
+    image = d.get("image")  # full export JPG as a data URL
+    if not image:
+        return jsonify({"error": "no image"}), 400
+    img_hash = hashlib.sha256(image.encode("utf-8")).hexdigest()
+    if not db.session.get(ImageBlob, img_hash):
+        db.session.add(ImageBlob(hash=img_hash, data=image))
+    label = Label(
+        name=(d.get("name") or "").strip(),
+        part_name=(d.get("part_name") or "").strip(),
+        size_mm=float(d.get("size_mm") or 26.0),
+        dpi=int(d.get("dpi") or 300),
+        image_hash=img_hash,
+    )
+    db.session.add(label)
+    db.session.commit()
+    return jsonify(label.to_dict()), 201
+
+
+@app.route("/api/labels/<label_id>/image", methods=["GET"])
+def label_image(label_id):
+    label = db.session.get(Label, label_id)
+    if not label or not label.blob:
+        return jsonify({"error": "not found"}), 404
+    data = label.blob.data
+    b64 = data.split(",", 1)[1] if "," in data else data
+    raw = base64.b64decode(b64)
+    return send_file(
+        io.BytesIO(raw),
+        mimetype="image/jpeg",
+        as_attachment=bool(request.args.get("download")),
+        download_name=(label.name or "label.jpg"),
+    )
+
+
+@app.route("/api/labels/<label_id>", methods=["DELETE"])
+def delete_label(label_id):
+    label = db.session.get(Label, label_id)
+    if label:
+        db.session.delete(label)
+        db.session.commit()
+    return "", 204
 
 
 if __name__ == "__main__":
