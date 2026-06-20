@@ -308,7 +308,7 @@ def suggest(path: str) -> dict:
     for label, val in zip(("Length", "Width", "Height"), bbox):
         checks.append(
             {
-                "desc": f"Check overall {label.lower()} {round(val, 1)}mm",
+                "desc": f"Check overall {label.lower()}",
                 "value_mm": round(val, 2),
                 "tol": "+/- 0.5mm",
                 "gauge": "Vernier",
@@ -319,7 +319,7 @@ def suggest(path: str) -> dict:
     for d in info.get("holes_mm") or []:
         checks.append(
             {
-                "desc": f"Check hole dia {round(d, 1)}mm",
+                "desc": "Check hole diameter",
                 "value_mm": round(d, 2),
                 "tol": "+/- 0.1mm",
                 "gauge": "Vernier",
@@ -330,7 +330,7 @@ def suggest(path: str) -> dict:
     for ang in _bend_angles(shape):
         checks.append(
             {
-                "desc": f"Ensure bend at {ang} deg",
+                "desc": "Ensure bend angle",
                 "value_mm": ang,
                 "tol": "+/- 1 deg",
                 "gauge": "Protractor",

@@ -484,7 +484,7 @@
   </div>
 
   <!-- Right: settings panel -->
-  <div id="lb-settings-panel" style="width:260px;flex-shrink:0;background:#F5F4F1;border-radius:18px;display:flex;flex-direction:column;padding:20px 18px;overflow:hidden;">
+  <div id="lb-settings-panel" style="width:392px;flex-shrink:0;background:#F5F4F1;border-radius:18px;display:flex;flex-direction:column;padding:20px 18px;overflow:hidden;">
     <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;margin-bottom:20px;flex-shrink:0;">SETTINGS</div>
 
     <!-- STEP / Photo toggle -->
@@ -599,7 +599,6 @@
     <!-- top bar -->
     <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 18px;flex-shrink:0;border-bottom:1px solid #ECEAE6;">
       <div style="display:flex;align-items:center;gap:11px;min-width:0;">
-        <span style="width:30px;height:30px;border-radius:8px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">&#9712;</span>
         <div style="min-width:0;">
           <div id="icl-filename" style="font-size:13.5px;font-weight:600;color:#1A1A1A;font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">No file loaded</div>
           <div id="icl-filesub" style="font-size:11px;color:#9A9A9A;margin-top:1px;">Import a STEP file to begin</div>
@@ -658,25 +657,15 @@
 
   <!-- Right: Inspection Check List card -->
   <aside style="width:392px;flex-shrink:0;display:flex;flex-direction:column;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 2px 14px rgba(0,0,0,0.05);">
-    <div style="padding:20px 22px 16px;border-bottom:1px solid #EFEDEA;flex-shrink:0;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="width:30px;height:30px;border-radius:8px;background:#161616;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</span>
-        <div style="min-width:0;">
-          <div style="font-size:15px;font-weight:800;letter-spacing:-0.2px;">Inspection Check List</div>
-          <div style="font-size:11.5px;color:#9A9A9A;">Pick on the model to add a check</div>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;margin-top:15px;font-size:12.5px;">
+    <div style="padding:18px 20px 16px;border-bottom:1px solid #EFEDEA;flex-shrink:0;">
+      <div style="font-size:15px;font-weight:800;letter-spacing:-0.2px;margin-bottom:15px;">Inspection Check List</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;font-size:12px;">
         <span style="color:#9A9A9A;font-weight:600;">IXL Part #</span>
-        <span id="icl-part-no" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#1A1A1A;">&mdash;</span>
+        <input id="icl-part-no" placeholder="—" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#1A1A1A;border:1px solid #E6E2DC;border-radius:7px;padding:5px 8px;font-size:12px;width:100%;background:#fff;">
         <span style="color:#9A9A9A;font-weight:600;">Cust Part #</span>
-        <span id="icl-cust-no" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#1A1A1A;">&mdash;</span>
+        <input id="icl-cust-no" placeholder="—" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#1A1A1A;border:1px solid #E6E2DC;border-radius:7px;padding:5px 8px;font-size:12px;width:100%;background:#fff;">
         <span style="color:#9A9A9A;font-weight:600;">Description</span>
-        <span id="icl-part-desc" style="font-weight:600;color:#1A1A1A;">&mdash;</span>
-      </div>
-      <div style="display:flex;gap:7px;margin-top:13px;flex-wrap:wrap;">
-        <span style="font-size:11px;font-weight:600;color:#5A5A5A;background:#F2F0EC;padding:4px 10px;border-radius:20px;">Freq &middot; At Setup / Hourly</span>
-        <span id="icl-source-tag" style="font-size:11px;font-weight:600;color:#fff;background:#161616;padding:4px 10px;border-radius:20px;font-family:'JetBrains Mono',monospace;">STEP &middot; 3D</span>
+        <input id="icl-part-desc" placeholder="—" style="font-weight:600;color:#1A1A1A;border:1px solid #E6E2DC;border-radius:7px;padding:5px 8px;font-size:12px;width:100%;background:#fff;">
       </div>
     </div>
 
@@ -2747,7 +2736,6 @@ function _iclShow(which){
 }
 function _iclToScene(p){ return new THREE.Vector3((p[0]-_icl.center.x)*_icl.scale,(p[1]-_icl.center.y)*_icl.scale,(p[2]-_icl.center.z)*_icl.scale); }
 function _iclEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
-function _iclIcon(t){ return t==='angle'?'∠':t==='dist'?'↔':t==='dia'?'Ø':t==='rad'?'R':'◉'; }
 const _ICL_GAUGES=['Vernier','Protractor','Micrometer','Height Gauge','Radius Gauge','Bore Gauge','Go / No-Go','Visual','Reference'];
 
 function _iclCleanup(){
@@ -2865,7 +2853,7 @@ async function _iclRunMeasure(){
   _iclDrawDim(r);
   _icl.checks.push({
     type:'dist',
-    desc:'Check distance '+r.value_mm+'mm',
+    desc:'Check distance',
     value:r.value_mm, tol:'0.5',
     gauge:r.suggested_gauge||'Vernier',
     entityLabel:p1.kind+' #'+p1.id+' → '+p2.kind+' #'+p2.id,
@@ -2907,10 +2895,10 @@ async function _iclSuggest(file){
       const t=TYPE[c.source]||'dist';
       _icl.checks.push({type:t, desc:c.desc, value:c.value_mm, tol:_iclTolNum(c.tol,t), gauge:c.gauge, entityLabel:'auto · '+c.source, source:c.source});
     });
-    // part metadata
+    // part metadata (editable inputs)
     const p=d.part||{};
-    const pn=document.getElementById('icl-part-no'); if(pn) pn.textContent=p.part_number||file.name.replace(/\.[^.]+$/,'');
-    const pd=document.getElementById('icl-part-desc'); if(pd) pd.textContent=p.description||'—';
+    const pn=document.getElementById('icl-part-no'); if(pn) pn.value=p.part_number||file.name.replace(/\.[^.]+$/,'');
+    const pd=document.getElementById('icl-part-desc'); if(pd) pd.value=p.description||'';
     _iclRenderChecks();
   }catch(e){}
 }
@@ -2927,34 +2915,29 @@ function _iclRenderChecks(){
     const unit = type==='angle'?'°':'mm';
     const hasPrefix = type==='dia'||type==='rad';
     const prefix = type==='dia'?'Ø':'R';
-    const iconBg = visual?'#F2F0EC':'#FBE9E9';
-    const iconColor = visual?'#8A8A8A':'#CC0000';
     const row=document.createElement('div');
-    row.style.cssText='border:1.5px solid #ECE9E4;background:#fff;border-radius:13px;padding:13px 13px 12px;';
+    row.style.cssText='border:1.5px solid #ECE9E4;background:#fff;border-radius:13px;padding:12px 13px;';
+    const gaugeOpts=_ICL_GAUGES.map(g=>'<option'+(g===c.gauge?' selected':'')+'>'+g+'</option>').join('');
     let measured='';
     if(!visual){
-      measured='<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'
-        +'<div style="display:flex;align-items:center;background:#F7F5F2;border:1px solid #ECE9E4;border-radius:9px;padding:5px 8px;gap:2px;">'
+      measured='<div style="display:flex;align-items:center;gap:8px;margin-top:9px;padding-left:34px;">'
+        +'<div style="display:flex;align-items:center;background:#F7F5F2;border:1px solid #ECE9E4;border-radius:9px;padding:5px 9px;gap:3px;">'
         +(hasPrefix?'<span style="font-size:13px;font-weight:700;color:#6A6A6A;font-family:\'JetBrains Mono\',monospace;">'+prefix+'</span>':'')
-        +'<input class="icl-nominal" data-i="'+i+'" value="'+_iclEsc(c.value)+'" inputmode="decimal" style="width:42px;border:none;background:transparent;outline:none;font-family:\'JetBrains Mono\',monospace;font-size:14px;font-weight:700;color:#1A1A1A;text-align:right;">'
+        +'<input class="icl-nominal" data-i="'+i+'" value="'+_iclEsc(c.value)+'" inputmode="decimal" style="width:56px;border:none;background:transparent;outline:none;font-family:\'JetBrains Mono\',monospace;font-size:14px;font-weight:700;color:#1A1A1A;text-align:right;">'
         +'<span style="font-size:12px;font-weight:600;color:#9A9A9A;font-family:\'JetBrains Mono\',monospace;">'+unit+'</span></div>'
-        +'<div style="display:flex;align-items:center;background:#F7F5F2;border:1px solid #ECE9E4;border-radius:9px;padding:5px 7px;gap:1px;">'
+        +'<div style="display:flex;align-items:center;background:#F7F5F2;border:1px solid #ECE9E4;border-radius:9px;padding:5px 9px;gap:2px;">'
         +'<span style="font-size:12px;font-weight:600;color:#9A9A9A;">±</span>'
-        +'<input class="icl-tol" data-i="'+i+'" value="'+_iclEsc(c.tol)+'" inputmode="decimal" style="width:26px;border:none;background:transparent;outline:none;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#1A1A1A;text-align:center;"></div>'
+        +'<input class="icl-tol" data-i="'+i+'" value="'+_iclEsc(c.tol)+'" inputmode="decimal" style="width:34px;border:none;background:transparent;outline:none;font-family:\'JetBrains Mono\',monospace;font-size:13px;font-weight:600;color:#1A1A1A;text-align:center;"></div>'
         +'</div>';
     }
-    const gaugeOpts=_ICL_GAUGES.map(g=>'<option'+(g===c.gauge?' selected':'')+'>'+g+'</option>').join('');
     row.innerHTML=
       '<div style="display:flex;align-items:center;gap:10px;">'
-      +'<span style="width:26px;height:26px;flex-shrink:0;border-radius:8px;background:'+iconBg+';color:'+iconColor+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">'+_iclIcon(type)+'</span>'
-      +'<div style="flex:1;min-width:0;">'
-      +'<input class="icl-desc" data-i="'+i+'" value="'+_iclEsc(c.desc)+'" placeholder="Describe the check…" style="border:none;background:transparent;outline:none;width:100%;font-size:13.5px;font-weight:600;color:#1A1A1A;">'
-      +'<div style="font-size:11px;color:#9A9A9A;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_iclEsc(c.entityLabel||'')+'</div>'
-      +'</div>'
-      +measured
+      +'<span style="width:24px;height:24px;flex-shrink:0;border-radius:7px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:\'JetBrains Mono\',monospace;">'+(i+1)+'</span>'
+      +'<input class="icl-desc" data-i="'+i+'" value="'+_iclEsc(c.desc)+'" placeholder="Describe the check…" style="flex:1;min-width:0;border:1px solid #E6E2DC;border-radius:7px;background:#fff;outline:none;padding:6px 9px;font-size:13.5px;font-weight:600;color:#1A1A1A;">'
       +'<button class="icl-del" data-i="'+i+'" title="Remove" style="flex-shrink:0;color:#C8C4BC;font-size:14px;background:transparent;border:none;cursor:pointer;padding:2px 3px;line-height:1;">✕</button>'
       +'</div>'
-      +'<div style="display:flex;align-items:center;gap:8px;margin-top:9px;padding-left:37px;">'
+      +measured
+      +'<div style="display:flex;align-items:center;gap:8px;margin-top:9px;padding-left:34px;">'
       +'<span style="font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.6px;">Gauge</span>'
       +'<select class="icl-gauge" data-i="'+i+'" style="font-family:inherit;font-size:12px;font-weight:600;color:#3A3A3A;background:#fff;border:1px solid #E6E2DC;border-radius:8px;padding:5px 8px;cursor:pointer;">'+gaugeOpts+'</select>'
       +(c.ref?'<span style="font-size:10.5px;font-weight:700;color:#8A6E2E;background:#F6EFD9;padding:3px 8px;border-radius:20px;">'+_iclEsc(c.ref)+'</span>':'')
