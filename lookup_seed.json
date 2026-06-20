@@ -1,0 +1,1162 @@
+[
+ {
+  "wip_number": "202600",
+  "wip_description": "Bracket Pole Top - Folded Channel",
+  "finish_goods": [
+   {
+    "fg_number": "828135",
+    "fg_description": "Pole Top"
+   }
+  ]
+ },
+ {
+  "wip_number": "202601",
+  "wip_description": "Strap-Strain 1300 Lug",
+  "finish_goods": [
+   {
+    "fg_number": "828120",
+    "fg_description": "1300 S/Strain"
+   }
+  ]
+ },
+ {
+  "wip_number": "202602",
+  "wip_description": "800 Extn Hook",
+  "finish_goods": [
+   {
+    "fg_number": "828107",
+    "fg_description": "800 Ext Bracket"
+   }
+  ]
+ },
+ {
+  "wip_number": "202603",
+  "wip_description": "Type 2 Brkt Plate",
+  "finish_goods": [
+   {
+    "fg_number": "828112",
+    "fg_description": "Type 2 Brkt"
+   }
+  ]
+ },
+ {
+  "wip_number": "202604",
+  "wip_description": "Xarm Assy Body",
+  "finish_goods": [
+   {
+    "fg_number": "828123",
+    "fg_description": "Xarm Assy Brkt"
+   }
+  ]
+ },
+ {
+  "wip_number": "202605",
+  "wip_description": "Xarm Assy Angle 75 x 50 x 6mm",
+  "finish_goods": [
+   {
+    "fg_number": "828123",
+    "fg_description": "Xarm Assy Brkt"
+   }
+  ]
+ },
+ {
+  "wip_number": "202606",
+  "wip_description": "Strap-Strain 1750 Lug",
+  "finish_goods": [
+   {
+    "fg_number": "828121",
+    "fg_description": "1750 S/Strain"
+   }
+  ]
+ },
+ {
+  "wip_number": "202607",
+  "wip_description": "Buckarm SHS Body",
+  "finish_goods": [
+   {
+    "fg_number": "828122",
+    "fg_description": "Buckarm"
+   }
+  ]
+ },
+ {
+  "wip_number": "202608",
+  "wip_description": "Buckarm Base",
+  "finish_goods": [
+   {
+    "fg_number": "826825",
+    "fg_description": "Buckarm - PCR"
+   },
+   {
+    "fg_number": "828122",
+    "fg_description": "Buckarm"
+   }
+  ]
+ },
+ {
+  "wip_number": "202609",
+  "wip_description": "Buckarm Ears",
+  "finish_goods": [
+   {
+    "fg_number": "828137",
+    "fg_description": "66 KV Centre Phase Ins"
+   },
+   {
+    "fg_number": "828143",
+    "fg_description": "Ladder Rest 5 & 6"
+   }
+  ]
+ },
+ {
+  "wip_number": "202610",
+  "wip_description": "Adj Angle Connector",
+  "finish_goods": [
+   {
+    "fg_number": "826837",
+    "fg_description": "Adj Angle Brkt"
+   },
+   {
+    "fg_number": "826852",
+    "fg_description": "27 Dia Adj Angle Brkt"
+   },
+   {
+    "fg_number": "828146",
+    "fg_description": "50 Dia Adj Angle Brkt"
+   }
+  ]
+ },
+ {
+  "wip_number": "202611",
+  "wip_description": "Adj Angle Brkt",
+  "finish_goods": [
+   {
+    "fg_number": "826837",
+    "fg_description": "Adj Angle Brkt"
+   }
+  ]
+ },
+ {
+  "wip_number": "202612",
+  "wip_description": "Adj Angle Brkt - Socket",
+  "finish_goods": [
+   {
+    "fg_number": "826837",
+    "fg_description": "Adj Angle Brkt"
+   }
+  ]
+ },
+ {
+  "wip_number": "202613",
+  "wip_description": "190 Tramway - Bottom",
+  "finish_goods": [
+   {
+    "fg_number": "826822",
+    "fg_description": "190 Tramway"
+   }
+  ]
+ },
+ {
+  "wip_number": "202614",
+  "wip_description": "190 Tramway - Top",
+  "finish_goods": [
+   {
+    "fg_number": "826822",
+    "fg_description": "190 Tramway"
+   }
+  ]
+ },
+ {
+  "wip_number": "202615",
+  "wip_description": "115 Tramway - Top",
+  "finish_goods": [
+   {
+    "fg_number": "826836",
+    "fg_description": "115 Tramway"
+   }
+  ]
+ },
+ {
+  "wip_number": "202616",
+  "wip_description": "115 Tramway - Bottom",
+  "finish_goods": [
+   {
+    "fg_number": "826836",
+    "fg_description": "115 Tramway"
+   }
+  ]
+ },
+ {
+  "wip_number": "202617",
+  "wip_description": "B1 Ears",
+  "finish_goods": [
+   {
+    "fg_number": "828133",
+    "fg_description": "TX Channel"
+   }
+  ]
+ },
+ {
+  "wip_number": "202618",
+  "wip_description": "TX Angle",
+  "finish_goods": [
+   {
+    "fg_number": "826846",
+    "fg_description": "#4 TX Band"
+   }
+  ]
+ },
+ {
+  "wip_number": "202619",
+  "wip_description": "50 Dia Adj Angle Brkt - 32NB",
+  "finish_goods": [
+   {
+    "fg_number": "828146",
+    "fg_description": "50 Dia Adj Angle Brkt"
+   }
+  ]
+ },
+ {
+  "wip_number": "202620",
+  "wip_description": "50 Dia Adj Angle Brkt - 50NB",
+  "finish_goods": [
+   {
+    "fg_number": "828146",
+    "fg_description": "50 Dia Adj Angle Brkt"
+   }
+  ]
+ },
+ {
+  "wip_number": "202621",
+  "wip_description": "Pillar Box Legs",
+  "finish_goods": [
+   {
+    "fg_number": "826840",
+    "fg_description": "Pillar Box"
+   }
+  ]
+ },
+ {
+  "wip_number": "202622",
+  "wip_description": "Strap Pole TFMR - Brkt 1",
+  "finish_goods": [
+   {
+    "fg_number": "826827",
+    "fg_description": "Strap Pole TFMR"
+   }
+  ]
+ },
+ {
+  "wip_number": "202623",
+  "wip_description": "Strap Pole TFMR - Brkt 2",
+  "finish_goods": [
+   {
+    "fg_number": "826827",
+    "fg_description": "Strap Pole TFMR"
+   }
+  ]
+ },
+ {
+  "wip_number": "202624",
+  "wip_description": "OH Service Raiser",
+  "finish_goods": [
+   {
+    "fg_number": "828134",
+    "fg_description": "OH Service Raiser"
+   }
+  ]
+ },
+ {
+  "wip_number": "202625",
+  "wip_description": "OH Service Raiser Hook",
+  "finish_goods": [
+   {
+    "fg_number": "828134",
+    "fg_description": "OH Service Raiser"
+   }
+  ]
+ },
+ {
+  "wip_number": "202626",
+  "wip_description": "Xarm Assy Angle 125 x 75 x 6mm",
+  "finish_goods": [
+   {
+    "fg_number": "826829",
+    "fg_description": "Xarm Assy Brkt - PCR"
+   }
+  ]
+ },
+ {
+  "wip_number": "202627",
+  "wip_description": "Xarm Assy Body PCR",
+  "finish_goods": [
+   {
+    "fg_number": "826829",
+    "fg_description": "Xarm Assy Brkt - PCR"
+   }
+  ]
+ },
+ {
+  "wip_number": "202628",
+  "wip_description": "Bridging Brkt Legs - Square",
+  "finish_goods": [
+   {
+    "fg_number": "826839",
+    "fg_description": "Bridging Brkt Type 1"
+   }
+  ]
+ },
+ {
+  "wip_number": "202629",
+  "wip_description": "Bridging Bracket Type 1 Body",
+  "finish_goods": [
+   {
+    "fg_number": "826839",
+    "fg_description": "Bridging Brkt Type 1"
+   }
+  ]
+ },
+ {
+  "wip_number": "202630",
+  "wip_description": "LVABC HOOK",
+  "finish_goods": [
+   {
+    "fg_number": "826824",
+    "fg_description": "LVABC Hook Brkt"
+   },
+   {
+    "fg_number": "828129",
+    "fg_description": "LV ABC Raiser"
+   }
+  ]
+ },
+ {
+  "wip_number": "202631",
+  "wip_description": "Ladder Rest 5 & 6 - Base",
+  "finish_goods": [
+   {
+    "fg_number": "828143",
+    "fg_description": "Ladder Rest 5 & 6"
+   }
+  ]
+ },
+ {
+  "wip_number": "202632",
+  "wip_description": "Ladder Rest 5 & 6 - SHS",
+  "finish_goods": [
+   {
+    "fg_number": "828143",
+    "fg_description": "Ladder Rest 5 & 6"
+   }
+  ]
+ },
+ {
+  "wip_number": "202633",
+  "wip_description": "Ladder Rest 5 & 6 - Flat Bar",
+  "finish_goods": [
+   {
+    "fg_number": "828143",
+    "fg_description": "Ladder Rest 5 & 6"
+   }
+  ]
+ },
+ {
+  "wip_number": "202634",
+  "wip_description": "Bracket-  \"P\" Top - Folded Channel",
+  "finish_goods": [
+   {
+    "fg_number": "828144",
+    "fg_description": "P Top - Jemena"
+   }
+  ]
+ },
+ {
+  "wip_number": "202635",
+  "wip_description": "Ladder Rest 450mm",
+  "finish_goods": [
+   {
+    "fg_number": "828142",
+    "fg_description": "Ladder Rest 450mm"
+   }
+  ]
+ },
+ {
+  "wip_number": "202636",
+  "wip_description": "Ladder Rest 450mm - Bracing",
+  "finish_goods": [
+   {
+    "fg_number": "828142",
+    "fg_description": "Ladder Rest 450mm"
+   }
+  ]
+ },
+ {
+  "wip_number": "202637",
+  "wip_description": "Buckarm SHS Body PCR",
+  "finish_goods": [
+   {
+    "fg_number": "826825",
+    "fg_description": "Buckarm - PCR"
+   }
+  ]
+ },
+ {
+  "wip_number": "202638",
+  "wip_description": "Top Hat Gusset",
+  "finish_goods": [
+   {
+    "fg_number": "828118",
+    "fg_description": "Top Hats"
+   },
+   {
+    "fg_number": "828141",
+    "fg_description": "Jemena Antenna Bracket"
+   }
+  ]
+ },
+ {
+  "wip_number": "202639",
+  "wip_description": "Top Hat Body",
+  "finish_goods": [
+   {
+    "fg_number": "828118",
+    "fg_description": "Top Hats"
+   },
+   {
+    "fg_number": "828141",
+    "fg_description": "Jemena Antenna Bracket"
+   }
+  ]
+ },
+ {
+  "wip_number": "202640",
+  "wip_description": "T54 Ears - Bend",
+  "finish_goods": [
+   {
+    "fg_number": "828139",
+    "fg_description": "Footpath Stay Strut"
+   }
+  ]
+ },
+ {
+  "wip_number": "202641",
+  "wip_description": "Cluster Brkt Body",
+  "finish_goods": [
+   {
+    "fg_number": "828110",
+    "fg_description": "Cluster Bracket"
+   }
+  ]
+ },
+ {
+  "wip_number": "202649",
+  "wip_description": "Cluster Brkt Angle",
+  "finish_goods": [
+   {
+    "fg_number": "828110",
+    "fg_description": "Cluster Bracket"
+   }
+  ]
+ },
+ {
+  "wip_number": "202650",
+  "wip_description": "110mm Xarm End Plate",
+  "finish_goods": [
+   {
+    "fg_number": "828138",
+    "fg_description": "66 KV Pole Top"
+   },
+   {
+    "fg_number": "828157",
+    "fg_description": "Crossarm Steel SL21"
+   }
+  ]
+ },
+ {
+  "wip_number": "202651",
+  "wip_description": "Pit Lifter",
+  "finish_goods": [
+   {
+    "fg_number": "828152",
+    "fg_description": "Pit Lifter"
+   }
+  ]
+ },
+ {
+  "wip_number": "202652",
+  "wip_description": "Pit Lifter - Round Bar",
+  "finish_goods": [
+   {
+    "fg_number": "828152",
+    "fg_description": "Pit Lifter"
+   }
+  ]
+ },
+ {
+  "wip_number": "202653",
+  "wip_description": "Adj Angle 20NB YOKE",
+  "finish_goods": [
+   {
+    "fg_number": "826852",
+    "fg_description": "27 Dia Adj Angle Brkt"
+   }
+  ]
+ },
+ {
+  "wip_number": "202654",
+  "wip_description": "Adj Angle 50NB YOKE",
+  "finish_goods": [
+   {
+    "fg_number": "826852",
+    "fg_description": "27 Dia Adj Angle Brkt"
+   }
+  ]
+ },
+ {
+  "wip_number": "202655",
+  "wip_description": "Poly Surge Adaptor Body",
+  "finish_goods": [
+   {
+    "fg_number": "828111",
+    "fg_description": "Surge Adaptor - SP"
+   }
+  ]
+ },
+ {
+  "wip_number": "202656",
+  "wip_description": "Poly Surge Adapator Base Plate",
+  "finish_goods": [
+   {
+    "fg_number": "828111",
+    "fg_description": "Surge Adaptor - SP"
+   }
+  ]
+ },
+ {
+  "wip_number": "202657",
+  "wip_description": "290 S/Band - A",
+  "finish_goods": [
+   {
+    "fg_number": "826801",
+    "fg_description": "290 S/Band (Downer only add thimble #1092)"
+   }
+  ]
+ },
+ {
+  "wip_number": "202658",
+  "wip_description": "290 S/Band - B",
+  "finish_goods": [
+   {
+    "fg_number": "826801",
+    "fg_description": "290 S/Band (Downer only add thimble #1092)"
+   }
+  ]
+ },
+ {
+  "wip_number": "202659",
+  "wip_description": "320 S/Band - A",
+  "finish_goods": [
+   {
+    "fg_number": "826802",
+    "fg_description": "320 S/Band (Downer only add thimble #1092)"
+   }
+  ]
+ },
+ {
+  "wip_number": "202660",
+  "wip_description": "320 S/Band - B",
+  "finish_goods": [
+   {
+    "fg_number": "826802",
+    "fg_description": "320 S/Band (Downer only add thimble #1092)"
+   }
+  ]
+ },
+ {
+  "wip_number": "202661",
+  "wip_description": "345 S/Band - A",
+  "finish_goods": [
+   {
+    "fg_number": "826803",
+    "fg_description": "345 S/Band (Downer only add thimble #1092)"
+   }
+  ]
+ },
+ {
+  "wip_number": "202662",
+  "wip_description": "345 S/Band - B",
+  "finish_goods": [
+   {
+    "fg_number": "826803",
+    "fg_description": "345 S/Band (Downer only add thimble #1092)"
+   }
+  ]
+ },
+ {
+  "wip_number": "202663",
+  "wip_description": "370 S/Band - A",
+  "finish_goods": [
+   {
+    "fg_number": "826804",
+    "fg_description": "370 S/Band (Downer only add thimble #1092)"
+   }
+  ]
+ },
+ {
+  "wip_number": "202664",
+  "wip_description": "370 S/Band - B",
+  "finish_goods": [
+   {
+    "fg_number": "826804",
+    "fg_description": "370 S/Band (Downer only add thimble #1092)"
+   }
+  ]
+ },
+ {
+  "wip_number": "202665",
+  "wip_description": "265 S/Band - A",
+  "finish_goods": [
+   {
+    "fg_number": "826814",
+    "fg_description": "265 S/Band (Downer only add thimble #1092)"
+   }
+  ]
+ },
+ {
+  "wip_number": "202666",
+  "wip_description": "265 S/Band - B",
+  "finish_goods": [
+   {
+    "fg_number": "826814",
+    "fg_description": "265 S/Band (Downer only add thimble #1092)"
+   }
+  ]
+ },
+ {
+  "wip_number": "202667",
+  "wip_description": "Earth & Short Brkt - 8mm Bar",
+  "finish_goods": [
+   {
+    "fg_number": "828167",
+    "fg_description": "Earth and Short Bracket"
+   }
+  ]
+ },
+ {
+  "wip_number": "202668",
+  "wip_description": "Earth & Short Brkt - 10mm Bar",
+  "finish_goods": [
+   {
+    "fg_number": "828167",
+    "fg_description": "Earth and Short Bracket"
+   }
+  ]
+ },
+ {
+  "wip_number": "202669",
+  "wip_description": "Earth & Short Brkt - Plate",
+  "finish_goods": [
+   {
+    "fg_number": "828167",
+    "fg_description": "Earth and Short Bracket"
+   }
+  ]
+ },
+ {
+  "wip_number": "202670",
+  "wip_description": "Laser OH Service Raiser Cap - 45x45x3",
+  "finish_goods": [
+   {
+    "fg_number": "828134",
+    "fg_description": "OH Service Raiser"
+   }
+  ]
+ },
+ {
+  "wip_number": "202671",
+  "wip_description": "OH Service Raiser - Hook End",
+  "finish_goods": [
+   {
+    "fg_number": "828134",
+    "fg_description": "OH Service Raiser"
+   }
+  ]
+ },
+ {
+  "wip_number": "202672",
+  "wip_description": "Bridging Brkt Legs - Angle",
+  "finish_goods": [
+   {
+    "fg_number": "826839",
+    "fg_description": "Bridging Brkt Type 1"
+   }
+  ]
+ },
+ {
+  "wip_number": "202673",
+  "wip_description": "Pole Chock - Centre Block - Cut",
+  "finish_goods": [
+   {
+    "fg_number": "826831",
+    "fg_description": "Pole Chock"
+   }
+  ]
+ },
+ {
+  "wip_number": "202674",
+  "wip_description": "Pole Chock - Rear Block - Drill Hole",
+  "finish_goods": [
+   {
+    "fg_number": "826831",
+    "fg_description": "Pole Chock"
+   }
+  ]
+ },
+ {
+  "wip_number": "202675",
+  "wip_description": "Pole Chock - Gusset",
+  "finish_goods": [
+   {
+    "fg_number": "826831",
+    "fg_description": "Pole Chock"
+   }
+  ]
+ },
+ {
+  "wip_number": "202676",
+  "wip_description": "Buckarm Gusset - 6mm",
+  "finish_goods": [
+   {
+    "fg_number": "826825",
+    "fg_description": "Buckarm - PCR"
+   },
+   {
+    "fg_number": "828122",
+    "fg_description": "Buckarm"
+   }
+  ]
+ },
+ {
+  "wip_number": "202677",
+  "wip_description": "Bracket Insulator with Short Stud - Leg",
+  "finish_goods": [
+   {
+    "fg_number": "826833",
+    "fg_description": "Bracket Insulator with Short Stud"
+   },
+   {
+    "fg_number": "828147",
+    "fg_description": "Lug"
+   }
+  ]
+ },
+ {
+  "wip_number": "202678",
+  "wip_description": "Bracket Insulator with Short Stud - Body",
+  "finish_goods": [
+   {
+    "fg_number": "826833",
+    "fg_description": "Bracket Insulator with Short Stud"
+   }
+  ]
+ },
+ {
+  "wip_number": "202679",
+  "wip_description": "Pipe Medium 25NB - Crop to length",
+  "finish_goods": [
+   {
+    "fg_number": "828176",
+    "fg_description": "X-ARM,STEEL,SL24,3200MMLG,STRAIN"
+   }
+  ]
+ },
+ {
+  "wip_number": "202680",
+  "wip_description": "Laser Cut Buckarm Top Plate 95 x 75 x 3mm",
+  "finish_goods": [
+   {
+    "fg_number": "826825",
+    "fg_description": "Buckarm - PCR"
+   },
+   {
+    "fg_number": "828122",
+    "fg_description": "Buckarm"
+   },
+   {
+    "fg_number": "828136",
+    "fg_description": "Buckarm T Support"
+   }
+  ]
+ },
+ {
+  "wip_number": "202681",
+  "wip_description": "M24 Thread Rod (Cut 45mm)",
+  "finish_goods": [
+   {
+    "fg_number": "828102",
+    "fg_description": "Centre Phase Insulator"
+   }
+  ]
+ },
+ {
+  "wip_number": "202682",
+  "wip_description": "M16 Zinc Threaded Rod",
+  "finish_goods": [
+   {
+    "fg_number": "828147",
+    "fg_description": "Lug"
+   }
+  ]
+ },
+ {
+  "wip_number": "202683",
+  "wip_description": "235 S/Band - A",
+  "finish_goods": [
+   {
+    "fg_number": "828156",
+    "fg_description": "Bracket-Stay No 235"
+   }
+  ]
+ },
+ {
+  "wip_number": "202684",
+  "wip_description": "235 S/Band - B",
+  "finish_goods": [
+   {
+    "fg_number": "828156",
+    "fg_description": "Bracket-Stay No 235"
+   }
+  ]
+ },
+ {
+  "wip_number": "202685",
+  "wip_description": "Laser Cut 66KV Cent Phase Gusset - 5mm",
+  "finish_goods": [
+   {
+    "fg_number": "828137",
+    "fg_description": "66 KV Centre Phase Ins"
+   }
+  ]
+ },
+ {
+  "wip_number": "202686",
+  "wip_description": "LVABC Hook Brkt - Plate",
+  "finish_goods": [
+   {
+    "fg_number": "826824",
+    "fg_description": "LVABC Hook Brkt"
+   }
+  ]
+ },
+ {
+  "wip_number": "202687",
+  "wip_description": "End Plate - 135 x 135 with M24 Nut",
+  "finish_goods": [
+   {
+    "fg_number": "828174",
+    "fg_description": "Crossarm Steel SL22 - Downer"
+   }
+  ]
+ },
+ {
+  "wip_number": "202688",
+  "wip_description": "End Plate - 110 x 110 with M24 Nut",
+  "finish_goods": [
+   {
+    "fg_number": "828176",
+    "fg_description": "X-ARM,STEEL,SL24,3200MMLG,STRAIN"
+   }
+  ]
+ },
+ {
+  "wip_number": "202689",
+  "wip_description": "Pipe Medium 25NB - Crop to length",
+  "finish_goods": [
+   {
+    "fg_number": "828174",
+    "fg_description": "Crossarm Steel SL22 - Downer"
+   }
+  ]
+ },
+ {
+  "wip_number": "202691",
+  "wip_description": "Pillar Boxes Sheet 2.5mm x 340 Wide - Bend",
+  "finish_goods": [
+   {
+    "fg_number": "826840",
+    "fg_description": "Pillar Box"
+   }
+  ]
+ },
+ {
+  "wip_number": "202692",
+  "wip_description": "Backarm 'T' Piece Attachment Plate",
+  "finish_goods": [
+   {
+    "fg_number": "828136",
+    "fg_description": "Buckarm T Support"
+   }
+  ]
+ },
+ {
+  "wip_number": "202693",
+  "wip_description": "M12 Thread Rod Zinc Plated",
+  "finish_goods": [
+   {
+    "fg_number": "826838",
+    "fg_description": "1.5 m Residential Lantern"
+   },
+   {
+    "fg_number": "826857",
+    "fg_description": "VX15/307/007 - CrossArm Mouting Bracket 0.7m"
+   }
+  ]
+ },
+ {
+  "wip_number": "202694",
+  "wip_description": "1.5m Residential Lantern - Angle Bracket",
+  "finish_goods": [
+   {
+    "fg_number": "826838",
+    "fg_description": "1.5 m Residential Lantern"
+   },
+   {
+    "fg_number": "826857",
+    "fg_description": "VX15/307/007 - CrossArm Mouting Bracket 0.7m"
+   }
+  ]
+ },
+ {
+  "wip_number": "202695",
+  "wip_description": "TX Channel Gusset",
+  "finish_goods": [
+   {
+    "fg_number": "828133",
+    "fg_description": "TX Channel"
+   }
+  ]
+ },
+ {
+  "wip_number": "202696",
+  "wip_description": "Polly Surge Div - Plate",
+  "finish_goods": [
+   {
+    "fg_number": "828109",
+    "fg_description": "Polly Surge Div"
+   }
+  ]
+ },
+ {
+  "wip_number": "202697",
+  "wip_description": "Poly SD - Plate 1",
+  "finish_goods": [
+   {
+    "fg_number": "826826",
+    "fg_description": "Cluster Brkt - Bird Type"
+   }
+  ]
+ },
+ {
+  "wip_number": "202698",
+  "wip_description": "Poly SD - Plate 2",
+  "finish_goods": [
+   {
+    "fg_number": "826826",
+    "fg_description": "Cluster Brkt - Bird Type"
+   }
+  ]
+ },
+ {
+  "wip_number": "202700",
+  "wip_description": "Round Bar 10mm - 270mm -",
+  "finish_goods": [
+   {
+    "fg_number": "828177",
+    "fg_description": "Raiser Bracket- Service Cable on LV Strain Xarm"
+   }
+  ]
+ },
+ {
+  "wip_number": "202701",
+  "wip_description": "Laser Cut Cluster Brkt Gusset 32mm x 6mm x 280mm",
+  "finish_goods": [
+   {
+    "fg_number": "828110",
+    "fg_description": "Cluster Bracket"
+   }
+  ]
+ },
+ {
+  "wip_number": "202702",
+  "wip_description": "Laser Cut Aerial Stay Small Radius",
+  "finish_goods": [
+   {
+    "fg_number": "828155",
+    "fg_description": "Aerial Stay #2"
+   }
+  ]
+ },
+ {
+  "wip_number": "202703",
+  "wip_description": "Laser Cut Aerial Stay Large Radius",
+  "finish_goods": [
+   {
+    "fg_number": "828155",
+    "fg_description": "Aerial Stay #2"
+   }
+  ]
+ },
+ {
+  "wip_number": "202704",
+  "wip_description": "Laser Cut Aerial Stay Lug",
+  "finish_goods": [
+   {
+    "fg_number": "828155",
+    "fg_description": "Aerial Stay #2"
+   }
+  ]
+ },
+ {
+  "wip_number": "202705",
+  "wip_description": "Tri Bracket - Body",
+  "finish_goods": [
+   {
+    "fg_number": "828228",
+    "fg_description": "Tri Bracket"
+   }
+  ]
+ },
+ {
+  "wip_number": "202706",
+  "wip_description": "Tri Bracket - Base Plate",
+  "finish_goods": [
+   {
+    "fg_number": "828228",
+    "fg_description": "Tri Bracket"
+   }
+  ]
+ },
+ {
+  "wip_number": "202707",
+  "wip_description": "Tri Bracket - Gusset",
+  "finish_goods": [
+   {
+    "fg_number": "828228",
+    "fg_description": "Tri Bracket"
+   }
+  ]
+ },
+ {
+  "wip_number": "202710",
+  "wip_description": "Ladder Rest 5 & 6 - Angle",
+  "finish_goods": [
+   {
+    "fg_number": "828143",
+    "fg_description": "Ladder Rest 5 & 6"
+   }
+  ]
+ },
+ {
+  "wip_number": "202711",
+  "wip_description": "Crossarm Steel SL21",
+  "finish_goods": [
+   {
+    "fg_number": "828129",
+    "fg_description": "LV ABC Raiser"
+   },
+   {
+    "fg_number": "828157",
+    "fg_description": "Crossarm Steel SL21"
+   }
+  ]
+ },
+ {
+  "wip_number": "202712",
+  "wip_description": "LVABC Hook for Raiser Bracket",
+  "finish_goods": [
+   {
+    "fg_number": "828129",
+    "fg_description": "LV ABC Raiser"
+   }
+  ]
+ },
+ {
+  "wip_number": "202713",
+  "wip_description": "Ladder Rest 450mm - Bracket",
+  "finish_goods": [
+   {
+    "fg_number": "828142",
+    "fg_description": "Ladder Rest 450mm"
+   }
+  ]
+ },
+ {
+  "wip_number": "202714",
+  "wip_description": "ISOL Plate Large 8mm -",
+  "finish_goods": [
+   {
+    "fg_number": "828145",
+    "fg_description": "ISOL Bracket"
+   }
+  ]
+ },
+ {
+  "wip_number": "202715",
+  "wip_description": "ISOL Plate Small 8mm -",
+  "finish_goods": [
+   {
+    "fg_number": "828145",
+    "fg_description": "ISOL Bracket"
+   }
+  ]
+ },
+ {
+  "wip_number": "202716",
+  "wip_description": "202716 - Press Brake Channel",
+  "finish_goods": [
+   {
+    "fg_number": "828186",
+    "fg_description": "Extreme Offset"
+   }
+  ]
+ },
+ {
+  "wip_number": "202717",
+  "wip_description": "202717 - Press Brake Bracket",
+  "finish_goods": [
+   {
+    "fg_number": "828186",
+    "fg_description": "Extreme Offset"
+   }
+  ]
+ },
+ {
+  "wip_number": "202718",
+  "wip_description": "Pillar Boxes Bend - Common",
+  "finish_goods": [
+   {
+    "fg_number": "826840",
+    "fg_description": "Pillar Box"
+   }
+  ]
+ },
+ {
+  "wip_number": "202720",
+  "wip_description": "140 Tramway - Top",
+  "finish_goods": [
+   {
+    "fg_number": "826806",
+    "fg_description": "140 Tramway"
+   }
+  ]
+ },
+ {
+  "wip_number": "202721",
+  "wip_description": "140 Tramway - Bottom",
+  "finish_goods": [
+   {
+    "fg_number": "826806",
+    "fg_description": "140 Tramway"
+   }
+  ]
+ }
+]

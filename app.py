@@ -130,6 +130,28 @@ class Label(db.Model):
         }
 
 
+class Mapping(db.Model):
+    """One WIP part → the finished good(s) it rolls up into (Look Up module)."""
+    __tablename__ = "mappings"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    wip_number = db.Column(db.Text, nullable=False, default="")
+    wip_description = db.Column(db.Text, nullable=False, default="")
+    finish_goods = db.Column(db.Text, nullable=False, default="[]")  # JSON: [{fg_number, fg_description}]
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "wip_number": self.wip_number,
+            "wip_description": self.wip_description,
+            "finish_goods": json.loads(self.finish_goods or "[]"),
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
+
+
 def _migrate():
     """Migrate steps.image → image_blobs + steps.image_hash if needed."""
     is_sqlite = db.engine.dialect.name == "sqlite"
@@ -179,12 +201,26 @@ with app.app_context():
         for _stmt in (
             "ALTER TABLE sops ADD COLUMN format_key TEXT NOT NULL DEFAULT 'a3-landscape'",
             "ALTER TABLE sops ADD COLUMN steps_per_page INTEGER NOT NULL DEFAULT 8",
+            "CREATE UNIQUE INDEX IF NOT EXISTS ix_mappings_wip ON mappings (wip_number)",
         ):
             try:
                 _conn.execute(text(_stmt))
                 _conn.commit()
             except Exception:
                 pass
+
+    # Seed Look Up master data (IXL Search DB) from lookup_seed.json on an empty table.
+    if Mapping.query.count() == 0:
+        _seed_path = os.path.join(os.path.dirname(__file__), "lookup_seed.json")
+        if os.path.exists(_seed_path):
+            with open(_seed_path, encoding="utf-8") as _f:
+                for _m in json.load(_f):
+                    db.session.add(Mapping(
+                        wip_number=_m.get("wip_number", ""),
+                        wip_description=_m.get("wip_description", ""),
+                        finish_goods=json.dumps(_m.get("finish_goods", [])),
+                    ))
+            db.session.commit()
 
 
 # ── Health check ──────────────────────────────────────────────────────────────
@@ -470,6 +506,120 @@ def delete_label(label_id):
         db.session.delete(label)
         db.session.commit()
     return "", 204
+
+
+# ── API: Look Up (WIP → Finish Good mappings) ─────────────────────────────────
+
+def _clean_fgs(raw) -> list:
+    """Normalize an incoming finish_goods list, dropping empty rows."""
+    out = []
+    for fg in raw or []:
+        num = (fg.get("fg_number") or "").strip()
+        desc = (fg.get("fg_description") or "").strip()
+        if num or desc:
+            out.append({"fg_number": num, "fg_description": desc})
+    return out
+
+
+def _find_mapping_by_wip(wip: str, exclude_id: str | None = None):
+    """Return the mapping whose WIP number matches (case-insensitive), or None."""
+    key = (wip or "").strip().upper()
+    if not key:
+        return None
+    for m in Mapping.query.all():
+        if m.id == exclude_id:
+            continue
+        if (m.wip_number or "").strip().upper() == key:
+            return m
+    return None
+
+
+@app.route("/api/mappings", methods=["GET"])
+def list_mappings():
+    rows = Mapping.query.order_by(Mapping.updated_at.desc()).all()
+    return jsonify([m.to_dict() for m in rows])
+
+
+@app.route("/api/mappings", methods=["POST"])
+def create_mapping():
+    d = request.get_json(silent=True) or {}
+    wip = (d.get("wip_number") or "").strip()
+    desc = (d.get("wip_description") or "").strip()
+    new_fgs = _clean_fgs(d.get("finish_goods"))
+
+    # If this WIP already exists, merge the new finished goods into it
+    # (dedupe by FG number) instead of creating a duplicate row.
+    existing = _find_mapping_by_wip(wip)
+    if existing:
+        fgs = json.loads(existing.finish_goods or "[]")
+        have = {(f.get("fg_number") or "").strip().upper() for f in fgs}
+        for fg in new_fgs:
+            if fg["fg_number"].upper() not in have:
+                fgs.append(fg)
+                have.add(fg["fg_number"].upper())
+        existing.finish_goods = json.dumps(fgs)
+        if desc:
+            existing.wip_description = desc
+        existing.updated_at = datetime.utcnow()
+        db.session.commit()
+        resp = existing.to_dict()
+        resp["merged"] = True
+        return jsonify(resp), 200
+
+    m = Mapping(wip_number=wip, wip_description=desc,
+                finish_goods=json.dumps(new_fgs))
+    db.session.add(m)
+    db.session.commit()
+    return jsonify(m.to_dict()), 201
+
+
+@app.route("/api/mappings/<mapping_id>", methods=["GET"])
+def get_mapping(mapping_id: str):
+    m = db.get_or_404(Mapping, mapping_id)
+    return jsonify(m.to_dict())
+
+
+@app.route("/api/mappings/<mapping_id>", methods=["PUT"])
+def update_mapping(mapping_id: str):
+    m = db.get_or_404(Mapping, mapping_id)
+    d = request.get_json(silent=True) or {}
+    if "wip_number" in d:
+        new_wip = (d.get("wip_number") or "").strip()
+        clash = _find_mapping_by_wip(new_wip, exclude_id=m.id)
+        if clash:
+            return jsonify({
+                "error": f"WIP {new_wip} is already mapped. Edit that mapping instead.",
+                "existing_id": clash.id,
+            }), 409
+        m.wip_number = new_wip
+    if "wip_description" in d:
+        m.wip_description = (d.get("wip_description") or "").strip()
+    if "finish_goods" in d:
+        m.finish_goods = json.dumps(_clean_fgs(d.get("finish_goods")))
+    m.updated_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify(m.to_dict())
+
+
+@app.route("/api/mappings/<mapping_id>", methods=["DELETE"])
+def delete_mapping(mapping_id: str):
+    m = db.session.get(Mapping, mapping_id)
+    if m:
+        db.session.delete(m)
+        db.session.commit()
+    return "", 204
+
+
+@app.route("/api/lookup", methods=["GET"])
+def lookup_wip():
+    """Operator lookup: exact (normalized) WIP number → mapping, or 404."""
+    q = (request.args.get("wip") or "").strip()
+    if not q:
+        return jsonify({"error": "no query"}), 400
+    m = _find_mapping_by_wip(q)
+    if m:
+        return jsonify(m.to_dict())
+    return jsonify({"error": "not found", "query": q.upper()}), 404
 
 
 if __name__ == "__main__":
