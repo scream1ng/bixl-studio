@@ -307,7 +307,7 @@
         <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
       </button>
       <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Label</span>
-      <button onclick="enterLabelNew()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;color:#CC0000;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
+      <button disabled title="Create labels on desktop" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;cursor:not-allowed;">+</button>
     </header>
     <!-- desktop header -->
     <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
@@ -410,7 +410,7 @@
 <div id="screen-label" class="screen">
 
   <!-- mobile header -->
-  <header class="mb-only" style="height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);background:#fff;">
+  <header class="mb-only" style="height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);background:#F5F4F1;">
     <button onclick="enterLabel()" style="color:#1A1A1A;font-size:15px;font-weight:600;padding:8px 2px;">&#8249; Home</button>
     <span style="font-weight:700;font-size:14px;color:#1A1A1A;">New label</span>
     <span style="width:52px;"></span>
@@ -601,7 +601,7 @@
         <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
       </button>
       <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Look Up</span>
-      <button onclick="lookupNew()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;color:#CC0000;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
+      <button disabled title="Create mappings on desktop" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;cursor:not-allowed;">+</button>
     </header>
     <!-- desktop header -->
     <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
@@ -722,14 +722,14 @@
 
 <!-- ═══════════════════ LOOK UP — MOBILE OPERATOR ═══════════════════ -->
 <div id="screen-lookup-mobile" class="screen" style="flex-direction:column;background:#F5F4F1;">
-  <header style="height:62px;display:flex;align-items:center;padding:0 18px;flex-shrink:0;">
-    <button onclick="openDrawer()" style="width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex-shrink:0;">
-      <span style="width:19px;height:2.5px;background:#CC0000;border-radius:1px;display:block;"></span>
-      <span style="width:19px;height:2.5px;background:#CC0000;border-radius:1px;display:block;"></span>
-      <span style="width:19px;height:2.5px;background:#CC0000;border-radius:1px;display:block;"></span>
+  <header style="height:58px;display:flex;align-items:center;padding:0 18px;flex-shrink:0;">
+    <button onclick="openDrawer()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex-shrink:0;">
+      <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+      <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+      <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
     </button>
-    <span id="lu-m-title" style="flex:1;text-align:center;font-size:21px;font-weight:700;color:#1A1A1A;">Look Up</span>
-    <div style="width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;color:#9B9B9B;font-size:19px;font-weight:700;">?</div>
+    <span id="lu-m-title" style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Look Up</span>
+    <button disabled title="Create mappings on desktop" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;cursor:not-allowed;">+</button>
   </header>
 
   <!-- entry -->
@@ -1200,12 +1200,18 @@ function enterSop() {
   showScreen('home');
 }
 
+function isMobile() { return window.matchMedia('(max-width: 767px)').matches; }
+
 function enterLabel() {
   if (window._lbRefresh) window._lbRefresh();
   showScreen('label-list');
 }
 
 function enterLabelNew() {
+  if (isMobile()) {
+    toast('Create labels on desktop — STEP upload not supported on phone');
+    return;
+  }
   if (window._lbNew) window._lbNew();
   showScreen('label');
 }
@@ -1216,7 +1222,7 @@ let _luEditingId = null;  // null = new mapping
 let _luFgRows = [];       // form FG rows: [{fg_number, fg_description}]
 
 function enterLookup() {
-  if (window.matchMedia('(max-width: 767px)').matches) {
+  if (isMobile()) {
     lookupMobileReset();
     showScreen('lookup-mobile');
     setTimeout(() => $('lu-m-input')?.focus(), 80);
@@ -1268,6 +1274,10 @@ function renderLookupList() {
 function lookupFilter() { renderLookupList(); }
 
 function lookupNew() {
+  if (isMobile()) {
+    toast('Create mappings on desktop — not supported on phone');
+    return;
+  }
   _luEditingId = null;
   _luFgRows = [{ fg_number: '', fg_description: '' }];
   $('lu-form-title').textContent = 'New mapping';
@@ -1422,7 +1432,7 @@ async function openSop(id) {
       if (s.image_hash) { _serverHashes.add(s.image_hash); }
       else if (s.image) { const h = await sha256Hex(s.image); if (h) _serverHashes.add(h); }
     }));
-    if (window.matchMedia('(max-width: 767px)').matches) {
+    if (isMobile()) {
       if (!sop.steps.length) sop.steps.push({ id: uuid(), index: 0, image: null, text: '', annotations: [] });
       state.captureIndex = 0;
       showScreen('capture');
