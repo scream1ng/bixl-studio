@@ -15,6 +15,7 @@ try:
     from cad.geometry import step_to_edges_json, brep_edges
     from cad.preview import step_to_stl, shape_to_stl
     from cad.loader import load_step
+    from cad.icl import faced_mesh, indexed_edges, measure_from_file, suggest
     from exports.jpg import step_to_jpg
     _OCC_AVAILABLE = True
 except ImportError:
@@ -242,3 +243,92 @@ async def flat_pattern(
         media_type="image/svg+xml",
         headers={"X-Flat-Pattern-Meta": json.dumps(meta)},
     )
+
+
+# ---------------------------------------------------------------------------
+# ICL — inspection dimension picking / measuring
+# ---------------------------------------------------------------------------
+
+
+@app.post("/api/icl/mesh")
+async def icl_mesh(file: UploadFile = File(...)):
+    """Face-tagged mesh + per-face metadata for clickable surface picking."""
+    if not _OCC_AVAILABLE:
+        raise HTTPException(503, "ICL requires pythonocc-core")
+    _check_file(file)
+    data = await file.read()
+    if not data:
+        raise HTTPException(400, "Empty file")
+    tmp_path = _save_upload(data)
+    try:
+        result = faced_mesh(load_step(tmp_path))
+    except Exception as e:
+        raise HTTPException(500, f"Mesh error: {e}")
+    finally:
+        os.unlink(tmp_path)
+    return JSONResponse(content=result)
+
+
+@app.post("/api/icl/edges")
+async def icl_edges(file: UploadFile = File(...)):
+    """Edges with stable ids + curve type for clickable edge picking."""
+    if not _OCC_AVAILABLE:
+        raise HTTPException(503, "ICL requires pythonocc-core")
+    _check_file(file)
+    data = await file.read()
+    if not data:
+        raise HTTPException(400, "Empty file")
+    tmp_path = _save_upload(data)
+    try:
+        result = indexed_edges(load_step(tmp_path))
+    except Exception as e:
+        raise HTTPException(500, f"Edge error: {e}")
+    finally:
+        os.unlink(tmp_path)
+    return JSONResponse(content={"edges": result})
+
+
+@app.post("/api/icl/measure")
+async def icl_measure(
+    file: UploadFile = File(...),
+    kind1: str = Query(..., regex="^(face|edge)$"),
+    id1: int = Query(..., ge=1),
+    kind2: str = Query(..., regex="^(face|edge)$"),
+    id2: int = Query(..., ge=1),
+):
+    """Distance between two picked entities -> value + closest points."""
+    if not _OCC_AVAILABLE:
+        raise HTTPException(503, "ICL requires pythonocc-core")
+    _check_file(file)
+    data = await file.read()
+    if not data:
+        raise HTTPException(400, "Empty file")
+    tmp_path = _save_upload(data)
+    try:
+        result = measure_from_file(tmp_path, kind1, id1, kind2, id2)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+    except Exception as e:
+        raise HTTPException(500, f"Measure error: {e}")
+    finally:
+        os.unlink(tmp_path)
+    return JSONResponse(content=result)
+
+
+@app.post("/api/icl/suggest")
+async def icl_suggest(file: UploadFile = File(...)):
+    """Auto-extract candidate inspection checks (bbox, holes, bend angles)."""
+    if not _OCC_AVAILABLE:
+        raise HTTPException(503, "ICL requires pythonocc-core")
+    _check_file(file)
+    data = await file.read()
+    if not data:
+        raise HTTPException(400, "Empty file")
+    tmp_path = _save_upload(data)
+    try:
+        result = suggest(tmp_path)
+    except Exception as e:
+        raise HTTPException(500, f"Suggest error: {e}")
+    finally:
+        os.unlink(tmp_path)
+    return JSONResponse(content=result)

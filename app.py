@@ -17,6 +17,7 @@ from sqlalchemy import text
 
 from modules.sop.fill import fill_sop as _fill_sop
 from modules.label import step_to_wireframe, step_to_mesh_and_edges
+from modules.icl import icl_mesh, icl_edges, icl_suggest, icl_measure
 
 app = Flask(__name__)
 
@@ -452,6 +453,55 @@ def label_generate():
         as_attachment=True,
         download_name=f"{filename.rsplit('.', 1)[0]}_label.jpg",
     )
+
+
+# ── ICL module (inspection measuring) ─────────────────────────────────────────
+
+@app.route("/api/icl/mesh", methods=["POST"])
+def icl_mesh_route():
+    """Face-tagged mesh + per-face metadata + indexed edges for the viewer."""
+    f = request.files.get("file")
+    if not f:
+        return jsonify({"error": "no file"}), 400
+    step_bytes = f.read()
+    filename = f.filename or "part.step"
+    try:
+        mesh = icl_mesh(step_bytes, filename)
+        edges = icl_edges(step_bytes, filename)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 502
+    return jsonify({"mesh": mesh, "edges": edges["edges"]})
+
+
+@app.route("/api/icl/suggest", methods=["POST"])
+def icl_suggest_route():
+    f = request.files.get("file")
+    if not f:
+        return jsonify({"error": "no file"}), 400
+    try:
+        result = icl_suggest(f.read(), f.filename or "part.step")
+    except Exception as e:
+        return jsonify({"error": str(e)}), 502
+    return jsonify(result)
+
+
+@app.route("/api/icl/measure", methods=["POST"])
+def icl_measure_route():
+    f = request.files.get("file")
+    if not f:
+        return jsonify({"error": "no file"}), 400
+    try:
+        result = icl_measure(
+            f.read(),
+            kind1=request.form.get("kind1", "face"),
+            id1=int(request.form.get("id1")),
+            kind2=request.form.get("kind2", "face"),
+            id2=int(request.form.get("id2")),
+            filename=f.filename or "part.step",
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 502
+    return jsonify(result)
 
 
 # ── Label history (exported JPGs) ─────────────────────────────────────────────
