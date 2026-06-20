@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script type="importmap">
   {
     "imports": {
@@ -123,10 +123,9 @@
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.2;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
@@ -170,14 +169,13 @@
             <div style="font-size:15px;font-weight:700;color:#1A1A1A;">Look Up</div>
             <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">Finish Good &#8596; WIP finder</div>
           </div>        </div>
-        <!-- ICL soon -->
-        <div style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;opacity:0.5;">
-          <div style="width:44px;height:44px;border-radius:12px;background:#E8E6E2;color:#A8A8A8;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">ICL</div>
+        <!-- ICL -->
+        <div class="module-card" id="landing-icl-card" onclick="enterIcl()" style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow 0.12s;">
+          <div style="width:44px;height:44px;border-radius:12px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">ICL</div>
           <div style="flex:1;min-width:0;">
             <div style="font-size:15px;font-weight:700;color:#1A1A1A;">Inspection Checklist</div>
-            <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">Quality checks</div>
+            <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">Measure dimensions from CAD</div>
           </div>
-          <span style="font-size:10px;font-weight:700;color:#8A8A8A;border:1px solid #D4D2CE;padding:4px 8px;border-radius:20px;flex-shrink:0;">SOON</span>
         </div>
         <!-- MLB soon -->
         <div style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;opacity:0.5;">
@@ -217,10 +215,9 @@
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.2;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
@@ -285,10 +282,9 @@
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.2;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
@@ -352,10 +348,9 @@
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.2;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
@@ -438,10 +433,9 @@
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.2;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
@@ -555,6 +549,157 @@
   <input type="file" id="lb-file-input" accept=".step,.stp" style="display:none;">
 </div>
 
+<!-- ═══════════════════ ICL — INSPECTION CHECKLIST (web) ═══════════════════ -->
+<div id="screen-icl" class="screen">
+
+  <!-- mobile header -->
+  <header class="mb-only" style="height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);background:#F5F4F1;">
+    <button onclick="goLanding()" style="color:#1A1A1A;font-size:15px;font-weight:600;padding:8px 2px;">&#8249; Home</button>
+    <span style="font-weight:700;font-size:14px;color:#1A1A1A;">Inspection</span>
+    <span style="width:52px;"></span>
+  </header>
+
+  <!-- Left: module nav -->
+  <aside class="shell-rail" style="display:flex;flex-direction:column;">
+    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;flex-shrink:0;">
+      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
+      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
+      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
+    </div>
+    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;flex-shrink:0;">PRODUCTS</div>
+    <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
+      <div class="rail-item" onclick="enterSop()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
+      </div>
+      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
+      </div>
+      <div class="rail-item" onclick="enterLookup()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
+      </div>
+      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;cursor:pointer;transition:background 0.1s;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#9A9A9A;">Quality checks</div></div>
+        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.2;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">MLB / PFC</div><div style="font-size:11px;color:#6E6E6E;">BOM &amp; flow</div></div>
+        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+      </div>
+    </div>
+    <div style="flex:1;min-height:0;"></div>
+  </aside>
+
+  <!-- Center: CAD viewer stage -->
+  <main id="icl-preview-panel" style="flex:1;min-width:0;display:flex;flex-direction:column;background:#FCFBFA;border:1px solid #E6E3DE;border-radius:20px;overflow:hidden;position:relative;">
+    <!-- top bar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 18px;flex-shrink:0;border-bottom:1px solid #ECEAE6;">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0;">
+        <span style="width:30px;height:30px;border-radius:8px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">&#9712;</span>
+        <div style="min-width:0;">
+          <div id="icl-filename" style="font-size:13.5px;font-weight:600;color:#1A1A1A;font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">No file loaded</div>
+          <div id="icl-filesub" style="font-size:11px;color:#9A9A9A;margin-top:1px;">Import a STEP file to begin</div>
+        </div>
+      </div>
+      <!-- file-type toggle -->
+      <div style="display:flex;align-items:center;background:#F2F0EC;border:1px solid #E6E3DE;border-radius:11px;padding:3px;gap:3px;flex-shrink:0;">
+        <button id="icl-step-btn" style="display:flex;align-items:center;gap:7px;padding:8px 15px;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;background:#161616;color:#fff;">STEP &middot; 3D</button>
+        <button id="icl-dxf-btn" title="DXF flat-pattern — coming soon" style="display:flex;align-items:center;gap:7px;padding:8px 15px;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;background:transparent;color:#B7B2AA;">DXF &middot; flat</button>
+      </div>
+      <button id="icl-reset-btn" style="font-size:12px;font-weight:600;color:#6A6A6A;background:transparent;border:1px solid #E2DED7;border-radius:8px;padding:8px 12px;cursor:pointer;flex-shrink:0;">Reset pick</button>
+    </div>
+
+    <!-- instruction strip -->
+    <div style="display:flex;align-items:center;gap:10px;padding:11px 20px;flex-shrink:0;">
+      <span id="icl-pending-dot" style="width:8px;height:8px;border-radius:50%;background:#C8C4BC;box-shadow:0 0 0 4px rgba(0,0,0,0.04);flex-shrink:0;"></span>
+      <span id="icl-instruction" style="font-size:13px;color:#2A2A2A;font-weight:500;">Import a STEP file, then pick surfaces or edges to add a check.</span>
+    </div>
+
+    <!-- stage -->
+    <div id="icl-body" style="flex:1;min-height:0;position:relative;padding:2px 20px 16px;overflow:hidden;">
+      <div style="position:absolute;top:8px;left:14px;width:17px;height:17px;border-top:2px solid #CC0000;border-left:2px solid #CC0000;z-index:5;pointer-events:none;"></div>
+      <div style="position:absolute;top:8px;right:14px;width:17px;height:17px;border-top:2px solid #CC0000;border-right:2px solid #CC0000;z-index:5;pointer-events:none;"></div>
+      <div style="position:absolute;bottom:10px;left:14px;width:17px;height:17px;border-bottom:2px solid #CC0000;border-left:2px solid #CC0000;z-index:5;pointer-events:none;"></div>
+      <div style="position:absolute;bottom:10px;right:14px;width:17px;height:17px;border-bottom:2px solid #CC0000;border-right:2px solid #CC0000;z-index:5;pointer-events:none;"></div>
+
+      <div id="icl-mount" style="display:none;position:absolute;inset:0;"></div>
+
+      <!-- dropzone -->
+      <div id="icl-dropzone" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;">
+        <div style="width:100%;max-width:340px;border:2px dashed rgba(0,0,0,0.13);border-radius:16px;padding:40px 28px;text-align:center;background:#fff;display:flex;flex-direction:column;align-items:center;gap:14px;">
+          <svg width="44" height="44" fill="none" stroke="#BBBBBB" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
+          <div style="font-size:15px;font-weight:700;color:#1A1A1A;">Drop a STEP file here</div>
+          <div style="font-size:12px;color:#7A7A7A;">Bend / weld part &middot; auto-suggests checks, then measure</div>
+          <button onclick="document.getElementById('icl-file-input').click()" style="width:100%;padding:10px 0;border-radius:10px;background:#1A1A1A;color:#fff;font-size:13px;font-weight:600;">Browse file</button>
+        </div>
+      </div>
+
+      <!-- zoom hint + scale -->
+      <div style="position:absolute;left:26px;bottom:14px;font-size:11px;color:#A8A49C;font-family:'JetBrains Mono',monospace;letter-spacing:0.4px;z-index:4;pointer-events:none;">mm &middot; orbit / scroll</div>
+
+      <div id="icl-status" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;pointer-events:none;z-index:10;">
+        <div id="icl-status-inner" style="background:rgba(255,255,255,0.93);border-radius:12px;padding:16px 24px;font-size:14px;font-weight:600;color:#1A1A1A;text-align:center;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,0.1);"></div>
+      </div>
+    </div>
+
+    <!-- rules legend -->
+    <div class="dt-only" style="flex-shrink:0;display:flex;align-items:center;gap:6px;padding:10px 18px;border-top:1px solid #ECEAE6;overflow-x:auto;">
+      <span style="font-size:10px;font-weight:700;color:#A8A49C;letter-spacing:1.2px;flex-shrink:0;">RULES</span>
+      <span style="font-size:10.5px;font-weight:600;color:#6A6A6A;background:#F2F0EC;border:1px solid #E6E3DE;padding:4px 9px;border-radius:7px;font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0;">surface+surface &#8741; &#8594; distance</span>
+      <span style="font-size:10.5px;font-weight:600;color:#6A6A6A;background:#F2F0EC;border:1px solid #E6E3DE;padding:4px 9px;border-radius:7px;font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0;">surface+edge &#8594; distance</span>
+      <span style="font-size:10.5px;font-weight:600;color:#6A6A6A;background:#F2F0EC;border:1px solid #E6E3DE;padding:4px 9px;border-radius:7px;font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0;">edge+edge &#8594; distance</span>
+      <span style="font-size:10.5px;font-weight:600;color:#6A6A6A;background:#F2F0EC;border:1px solid #E6E3DE;padding:4px 9px;border-radius:7px;font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0;">auto &#8594; &#216; / R / bend</span>
+    </div>
+  </main>
+
+  <!-- Right: Inspection Check List card -->
+  <aside style="width:392px;flex-shrink:0;display:flex;flex-direction:column;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 2px 14px rgba(0,0,0,0.05);">
+    <div style="padding:20px 22px 16px;border-bottom:1px solid #EFEDEA;flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="width:30px;height:30px;border-radius:8px;background:#161616;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</span>
+        <div style="min-width:0;">
+          <div style="font-size:15px;font-weight:800;letter-spacing:-0.2px;">Inspection Check List</div>
+          <div style="font-size:11.5px;color:#9A9A9A;">Pick on the model to add a check</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;margin-top:15px;font-size:12.5px;">
+        <span style="color:#9A9A9A;font-weight:600;">IXL Part #</span>
+        <span id="icl-part-no" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#1A1A1A;">&mdash;</span>
+        <span style="color:#9A9A9A;font-weight:600;">Cust Part #</span>
+        <span id="icl-cust-no" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#1A1A1A;">&mdash;</span>
+        <span style="color:#9A9A9A;font-weight:600;">Description</span>
+        <span id="icl-part-desc" style="font-weight:600;color:#1A1A1A;">&mdash;</span>
+      </div>
+      <div style="display:flex;gap:7px;margin-top:13px;flex-wrap:wrap;">
+        <span style="font-size:11px;font-weight:600;color:#5A5A5A;background:#F2F0EC;padding:4px 10px;border-radius:20px;">Freq &middot; At Setup / Hourly</span>
+        <span id="icl-source-tag" style="font-size:11px;font-weight:600;color:#fff;background:#161616;padding:4px 10px;border-radius:20px;font-family:'JetBrains Mono',monospace;">STEP &middot; 3D</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 22px 9px;flex-shrink:0;">
+      <span style="font-size:11px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.3px;">Check dimensions</span>
+      <span id="icl-check-count" style="font-size:11px;font-weight:700;color:#CC0000;background:#FCE9E9;padding:3px 9px;border-radius:20px;">0 checks</span>
+    </div>
+
+    <div id="icl-check-list" class="scrollarea" style="flex:1;min-height:0;overflow-y:auto;padding:0 16px 6px;display:flex;flex-direction:column;gap:8px;"></div>
+
+    <div style="flex-shrink:0;border-top:1px solid #EFEDEA;padding:13px 16px;display:flex;flex-direction:column;gap:9px;">
+      <button id="icl-add-visual" style="display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px dashed #D8D3CA;background:transparent;border-radius:13px;padding:11px;font-size:13px;font-weight:600;color:#8A8A8A;cursor:pointer;">&#65291; Add visual check</button>
+      <div style="display:flex;gap:9px;">
+        <button id="icl-export-btn" style="flex:1;background:#fff;color:#2C2C2C;border:1px solid #E2DED7;border-radius:10px;padding:11px;font-size:13.5px;font-weight:600;cursor:pointer;">Export sheet</button>
+        <button id="icl-save-btn" style="flex:1.2;background:#CC0000;color:#fff;border:none;border-radius:10px;padding:11px;font-size:13.5px;font-weight:600;cursor:pointer;">Save checklist</button>
+      </div>
+      <div style="font-size:10.5px;color:#AEAAA2;text-align:center;">Generates the printed ICL &middot; 1 sheet/day &#8594; QA</div>
+    </div>
+  </aside>
+
+  <input type="file" id="icl-file-input" accept=".step,.stp" style="display:none;">
+</div>
+
 <!-- ═══════════════════ LOOK UP — LIBRARY (web) ═══════════════════ -->
 <div id="screen-lookup" class="screen">
 
@@ -579,10 +724,9 @@
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;">Look Up</div><div style="font-size:11px;color:#9A9A9A;">FG &#8596; WIP finder</div></div>
         <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.2;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
@@ -657,10 +801,9 @@
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;">Look Up</div><div style="font-size:11px;color:#9A9A9A;">FG &#8596; WIP finder</div></div>
         <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
         <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.2;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
@@ -1214,6 +1357,15 @@ function enterLabelNew() {
   }
   if (window._lbNew) window._lbNew();
   showScreen('label');
+}
+
+function enterIcl() {
+  if (isMobile()) {
+    toast('Measure dimensions on desktop — STEP upload not supported on phone');
+    return;
+  }
+  showScreen('icl');
+  if (window._iclOnShow) window._iclOnShow();
 }
 
 // ── Look Up (WIP → Finish Good) ───────────────────────────────────────────────
@@ -2572,6 +2724,273 @@ if (lbBody) {
 // Init dims display and load history from the DB
 _lbUpdateDims();
 _lbRefresh();
+
+// ═══════════════════ ICL — inspection measuring viewer ═══════════════════
+const _icl = {
+  file:null, renderer:null, scene:null, camera:null, controls:null,
+  mount:null, raycaster:null, mesh:null, triFace:null, faces:null,
+  edgeLines:[], pickMarkers:[], dims:[], checks:[],
+  center:new THREE.Vector3(), scale:1, picking:false, picks:[],
+  animId:0, resizeHandler:null, orthoD:80,
+};
+
+function _iclStatus(msg){ const el=document.getElementById('icl-status'),inner=document.getElementById('icl-status-inner'); if(!el)return; if(msg){inner.textContent=msg; el.style.display='flex';} else el.style.display='none'; }
+function _iclInstruction(msg, pending){
+  const t=document.getElementById('icl-instruction'); if(t) t.textContent=msg;
+  const d=document.getElementById('icl-pending-dot');
+  if(d){ d.style.background = pending?'#CC0000':'#C8C4BC'; d.style.boxShadow = pending?'0 0 0 4px rgba(204,0,0,0.18)':'0 0 0 4px rgba(0,0,0,0.04)'; }
+}
+function _iclShow(which){
+  const dz=document.getElementById('icl-dropzone'), mt=document.getElementById('icl-mount');
+  if(dz) dz.style.display = which==='drop'?'flex':'none';
+  if(mt) mt.style.display = which==='mount'?'block':'none';
+}
+function _iclToScene(p){ return new THREE.Vector3((p[0]-_icl.center.x)*_icl.scale,(p[1]-_icl.center.y)*_icl.scale,(p[2]-_icl.center.z)*_icl.scale); }
+function _iclEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function _iclIcon(t){ return t==='angle'?'∠':t==='dist'?'↔':t==='dia'?'Ø':t==='rad'?'R':'◉'; }
+const _ICL_GAUGES=['Vernier','Protractor','Micrometer','Height Gauge','Radius Gauge','Bore Gauge','Go / No-Go','Visual','Reference'];
+
+function _iclCleanup(){
+  cancelAnimationFrame(_icl.animId);
+  if(_icl.resizeHandler){ window.removeEventListener('resize',_icl.resizeHandler); _icl.resizeHandler=null; }
+  if(_icl.controls){ _icl.controls.dispose(); _icl.controls=null; }
+  if(_icl.scene){ _icl.scene.traverse(o=>{ if(o.geometry)o.geometry.dispose(); const m=o.material; if(m){Array.isArray(m)?m.forEach(x=>x.dispose()):m.dispose();} }); _icl.scene=null; }
+  if(_icl.renderer){ const mt=document.getElementById('icl-mount'); if(mt&&mt.contains(_icl.renderer.domElement)) mt.removeChild(_icl.renderer.domElement); _icl.renderer.dispose(); _icl.renderer=null; }
+  _icl.dims.forEach(d=>{ if(d.label&&d.label.parentNode) d.label.parentNode.removeChild(d.label); });
+  _icl.dims=[]; _icl.edgeLines=[]; _icl.pickMarkers=[]; _icl.picks=[]; _icl.mesh=null; _icl.camera=null;
+}
+
+async function _iclLoad(file){
+  _icl.file=file; _iclCleanup(); _iclShow('mount'); _iclStatus('Loading '+file.name+'…');
+  const fn=document.getElementById('icl-filename'); if(fn) fn.textContent=file.name;
+  const fs=document.getElementById('icl-filesub'); if(fs) fs.textContent='Reading geometry…';
+  _icl.checks=[]; _iclRenderChecks();
+  _iclInstruction('Loading model…', false);
+  const form=new FormData(); form.append('file',file);
+  let data;
+  try{
+    const res=await fetch('/api/icl/mesh',{method:'POST',body:form});
+    if(!res.ok){const j=await res.json().catch(()=>({})); throw new Error(j.error||'Server error '+res.status);}
+    data=await res.json();
+  }catch(e){ _iclShow('drop'); _iclStatus(''); if(window.toast)window.toast('Load failed: '+e.message); return; }
+  try { _iclBuildScene(data.mesh, data.edges||[]); }
+  catch(e){ _iclShow('drop'); _iclStatus(''); if(window.toast)window.toast('Viewer error: '+e.message); return; }
+  _iclStatus('');
+  if(fs) fs.textContent=(data.mesh.face_count||0)+' faces · '+(data.edges||[]).length+' edges';
+  _iclInstruction('Pick a surface or edge to start a dimension.', false);
+  _iclSuggest(file);
+}
+
+function _iclBuildScene(mesh, edges){
+  const mount=document.getElementById('icl-mount'); if(!mount)return; _icl.mount=mount;
+  const width=mount.clientWidth||600,height=mount.clientHeight||600;
+  const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(Math.min(window.devicePixelRatio,2)); renderer.setSize(width,height); renderer.setClearColor(0xf5f4f1,1); renderer.outputColorSpace=THREE.SRGBColorSpace; mount.appendChild(renderer.domElement); _icl.renderer=renderer;
+  const scene=new THREE.Scene(); _icl.scene=scene;
+  scene.add(new THREE.AmbientLight(0xffffff,0.8));
+  const dl=new THREE.DirectionalLight(0xffffff,0.55); dl.position.set(1,1,2); scene.add(dl);
+  const camera=new THREE.OrthographicCamera(-_icl.orthoD,_icl.orthoD,_icl.orthoD,-_icl.orthoD,0.001,1e6); camera.up.set(0,0,1); _icl.camera=camera;
+  const controls=new OrbitControls(camera,renderer.domElement); controls.enableDamping=true; controls.dampingFactor=0.08; _icl.controls=controls;
+  _icl.raycaster=new THREE.Raycaster();
+
+  const positions=new Float32Array(mesh.positions);
+  const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.BufferAttribute(positions,3)); geo.setIndex(mesh.indices); geo.computeBoundingBox();
+  const box=geo.boundingBox; const center=new THREE.Vector3(); box.getCenter(center); const size=new THREE.Vector3(); box.getSize(size);
+  const maxDim=Math.max(size.x,size.y,size.z)||1; const scale=100/maxDim;
+  _icl.center.copy(center); _icl.scale=scale;
+  geo.translate(-center.x,-center.y,-center.z); geo.scale(scale,scale,scale); geo.computeVertexNormals();
+  const mat=new THREE.MeshPhongMaterial({color:0xc9ccd1,flatShading:true,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1});
+  const m=new THREE.Mesh(geo,mat); scene.add(m); _icl.mesh=m; _icl.triFace=mesh.tri_face;
+  _icl.faces=[]; (mesh.faces||[]).forEach(f=>{_icl.faces[f.id]=f;});
+
+  _icl.edgeLines=[];
+  const edgeMat=new THREE.LineBasicMaterial({color:0x333333});
+  edges.forEach(ed=>{
+    const g=new THREE.BufferGeometry().setFromPoints(ed.points.map(p=>_iclToScene(p)));
+    const line=new THREE.Line(g,edgeMat); line.userData.edgeId=ed.id; scene.add(line); _icl.edgeLines.push(line);
+  });
+
+  camera.position.set(120,120,120); controls.target.set(0,0,0); controls.update();
+  const onResize=()=>{ const w=mount.clientWidth||600,h=mount.clientHeight||600,a=w/h; camera.left=-_icl.orthoD*a; camera.right=_icl.orthoD*a; camera.top=_icl.orthoD; camera.bottom=-_icl.orthoD; camera.updateProjectionMatrix(); renderer.setSize(w,h); };
+  _icl.resizeHandler=onResize; window.addEventListener('resize',onResize); onResize();
+
+  let downXY=null;
+  renderer.domElement.addEventListener('pointerdown',e=>{ downXY=[e.clientX,e.clientY]; });
+  renderer.domElement.addEventListener('pointerup',e=>{ if(!downXY)return; const dx=e.clientX-downXY[0],dy=e.clientY-downXY[1]; downXY=null; if(Math.hypot(dx,dy)>5)return; _iclClick(e); });
+
+  const tick=()=>{ _icl.animId=requestAnimationFrame(tick); controls.update(); renderer.render(scene,camera); _iclUpdateLabels(); };
+  tick();
+}
+
+function _iclClearPicks(){ _icl.pickMarkers.forEach(s=>_icl.scene&&_icl.scene.remove(s)); _icl.pickMarkers=[]; _icl.picks=[]; }
+
+function _iclResetPick(){
+  _iclClearPicks();
+  if(_icl.mesh) _iclInstruction('Pick a surface or edge to start a dimension.', false);
+}
+
+function _iclClick(e){
+  if(!_icl.mesh) return;
+  const rect=_icl.renderer.domElement.getBoundingClientRect();
+  const ndc=new THREE.Vector2(((e.clientX-rect.left)/rect.width)*2-1, -((e.clientY-rect.top)/rect.height)*2+1);
+  _icl.raycaster.setFromCamera(ndc,_icl.camera);
+  // face first, fall back to edge
+  let pick=null;
+  const fh=_icl.raycaster.intersectObject(_icl.mesh,false);
+  _icl.raycaster.params.Line.threshold=2.2;
+  const eh=_icl.raycaster.intersectObjects(_icl.edgeLines,false);
+  if(eh.length && (!fh.length || eh[0].distance < fh[0].distance-1)){
+    pick={kind:'edge',id:eh[0].object.userData.edgeId,point:eh[0].point.clone()};
+  } else if(fh.length){
+    pick={kind:'face',id:_icl.triFace[fh[0].faceIndex],point:fh[0].point.clone()};
+  }
+  if(!pick){ _iclResetPick(); return; }   // clicked empty space → cancel pending
+  // clicking the same entity again cancels
+  if(_icl.picks.length===1 && _icl.picks[0].kind===pick.kind && _icl.picks[0].id===pick.id){ _iclResetPick(); return; }
+  _icl.picks.push(pick);
+  const s=new THREE.Mesh(new THREE.SphereGeometry(1.7,12,12), new THREE.MeshBasicMaterial({color:0xCC0000,depthTest:false})); s.position.copy(pick.point); s.renderOrder=11; _icl.scene.add(s); _icl.pickMarkers.push(s);
+  if(_icl.picks.length===1){
+    _iclInstruction('Picked '+pick.kind+' #'+pick.id+'. Pick a second surface or edge — or Reset pick.', true);
+  } else {
+    _iclInstruction('Measuring…', true); _iclRunMeasure();
+  }
+}
+
+async function _iclRunMeasure(){
+  const p1=_icl.picks[0],p2=_icl.picks[1];
+  const form=new FormData(); form.append('file',_icl.file);
+  form.append('kind1',p1.kind); form.append('id1',p1.id); form.append('kind2',p2.kind); form.append('id2',p2.id);
+  let r;
+  try{ const res=await fetch('/api/icl/measure',{method:'POST',body:form}); if(!res.ok){const j=await res.json().catch(()=>({}));throw new Error(j.error||('Server error '+res.status));} r=await res.json(); }
+  catch(e){ if(window.toast)window.toast('Measure failed: '+e.message); _iclResetPick(); return; }
+  _iclDrawDim(r);
+  _icl.checks.push({
+    type:'dist',
+    desc:'Check distance '+r.value_mm+'mm',
+    value:r.value_mm, tol:'0.5',
+    gauge:r.suggested_gauge||'Vernier',
+    entityLabel:p1.kind+' #'+p1.id+' → '+p2.kind+' #'+p2.id,
+    source:'manual',
+  });
+  _iclRenderChecks();
+  _iclClearPicks();
+  _iclInstruction('Added '+r.value_mm+' mm. Pick again to add another check.', false);
+}
+
+function _iclDrawDim(r){
+  const a=_iclToScene(r.p1),b=_iclToScene(r.p2);
+  const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),new THREE.LineBasicMaterial({color:0xCC0000,depthTest:false})); line.renderOrder=10; _icl.scene.add(line);
+  const mk=[]; [a,b].forEach(pt=>{ const s=new THREE.Mesh(new THREE.SphereGeometry(1.3,10,10),new THREE.MeshBasicMaterial({color:0xCC0000,depthTest:false})); s.position.copy(pt); s.renderOrder=11; _icl.scene.add(s); mk.push(s); });
+  const label=document.createElement('div'); label.textContent=r.value_mm+' mm';
+  label.style.cssText="position:absolute;transform:translate(-50%,-50%);background:#CC0000;color:#fff;padding:2px 7px;border-radius:6px;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;pointer-events:none;white-space:nowrap;z-index:7;";
+  _icl.mount.appendChild(label);
+  _icl.dims.push({mid:a.clone().lerp(b,0.5),label,line,markers:mk});
+}
+
+function _iclUpdateLabels(){
+  if(!_icl.camera||!_icl.dims.length||!_icl.mount)return;
+  const w=_icl.mount.clientWidth,h=_icl.mount.clientHeight;
+  _icl.dims.forEach(d=>{ const v=d.mid.clone().project(_icl.camera); d.label.style.left=((v.x*0.5+0.5)*w)+'px'; d.label.style.top=((-v.y*0.5+0.5)*h)+'px'; });
+}
+
+function _iclTolNum(s, type){
+  const m=String(s==null?'':s).match(/[\d.]+/);
+  if(m) return m[0];
+  return type==='angle'?'1':type==='dia'?'0.1':type==='rad'?'0.5':'0.5';
+}
+
+async function _iclSuggest(file){
+  const form=new FormData(); form.append('file',file);
+  try{
+    const res=await fetch('/api/icl/suggest',{method:'POST',body:form}); if(!res.ok)return; const d=await res.json();
+    const TYPE={bbox:'dist',hole:'dia',bend:'angle'};
+    (d.checks||[]).forEach(c=>{
+      const t=TYPE[c.source]||'dist';
+      _icl.checks.push({type:t, desc:c.desc, value:c.value_mm, tol:_iclTolNum(c.tol,t), gauge:c.gauge, entityLabel:'auto · '+c.source, source:c.source});
+    });
+    // part metadata
+    const p=d.part||{};
+    const pn=document.getElementById('icl-part-no'); if(pn) pn.textContent=p.part_number||file.name.replace(/\.[^.]+$/,'');
+    const pd=document.getElementById('icl-part-desc'); if(pd) pd.textContent=p.description||'—';
+    _iclRenderChecks();
+  }catch(e){}
+}
+
+function _iclRenderChecks(){
+  const list=document.getElementById('icl-check-list');
+  const cnt=document.getElementById('icl-check-count');
+  if(!list)return;
+  if(cnt) cnt.textContent=_icl.checks.length+' check'+(_icl.checks.length===1?'':'s');
+  list.innerHTML='';
+  _icl.checks.forEach((c,i)=>{
+    const type=c.type||'dist';
+    const visual = type==='visual';
+    const unit = type==='angle'?'°':'mm';
+    const hasPrefix = type==='dia'||type==='rad';
+    const prefix = type==='dia'?'Ø':'R';
+    const iconBg = visual?'#F2F0EC':'#FBE9E9';
+    const iconColor = visual?'#8A8A8A':'#CC0000';
+    const row=document.createElement('div');
+    row.style.cssText='border:1.5px solid #ECE9E4;background:#fff;border-radius:13px;padding:13px 13px 12px;';
+    let measured='';
+    if(!visual){
+      measured='<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'
+        +'<div style="display:flex;align-items:center;background:#F7F5F2;border:1px solid #ECE9E4;border-radius:9px;padding:5px 8px;gap:2px;">'
+        +(hasPrefix?'<span style="font-size:13px;font-weight:700;color:#6A6A6A;font-family:\'JetBrains Mono\',monospace;">'+prefix+'</span>':'')
+        +'<input class="icl-nominal" data-i="'+i+'" value="'+_iclEsc(c.value)+'" inputmode="decimal" style="width:42px;border:none;background:transparent;outline:none;font-family:\'JetBrains Mono\',monospace;font-size:14px;font-weight:700;color:#1A1A1A;text-align:right;">'
+        +'<span style="font-size:12px;font-weight:600;color:#9A9A9A;font-family:\'JetBrains Mono\',monospace;">'+unit+'</span></div>'
+        +'<div style="display:flex;align-items:center;background:#F7F5F2;border:1px solid #ECE9E4;border-radius:9px;padding:5px 7px;gap:1px;">'
+        +'<span style="font-size:12px;font-weight:600;color:#9A9A9A;">±</span>'
+        +'<input class="icl-tol" data-i="'+i+'" value="'+_iclEsc(c.tol)+'" inputmode="decimal" style="width:26px;border:none;background:transparent;outline:none;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#1A1A1A;text-align:center;"></div>'
+        +'</div>';
+    }
+    const gaugeOpts=_ICL_GAUGES.map(g=>'<option'+(g===c.gauge?' selected':'')+'>'+g+'</option>').join('');
+    row.innerHTML=
+      '<div style="display:flex;align-items:center;gap:10px;">'
+      +'<span style="width:26px;height:26px;flex-shrink:0;border-radius:8px;background:'+iconBg+';color:'+iconColor+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">'+_iclIcon(type)+'</span>'
+      +'<div style="flex:1;min-width:0;">'
+      +'<input class="icl-desc" data-i="'+i+'" value="'+_iclEsc(c.desc)+'" placeholder="Describe the check…" style="border:none;background:transparent;outline:none;width:100%;font-size:13.5px;font-weight:600;color:#1A1A1A;">'
+      +'<div style="font-size:11px;color:#9A9A9A;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_iclEsc(c.entityLabel||'')+'</div>'
+      +'</div>'
+      +measured
+      +'<button class="icl-del" data-i="'+i+'" title="Remove" style="flex-shrink:0;color:#C8C4BC;font-size:14px;background:transparent;border:none;cursor:pointer;padding:2px 3px;line-height:1;">✕</button>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-top:9px;padding-left:37px;">'
+      +'<span style="font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.6px;">Gauge</span>'
+      +'<select class="icl-gauge" data-i="'+i+'" style="font-family:inherit;font-size:12px;font-weight:600;color:#3A3A3A;background:#fff;border:1px solid #E6E2DC;border-radius:8px;padding:5px 8px;cursor:pointer;">'+gaugeOpts+'</select>'
+      +(c.ref?'<span style="font-size:10.5px;font-weight:700;color:#8A6E2E;background:#F6EFD9;padding:3px 8px;border-radius:20px;">'+_iclEsc(c.ref)+'</span>':'')
+      +'</div>';
+    list.appendChild(row);
+  });
+  list.querySelectorAll('.icl-desc').forEach(el=>el.addEventListener('change',e=>{_icl.checks[+e.target.dataset.i].desc=e.target.value;}));
+  list.querySelectorAll('.icl-nominal').forEach(el=>el.addEventListener('change',e=>{_icl.checks[+e.target.dataset.i].value=e.target.value;}));
+  list.querySelectorAll('.icl-tol').forEach(el=>el.addEventListener('change',e=>{_icl.checks[+e.target.dataset.i].tol=e.target.value;}));
+  list.querySelectorAll('.icl-gauge').forEach(el=>el.addEventListener('change',e=>{_icl.checks[+e.target.dataset.i].gauge=e.target.value;}));
+  list.querySelectorAll('.icl-del').forEach(el=>el.addEventListener('click',e=>{_icl.checks.splice(+e.target.dataset.i,1);_iclRenderChecks();}));
+}
+
+function _iclAddVisual(){
+  if(!_icl.file){ if(window.toast)window.toast('Load a STEP file first'); return; }
+  _icl.checks.push({type:'visual', desc:'', value:null, tol:'', gauge:'Visual', entityLabel:'Visual check', source:'manual'});
+  _iclRenderChecks();
+  const inputs=document.querySelectorAll('#icl-check-list .icl-desc');
+  if(inputs.length) inputs[inputs.length-1].focus();
+}
+
+// ICL wiring
+const iclInp=document.getElementById('icl-file-input');
+if(iclInp) iclInp.addEventListener('change',e=>{const f=e.target.files[0]; if(f)_iclLoad(f); e.target.value='';});
+const iclReset=document.getElementById('icl-reset-btn'); if(iclReset) iclReset.addEventListener('click',_iclResetPick);
+const iclAddV=document.getElementById('icl-add-visual'); if(iclAddV) iclAddV.addEventListener('click',_iclAddVisual);
+const iclDxf=document.getElementById('icl-dxf-btn'); if(iclDxf) iclDxf.addEventListener('click',()=>{ if(window.toast)window.toast('DXF flat-pattern — coming soon'); });
+const iclExport=document.getElementById('icl-export-btn'); if(iclExport) iclExport.addEventListener('click',()=>{ if(window.toast)window.toast('Export sheet — coming soon'); });
+const iclSave=document.getElementById('icl-save-btn'); if(iclSave) iclSave.addEventListener('click',()=>{ if(window.toast)window.toast('Save checklist — coming soon'); });
+const iclPanel=document.getElementById('icl-preview-panel');
+if(iclPanel){
+  iclPanel.addEventListener('dragover',e=>e.preventDefault());
+  iclPanel.addEventListener('drop',e=>{e.preventDefault(); const f=e.dataTransfer.files[0]; if(!f)return; const ext=f.name.split('.').pop().toLowerCase(); if(!['step','stp'].includes(ext)){if(window.toast)window.toast('Only .step / .stp files accepted');return;} _iclLoad(f);});
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&_icl.picks.length){ _iclResetPick(); } });
+window._iclOnShow=function(){ if(_icl.resizeHandler) setTimeout(_icl.resizeHandler,40); };
 
 // Expose to main script (module scope is not global)
 window._lbListRender = _lbListRender;
