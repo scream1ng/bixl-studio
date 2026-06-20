@@ -56,6 +56,29 @@ python fill_sop.py
 
 ---
 
+## ICL smart dimensioning
+
+The Inspection Check List module measures dimensions off an uploaded STEP model. Picking follows a **smart-dimension** model (like SolidWorks): the geometry you select decides the dimension type — there are no separate tool buttons.
+
+| You pick | You get | Picks |
+|---|---|---|
+| 1 cylinder face / hole | **Ø** diameter | single click |
+| 1 bend cylinder | **R** radius (and bend angle from sweep) | single click |
+| 2 planar faces, parallel | **distance** (perpendicular gap) | two clicks |
+| 2 planar faces, non-parallel | **angle** (between face normals) | two clicks |
+| 2 edges, or face + edge | **distance** | two clicks |
+| cylinder/hole + planar face | **centre-to-surface** distance (from the hole axis, not the rim) | two clicks |
+
+Rules:
+- **Single-entity dimensions** (Ø, R) commit on the first click — the entity alone defines them.
+- **Two-entity dimensions** (distance, angle) need a second pick.
+- The instruction strip previews what the current hover will produce.
+- Dimensions are drawn **outside the part** in engineering-drawing style: the dimension line is offset along the nearest world axis past the silhouette, with witness (extension) lines and arrowheads.
+- Parallel dimensions sharing an axis **stack**: shortest sits closest to the part, each longer one steps further out so they don't overlap.
+- Dimensions read square in the **Front / Right / Top** ortho views; the Iso view is for orbiting/context only.
+
+---
+
 ## Build order (see CLAUDE.md for detail)
 
 1. **Flask API + DB + engine** on Railway — create an SOP, post steps, download a correct `.docx`

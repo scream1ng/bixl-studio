@@ -90,6 +90,22 @@ def _face_meta(face, idx: int) -> dict:
 # ---------------------------------------------------------------------------
 
 
+def _tri_node(tri, k):
+    """Triangulation node access across OCC versions (Node(i) vs Nodes().Value(i))."""
+    try:
+        return tri.Node(k)
+    except (AttributeError, TypeError):
+        return tri.Nodes().Value(k)
+
+
+def _tri_indices(triangle):
+    """Triangle vertex indices across OCC versions."""
+    g = triangle.Get()
+    if g is not None:
+        return g
+    return (triangle.Value(1), triangle.Value(2), triangle.Value(3))
+
+
 def faced_mesh(shape) -> dict:
     """Tessellate the shape, returning vertices + triangles tagged by face id.
 
@@ -98,7 +114,9 @@ def faced_mesh(shape) -> dict:
     tri_face:  face id (1-based) for each triangle (len == indices/3)
     faces:     per-face metadata (type/normal/axis/centroid/radius/sweep)
     """
-    BRepMesh_IncrementalMesh(shape, 0.3, False, 0.5, True).Perform()
+    # 4-arg form matches the proven cad.preview meshing — the 5-arg
+    # (parallel) overload is missing on some OCC builds.
+    BRepMesh_IncrementalMesh(shape, 0.3, False, 0.5).Perform()
     fmap = _face_map(shape)
     positions: list[float] = []
     indices: list[int] = []
@@ -115,11 +133,11 @@ def faced_mesh(shape) -> dict:
         trsf = loc.Transformation()
         n = tri.NbNodes()
         for k in range(1, n + 1):
-            p = tri.Node(k).Transformed(trsf)
+            p = _tri_node(tri, k).Transformed(trsf)
             positions.extend((round(p.X(), 3), round(p.Y(), 3), round(p.Z(), 3)))
         reversed_ = face.Orientation() == TopAbs_REVERSED
         for t in range(1, tri.NbTriangles() + 1):
-            a, b, c = tri.Triangle(t).Get()
+            a, b, c = _tri_indices(tri.Triangle(t))
             if reversed_:
                 b, c = c, b
             indices.extend((vbase + a - 1, vbase + b - 1, vbase + c - 1))
@@ -200,6 +218,79 @@ def _dot(a, b):
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 
 
+def _cross(a, b):
+    return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+
+
+def _unit(a):
+    m = math.sqrt(_dot(a, a)) or 1.0
+    return (a[0] / m, a[1] / m, a[2] / m)
+
+
+def _rnd3(p):
+    return [round(p[0], 3), round(p[1], 3), round(p[2], 3)]
+
+
+def _solve3(rows, b):
+    """Solve 3x3 linear system via Cramer's rule. rows = 3 vectors, b = 3-tuple."""
+    (a, c, d), (e, f, g), (h, i, j) = rows
+    det = a * (f * j - g * i) - c * (e * j - g * h) + d * (e * i - f * h)
+    if abs(det) < 1e-9:
+        return None
+    bx, by, bz = b
+    dx = bx * (f * j - g * i) - c * (by * j - g * bz) + d * (by * i - f * bz)
+    dy = a * (by * j - g * bz) - bx * (e * j - g * h) + d * (e * bz - by * h)
+    dz = a * (f * bz - by * i) - c * (e * bz - by * h) + bx * (e * i - f * h)
+    return (dx / det, dy / det, dz / det)
+
+
+def _cylinder_center(face):
+    """Axis-projected centre, unit axis, radius of a cylindrical face."""
+    s = BRepAdaptor_Surface(face)
+    cyl = s.Cylinder()
+    base = (cyl.Axis().Location().X(), cyl.Axis().Location().Y(), cyl.Axis().Location().Z())
+    axis = _unit((cyl.Axis().Direction().X(), cyl.Axis().Direction().Y(), cyl.Axis().Direction().Z()))
+    c = _centroid(face)
+    t = _dot((c[0] - base[0], c[1] - base[1], c[2] - base[2]), axis)
+    center = [base[i] + axis[i] * t for i in range(3)]
+    return center, axis, cyl.Radius()
+
+
+def measure_single(shape, kind: str, ent_id: int) -> dict:
+    """Smart single-entity dimension: cylinder face -> Ø (full hole) or R (arc/bend)."""
+    if kind != "face":
+        raise ValueError("single-entity dimension needs a cylindrical face")
+    f = TopoDS.Face_s(_sub_shape(shape, "face", ent_id))
+    s = BRepAdaptor_Surface(f)
+    if s.GetType() != GeomAbs_Cylinder:
+        raise ValueError("pick a hole or cylindrical face for Ø / R")
+    cyl = s.Cylinder()
+    r = cyl.Radius()
+    ax = cyl.Axis()
+    base = (ax.Location().X(), ax.Location().Y(), ax.Location().Z())
+    axis = _unit((ax.Direction().X(), ax.Direction().Y(), ax.Direction().Z()))
+    c = _centroid(f)
+    t = _dot((c[0] - base[0], c[1] - base[1], c[2] - base[2]), axis)
+    center = [base[i] + axis[i] * t for i in range(3)]
+    perp = _cross(axis, (1.0, 0.0, 0.0))
+    if math.sqrt(_dot(perp, perp)) < 1e-6:
+        perp = _cross(axis, (0.0, 1.0, 0.0))
+    perp = _unit(perp)
+    sweep = math.degrees(s.LastUParameter() - s.FirstUParameter())
+    if sweep >= 350:
+        p1 = [center[i] + perp[i] * r for i in range(3)]
+        p2 = [center[i] - perp[i] * r for i in range(3)]
+        return {"type": "dia", "value_mm": round(2 * r, 3), "p1": _rnd3(p1), "p2": _rnd3(p2),
+                "center": _rnd3(center), "suggested_gauge": "Vernier"}
+    p2 = [center[i] + perp[i] * r for i in range(3)]
+    return {"type": "rad", "value_mm": round(r, 3), "p1": _rnd3(center), "p2": _rnd3(p2),
+            "center": _rnd3(center), "suggested_gauge": "Radius Gauge"}
+
+
+def measure_single_from_file(path: str, kind, ent_id) -> dict:
+    return measure_single(load_step(path), kind, ent_id)
+
+
 def measure(
     shape,
     kind1: str,
@@ -244,6 +335,51 @@ def measure(
                     "method": "parallel-plane",
                     "suggested_gauge": "Vernier",
                 }
+            # non-parallel planes -> angle, drawn at the shared (dihedral) edge
+            n1u, n2u = _unit(n1), _unit(n2)
+            ang = math.degrees(math.acos(min(1.0, abs(_dot(n1u, n2u)))))
+            c1, c2 = _centroid(f1), _centroid(f2)
+            P1 = (pln1.Location().X(), pln1.Location().Y(), pln1.Location().Z())
+            pln2 = a2.Plane()
+            P2 = (pln2.Location().X(), pln2.Location().Y(), pln2.Location().Z())
+            e = _cross(n1u, n2u)
+            res = {
+                "type": "angle", "value_mm": round(ang, 1),
+                "mode": "angle", "method": "face-angle", "suggested_gauge": "Protractor",
+                "p1": _rnd3(c1), "p2": _rnd3(c2),
+            }
+            if _dot(e, e) > 1e-9:
+                e = _unit(e)
+                p0 = _solve3((n1u, n2u, e), (_dot(n1u, P1), _dot(n2u, P2), 0.0))
+                if p0 is not None:
+                    mid = [(c1[i] + c2[i]) / 2 for i in range(3)]
+                    t = _dot((mid[0] - p0[0], mid[1] - p0[1], mid[2] - p0[2]), e)
+                    vtx = [p0[i] + e[i] * t for i in range(3)]
+                    def _stub(c):
+                        w = [c[i] - vtx[i] for i in range(3)]
+                        w = [w[i] - e[i] * _dot(w, e) for i in range(3)]
+                        return _unit(w)
+                    res["vertex"] = _rnd3(vtx)
+                    res["dir1"] = _rnd3(_stub(c1))
+                    res["dir2"] = _rnd3(_stub(c2))
+            return res
+
+        # cylinder (hole) + plane -> centre-to-surface distance
+        if {a1.GetType(), a2.GetType()} == {GeomAbs_Cylinder, GeomAbs_Plane}:
+            fcyl, fpln = (f1, f2) if a1.GetType() == GeomAbs_Cylinder else (f2, f1)
+            apln = BRepAdaptor_Surface(fpln)
+            center, _axis, _r = _cylinder_center(fcyl)
+            pln = apln.Plane()
+            nn = _unit((pln.Axis().Direction().X(), pln.Axis().Direction().Y(), pln.Axis().Direction().Z()))
+            lp = (pln.Location().X(), pln.Location().Y(), pln.Location().Z())
+            signed = _dot((center[0] - lp[0], center[1] - lp[1], center[2] - lp[2]), nn)
+            foot = [center[i] - nn[i] * signed for i in range(3)]
+            return {
+                "value_mm": round(abs(signed), 3),
+                "p1": _rnd3(center), "p2": _rnd3(foot),
+                "mode": "surface-to-surface", "method": "center-to-plane",
+                "suggested_gauge": "Vernier",
+            }
 
     dss = BRepExtrema_DistShapeShape(s1, s2)
     if not dss.IsDone():

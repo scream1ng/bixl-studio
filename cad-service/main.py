@@ -15,7 +15,7 @@ try:
     from cad.geometry import step_to_edges_json, brep_edges
     from cad.preview import step_to_stl, shape_to_stl
     from cad.loader import load_step
-    from cad.icl import faced_mesh, indexed_edges, measure_from_file, suggest
+    from cad.icl import faced_mesh, indexed_edges, measure_from_file, measure_single_from_file, suggest
     from exports.jpg import step_to_jpg
     _OCC_AVAILABLE = True
 except ImportError:
@@ -293,10 +293,10 @@ async def icl_measure(
     file: UploadFile = File(...),
     kind1: str = Query(..., regex="^(face|edge)$"),
     id1: int = Query(..., ge=1),
-    kind2: str = Query(..., regex="^(face|edge)$"),
-    id2: int = Query(..., ge=1),
+    kind2: Optional[str] = Query(None, regex="^(face|edge)$"),
+    id2: Optional[int] = Query(None, ge=1),
 ):
-    """Distance between two picked entities -> value + closest points."""
+    """Smart dimension: one entity -> Ø/R, two entities -> distance/angle."""
     if not _OCC_AVAILABLE:
         raise HTTPException(503, "ICL requires pythonocc-core")
     _check_file(file)
@@ -305,7 +305,10 @@ async def icl_measure(
         raise HTTPException(400, "Empty file")
     tmp_path = _save_upload(data)
     try:
-        result = measure_from_file(tmp_path, kind1, id1, kind2, id2)
+        if kind2 is None or id2 is None:
+            result = measure_single_from_file(tmp_path, kind1, id1)
+        else:
+            result = measure_from_file(tmp_path, kind1, id1, kind2, id2)
     except ValueError as e:
         raise HTTPException(422, str(e))
     except Exception as e:

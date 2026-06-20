@@ -35,13 +35,11 @@ def icl_measure(
     step_bytes: bytes,
     kind1: str,
     id1: int,
-    kind2: str,
-    id2: int,
+    kind2: str | None = None,
+    id2: int | None = None,
     filename: str = "part.step",
 ) -> dict:
-    return _post(
-        "/api/icl/measure",
-        step_bytes,
-        filename,
-        params={"kind1": kind1, "id1": id1, "kind2": kind2, "id2": id2},
-    )
+    params = {"kind1": kind1, "id1": id1}
+    if kind2 is not None and id2 is not None:
+        params |= {"kind2": kind2, "id2": id2}
+    return _post("/api/icl/measure", step_bytes, filename, params=params)

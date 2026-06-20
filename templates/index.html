@@ -637,6 +637,16 @@
         </div>
       </div>
 
+      <!-- view buttons -->
+      <div id="icl-viewbar" style="display:none;position:absolute;top:12px;right:14px;z-index:6;gap:4px;background:#fff;border:1px solid #E6E3DE;border-radius:10px;padding:4px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <button onclick="window._iclView&&window._iclView('front')" style="padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:600;color:#3A3A3A;cursor:pointer;background:transparent;">Front</button>
+        <button onclick="window._iclView&&window._iclView('right')" style="padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:600;color:#3A3A3A;cursor:pointer;background:transparent;">Right</button>
+        <button onclick="window._iclView&&window._iclView('top')" style="padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:600;color:#3A3A3A;cursor:pointer;background:transparent;">Top</button>
+        <button onclick="window._iclView&&window._iclView('iso')" style="padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:600;color:#3A3A3A;cursor:pointer;background:transparent;">Iso</button>
+        <span style="width:1px;align-self:stretch;background:#E6E3DE;margin:2px 2px;"></span>
+        <button id="icl-capture-btn" onclick="window._iclCapture&&window._iclCapture()" style="padding:6px 10px;border-radius:7px;font-size:11.5px;font-weight:700;color:#fff;background:#CC0000;cursor:pointer;">&#9673; Capture</button>
+      </div>
+
       <!-- zoom hint + scale -->
       <div style="position:absolute;left:26px;bottom:14px;font-size:11px;color:#A8A49C;font-family:'JetBrains Mono',monospace;letter-spacing:0.4px;z-index:4;pointer-events:none;">mm &middot; orbit / scroll</div>
 
@@ -675,6 +685,11 @@
     </div>
 
     <div id="icl-check-list" class="scrollarea" style="flex:1;min-height:0;overflow-y:auto;padding:0 16px 6px;display:flex;flex-direction:column;gap:8px;"></div>
+
+    <div id="icl-captures-wrap" style="display:none;flex-shrink:0;border-top:1px solid #EFEDEA;padding:11px 16px 4px;">
+      <div style="font-size:11px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.3px;margin-bottom:8px;">Captured views</div>
+      <div id="icl-captures" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;"></div>
+    </div>
 
     <div style="flex-shrink:0;border-top:1px solid #EFEDEA;padding:13px 16px;display:flex;flex-direction:column;gap:9px;">
       <button id="icl-add-visual" style="display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px dashed #D8D3CA;background:transparent;border-radius:13px;padding:11px;font-size:13px;font-weight:600;color:#8A8A8A;cursor:pointer;">&#65291; Add visual check</button>
@@ -2720,7 +2735,7 @@ const _icl = {
   mount:null, raycaster:null, mesh:null, triFace:null, faces:null,
   edgeLines:[], pickMarkers:[], dims:[], checks:[],
   center:new THREE.Vector3(), scale:1, picking:false, picks:[],
-  animId:0, resizeHandler:null, orthoD:80,
+  animId:0, resizeHandler:null, orthoD:80, seq:0, captures:[], lastView:'Iso',
 };
 
 function _iclStatus(msg){ const el=document.getElementById('icl-status'),inner=document.getElementById('icl-status-inner'); if(!el)return; if(msg){inner.textContent=msg; el.style.display='flex';} else el.style.display='none'; }
@@ -2730,9 +2745,10 @@ function _iclInstruction(msg, pending){
   if(d){ d.style.background = pending?'#CC0000':'#C8C4BC'; d.style.boxShadow = pending?'0 0 0 4px rgba(204,0,0,0.18)':'0 0 0 4px rgba(0,0,0,0.04)'; }
 }
 function _iclShow(which){
-  const dz=document.getElementById('icl-dropzone'), mt=document.getElementById('icl-mount');
+  const dz=document.getElementById('icl-dropzone'), mt=document.getElementById('icl-mount'), vb=document.getElementById('icl-viewbar');
   if(dz) dz.style.display = which==='drop'?'flex':'none';
   if(mt) mt.style.display = which==='mount'?'block':'none';
+  if(vb) vb.style.display = which==='mount'?'flex':'none';
 }
 function _iclToScene(p){ return new THREE.Vector3((p[0]-_icl.center.x)*_icl.scale,(p[1]-_icl.center.y)*_icl.scale,(p[2]-_icl.center.z)*_icl.scale); }
 function _iclEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
@@ -2745,7 +2761,8 @@ function _iclCleanup(){
   if(_icl.scene){ _icl.scene.traverse(o=>{ if(o.geometry)o.geometry.dispose(); const m=o.material; if(m){Array.isArray(m)?m.forEach(x=>x.dispose()):m.dispose();} }); _icl.scene=null; }
   if(_icl.renderer){ const mt=document.getElementById('icl-mount'); if(mt&&mt.contains(_icl.renderer.domElement)) mt.removeChild(_icl.renderer.domElement); _icl.renderer.dispose(); _icl.renderer=null; }
   _icl.dims.forEach(d=>{ if(d.label&&d.label.parentNode) d.label.parentNode.removeChild(d.label); });
-  _icl.dims=[]; _icl.edgeLines=[]; _icl.pickMarkers=[]; _icl.picks=[]; _icl.mesh=null; _icl.camera=null;
+  _icl.dims=[]; _icl.edgeLines=[]; _icl.pickMarkers=[]; _icl.pickMeshes=[]; _icl.picks=[];
+  _icl.hoverObj=null; _icl.hoverKey=null; _icl.mesh=null; _icl.camera=null;
 }
 
 async function _iclLoad(file){
@@ -2753,6 +2770,7 @@ async function _iclLoad(file){
   const fn=document.getElementById('icl-filename'); if(fn) fn.textContent=file.name;
   const fs=document.getElementById('icl-filesub'); if(fs) fs.textContent='Reading geometry…';
   _icl.checks=[]; _iclRenderChecks();
+  _icl.captures=[]; _iclRenderCaptures();
   _iclInstruction('Loading model…', false);
   const form=new FormData(); form.append('file',file);
   let data;
@@ -2790,6 +2808,22 @@ function _iclBuildScene(mesh, edges){
   const m=new THREE.Mesh(geo,mat); scene.add(m); _icl.mesh=m; _icl.triFace=mesh.tri_face;
   _icl.faces=[]; (mesh.faces||[]).forEach(f=>{_icl.faces[f.id]=f;});
 
+  // face -> triangle list, for full-face highlight
+  const triFace=mesh.tri_face, gidx=geo.getIndex().array, gpos=geo.attributes.position.array;
+  const faceTris={}; for(let t=0;t<triFace.length;t++){ (faceTris[triFace[t]]=faceTris[triFace[t]]||[]).push(t); }
+  _icl.faceTris=faceTris; _icl.gidx=gidx; _icl.gpos=gpos;
+
+  // highlight materials
+  const ho={transparent:true,depthWrite:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2};
+  _icl.matHoverFace=new THREE.MeshBasicMaterial(Object.assign({color:0xCC0000,opacity:0.22},ho));
+  _icl.matPickFace=new THREE.MeshBasicMaterial(Object.assign({color:0xCC0000,opacity:0.5},ho));
+  _icl.matHoverEdge=new THREE.LineBasicMaterial({color:0xCC0000,depthTest:false});
+  _icl.matPickEdge=new THREE.LineBasicMaterial({color:0xCC0000,depthTest:false});
+  _icl.matDimLine=new THREE.LineBasicMaterial({color:0xCC0000,depthTest:false});
+  _icl.matWit=new THREE.LineBasicMaterial({color:0xCC0000,transparent:true,opacity:0.55,depthTest:false});
+  _icl.matDim=new THREE.MeshBasicMaterial({color:0xCC0000,depthTest:false});
+  _icl.hoverObj=null; _icl.hoverKey=null; _icl.pickMeshes=[];
+
   _icl.edgeLines=[];
   const edgeMat=new THREE.LineBasicMaterial({color:0x333333});
   edges.forEach(ed=>{
@@ -2797,19 +2831,72 @@ function _iclBuildScene(mesh, edges){
     const line=new THREE.Line(g,edgeMat); line.userData.edgeId=ed.id; scene.add(line); _icl.edgeLines.push(line);
   });
 
-  camera.position.set(120,120,120); controls.target.set(0,0,0); controls.update();
-  const onResize=()=>{ const w=mount.clientWidth||600,h=mount.clientHeight||600,a=w/h; camera.left=-_icl.orthoD*a; camera.right=_icl.orthoD*a; camera.top=_icl.orthoD; camera.bottom=-_icl.orthoD; camera.updateProjectionMatrix(); renderer.setSize(w,h); };
-  _icl.resizeHandler=onResize; window.addEventListener('resize',onResize); onResize();
+  // fit distance from scaled bbox
+  geo.computeBoundingBox(); const ext=new THREE.Vector3(); geo.boundingBox.getSize(ext);
+  _icl.fitD=(Math.max(ext.x,ext.y,ext.z)*0.62)||80; _icl.orthoD=_icl.fitD;
+  geo.computeBoundingSphere(); _icl.modelR=(geo.boundingSphere&&geo.boundingSphere.radius)||_icl.fitD;
+  _icl.half=ext.clone().multiplyScalar(0.5);
 
-  let downXY=null;
-  renderer.domElement.addEventListener('pointerdown',e=>{ downXY=[e.clientX,e.clientY]; });
-  renderer.domElement.addEventListener('pointerup',e=>{ if(!downXY)return; const dx=e.clientX-downXY[0],dy=e.clientY-downXY[1]; downXY=null; if(Math.hypot(dx,dy)>5)return; _iclClick(e); });
+  const onResize=()=>{ const w=mount.clientWidth||600,h=mount.clientHeight||600,a=w/h; camera.left=-_icl.orthoD*a; camera.right=_icl.orthoD*a; camera.top=_icl.orthoD; camera.bottom=-_icl.orthoD; camera.updateProjectionMatrix(); renderer.setSize(w,h); };
+  _icl.resizeHandler=onResize; window.addEventListener('resize',onResize);
+  _iclView('iso'); onResize();
+
+  let downXY=null, isDown=false, hoverRAF=0, lastMove=null;
+  const dom=renderer.domElement;
+  dom.addEventListener('pointerdown',e=>{ downXY=[e.clientX,e.clientY]; isDown=true; });
+  dom.addEventListener('pointerup',e=>{ isDown=false; if(!downXY)return; const dx=e.clientX-downXY[0],dy=e.clientY-downXY[1]; downXY=null; if(Math.hypot(dx,dy)>5)return; _iclClick(e); });
+  dom.addEventListener('pointerleave',()=>_iclHoverClear());
+  dom.addEventListener('pointermove',e=>{ lastMove=e; if(isDown){ _iclHoverClear(); return; } if(!hoverRAF) hoverRAF=requestAnimationFrame(()=>{ hoverRAF=0; _iclHover(lastMove); }); });
 
   const tick=()=>{ _icl.animId=requestAnimationFrame(tick); controls.update(); renderer.render(scene,camera); _iclUpdateLabels(); };
   tick();
 }
 
-function _iclClearPicks(){ _icl.pickMarkers.forEach(s=>_icl.scene&&_icl.scene.remove(s)); _icl.pickMarkers=[]; _icl.picks=[]; }
+function _iclFaceGeom(id){
+  const tris=_icl.faceTris[id]||[], idx=_icl.gidx, pos=_icl.gpos;
+  const arr=new Float32Array(tris.length*9); let p=0;
+  for(const t of tris){ for(let k=0;k<3;k++){ const vi=idx[t*3+k]*3; arr[p++]=pos[vi]; arr[p++]=pos[vi+1]; arr[p++]=pos[vi+2]; } }
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(arr,3)); return g;
+}
+function _iclHoverClear(){ if(_icl.hoverObj){ _icl.scene&&_icl.scene.remove(_icl.hoverObj); if(!_icl.hoverObj.userData.shared&&_icl.hoverObj.geometry) _icl.hoverObj.geometry.dispose(); _icl.hoverObj=null; } _icl.hoverKey=null; }
+function _iclHoverFace(id){ const key='f'+id; if(_icl.hoverKey===key)return; _iclHoverClear(); _icl.hoverKey=key; const o=new THREE.Mesh(_iclFaceGeom(id),_icl.matHoverFace); o.renderOrder=9; o.userData.shared=false; _icl.scene.add(o); _icl.hoverObj=o; }
+function _iclHoverEdge(id){ const key='e'+id; if(_icl.hoverKey===key)return; _iclHoverClear(); _icl.hoverKey=key; const src=_icl.edgeLines.find(l=>l.userData.edgeId===id); if(!src)return; const o=new THREE.Line(src.geometry,_icl.matHoverEdge); o.renderOrder=9; o.userData.shared=true; _icl.scene.add(o); _icl.hoverObj=o; }
+function _iclHover(e){
+  if(!_icl.mesh||!e) return;
+  const rect=_icl.renderer.domElement.getBoundingClientRect();
+  const ndc=new THREE.Vector2(((e.clientX-rect.left)/rect.width)*2-1, -((e.clientY-rect.top)/rect.height)*2+1);
+  _icl.raycaster.setFromCamera(ndc,_icl.camera);
+  const fh=_icl.raycaster.intersectObject(_icl.mesh,false);
+  _icl.raycaster.params.Line.threshold=2.2;
+  const eh=_icl.raycaster.intersectObjects(_icl.edgeLines,false);
+  if(eh.length && (!fh.length || eh[0].distance<fh[0].distance-1)) _iclHoverEdge(eh[0].object.userData.edgeId);
+  else if(fh.length) _iclHoverFace(_icl.triFace[fh[0].faceIndex]);
+  else _iclHoverClear();
+}
+function _iclAddPickHighlight(pick){
+  let o;
+  if(pick.kind==='face'){ o=new THREE.Mesh(_iclFaceGeom(pick.id),_icl.matPickFace); o.userData.shared=false; }
+  else { const src=_icl.edgeLines.find(l=>l.userData.edgeId===pick.id); if(!src)return; o=new THREE.Line(src.geometry,_icl.matPickEdge); o.userData.shared=true; }
+  o.renderOrder=10; _icl.scene.add(o); _icl.pickMeshes.push(o);
+}
+function _iclView(name){
+  if(!_icl.camera||!_icl.controls) return;
+  _icl.lastView = name.charAt(0).toUpperCase()+name.slice(1);
+  const c=_icl.camera, ctr=_icl.controls, d=300;
+  let pos=[d*0.8,-d*0.8,d*0.8], up=[0,0,1];
+  if(name==='front') pos=[0,-d,0];
+  else if(name==='right') pos=[d,0,0];
+  else if(name==='top'){ pos=[0,0,d]; up=[0,1,0]; }
+  c.up.set(up[0],up[1],up[2]); c.position.set(pos[0],pos[1],pos[2]); ctr.target.set(0,0,0); c.zoom=1; c.updateProjectionMatrix(); ctr.update();
+  if(_icl.resizeHandler) _icl.resizeHandler();
+}
+
+function _iclClearPicks(){
+  (_icl.pickMeshes||[]).forEach(o=>{ _icl.scene&&_icl.scene.remove(o); if(o&&!o.userData.shared&&o.geometry) o.geometry.dispose(); });
+  _icl.pickMeshes=[];
+  _icl.pickMarkers.forEach(s=>_icl.scene&&_icl.scene.remove(s)); _icl.pickMarkers=[];
+  _icl.picks=[];
+}
 
 function _iclResetPick(){
   _iclClearPicks();
@@ -2832,10 +2919,15 @@ function _iclClick(e){
     pick={kind:'face',id:_icl.triFace[fh[0].faceIndex],point:fh[0].point.clone()};
   }
   if(!pick){ _iclResetPick(); return; }   // clicked empty space → cancel pending
+  // smart single-pick: a cylinder face on its own = Ø / R
+  if(_icl.picks.length===0 && pick.kind==='face'){
+    const meta=_icl.faces[pick.id];
+    if(meta && meta.type==='cylinder'){ _iclRunSingle(pick); return; }
+  }
   // clicking the same entity again cancels
   if(_icl.picks.length===1 && _icl.picks[0].kind===pick.kind && _icl.picks[0].id===pick.id){ _iclResetPick(); return; }
   _icl.picks.push(pick);
-  const s=new THREE.Mesh(new THREE.SphereGeometry(1.7,12,12), new THREE.MeshBasicMaterial({color:0xCC0000,depthTest:false})); s.position.copy(pick.point); s.renderOrder=11; _icl.scene.add(s); _icl.pickMarkers.push(s);
+  _iclAddPickHighlight(pick);
   if(_icl.picks.length===1){
     _iclInstruction('Picked '+pick.kind+' #'+pick.id+'. Pick a second surface or edge — or Reset pick.', true);
   } else {
@@ -2850,34 +2942,225 @@ async function _iclRunMeasure(){
   let r;
   try{ const res=await fetch('/api/icl/measure',{method:'POST',body:form}); if(!res.ok){const j=await res.json().catch(()=>({}));throw new Error(j.error||('Server error '+res.status));} r=await res.json(); }
   catch(e){ if(window.toast)window.toast('Measure failed: '+e.message); _iclResetPick(); return; }
-  _iclDrawDim(r);
+  const checkId=++_icl.seq;
+  _iclAddDim(r, checkId);
+  const isAngle=r.type==='angle';
   _icl.checks.push({
-    type:'dist',
-    desc:'Check distance',
-    value:r.value_mm, tol:'0.5',
-    gauge:r.suggested_gauge||'Vernier',
+    type:isAngle?'angle':'dist',
+    desc:isAngle?'Ensure bend angle':'Check distance',
+    value:r.value_mm, tol:isAngle?'1':'0.5',
+    gauge:r.suggested_gauge||(isAngle?'Protractor':'Vernier'),
     entityLabel:p1.kind+' #'+p1.id+' → '+p2.kind+' #'+p2.id,
     source:'manual',
+    checkId,
+    ents:[{kind:p1.kind,id:p1.id},{kind:p2.kind,id:p2.id}],
   });
   _iclRenderChecks();
   _iclClearPicks();
-  _iclInstruction('Added '+r.value_mm+' mm. Pick again to add another check.', false);
+  _iclInstruction('Added '+_iclDimText(_icl.dims[_icl.dims.length-1])+'. Pick again to add another check.', false);
 }
 
-function _iclDrawDim(r){
-  const a=_iclToScene(r.p1),b=_iclToScene(r.p2);
-  const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),new THREE.LineBasicMaterial({color:0xCC0000,depthTest:false})); line.renderOrder=10; _icl.scene.add(line);
-  const mk=[]; [a,b].forEach(pt=>{ const s=new THREE.Mesh(new THREE.SphereGeometry(1.3,10,10),new THREE.MeshBasicMaterial({color:0xCC0000,depthTest:false})); s.position.copy(pt); s.renderOrder=11; _icl.scene.add(s); mk.push(s); });
-  const label=document.createElement('div'); label.textContent=r.value_mm+' mm';
-  label.style.cssText="position:absolute;transform:translate(-50%,-50%);background:#CC0000;color:#fff;padding:2px 7px;border-radius:6px;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;pointer-events:none;white-space:nowrap;z-index:7;";
-  _icl.mount.appendChild(label);
-  _icl.dims.push({mid:a.clone().lerp(b,0.5),label,line,markers:mk});
+async function _iclRunSingle(pick){
+  _icl.picks.push(pick); _iclAddPickHighlight(pick);
+  const form=new FormData(); form.append('file',_icl.file); form.append('kind1',pick.kind); form.append('id1',pick.id);
+  let r;
+  try{ const res=await fetch('/api/icl/measure',{method:'POST',body:form}); if(!res.ok){const j=await res.json().catch(()=>({}));throw new Error(j.error||('Server error '+res.status));} r=await res.json(); }
+  catch(e){ if(window.toast)window.toast('Measure failed: '+e.message); _iclResetPick(); return; }
+  const checkId=++_icl.seq;
+  _iclAddDim(r, checkId);
+  const isDia=r.type==='dia';
+  _icl.checks.push({
+    type:isDia?'dia':'rad',
+    desc:isDia?'Check hole diameter':'Check radius',
+    value:r.value_mm, tol:isDia?'0.1':'0.5',
+    gauge:r.suggested_gauge||(isDia?'Vernier':'Radius Gauge'),
+    entityLabel:'face #'+pick.id,
+    source:'manual', checkId,
+    ents:[{kind:pick.kind,id:pick.id}],
+  });
+  _iclRenderChecks();
+  _iclClearPicks();
+  _iclInstruction('Added '+(isDia?'Ø ':'R ')+r.value_mm+'. Pick again to add another check.', false);
+}
+
+function _iclSnapAxis(mid,u){
+  // offset along the world axis most perpendicular to the measurement, pointing outward
+  const axes=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]].map(a=>new THREE.Vector3(a[0],a[1],a[2]));
+  let best=null,score=-1e9;
+  axes.forEach(ax=>{ if(Math.abs(ax.dot(u))>0.35) return; const s=ax.dot(mid); if(s>score){ score=s; best=ax; } });
+  if(!best){ let mn=1e9; axes.forEach(ax=>{ const dd=Math.abs(ax.dot(u)); if(dd<mn){ mn=dd; best=ax; } }); }
+  return best.clone();
+}
+function _iclDomAxis(v){ const ax=Math.abs(v.x),ay=Math.abs(v.y),az=Math.abs(v.z); return ax>=ay&&ax>=az?'x':(ay>=az?'y':'z'); }
+function _iclAxisKey(d){ return _iclDomAxis(d)+(d.x+d.y+d.z>=0?'+':'-'); }
+
+function _iclDimText(dm){ return dm.type==='dia'?('Ø '+dm.value):dm.type==='rad'?('R '+dm.value):dm.type==='angle'?(dm.value+'°'):(dm.value+' mm'); }
+
+function _iclAddDim(r, checkId){
+  const t=r.type||'dist';
+  const mode = (t==='dia'||t==='rad')?'radial':(t==='angle'?'angle':'linear');
+  const dm={ a:_iclToScene(r.p1), b:_iclToScene(r.p2), value:r.value_mm, type:t, mode, checkId, group:null, label:null };
+  if(t==='angle'){ dm.vertex=r.vertex||null; dm.dir1=r.dir1||null; dm.dir2=r.dir2||null; }
+  _icl.dims.push(dm);
+  _iclLayoutDims();
+}
+
+function _iclLayoutDims(){
+  if(!_icl.scene) return;
+  // clear existing visuals
+  _icl.dims.forEach(dm=>{ if(dm.group){ _icl.scene.remove(dm.group); } if(dm.label&&dm.label.parentNode) dm.label.parentNode.removeChild(dm.label); dm.group=null; dm.label=null; });
+  // radial (Ø/R) and angle dims draw in place; linear dims stack outside
+  const linear=[];
+  _icl.dims.forEach(dm=>{ if(dm.mode==='linear') linear.push(dm); else _iclBuildRadial(dm); });
+  // group linear dims that share an offset axis + measurement direction
+  const groups={};
+  linear.forEach(dm=>{
+    const u=dm.b.clone().sub(dm.a); dm.len=u.length()||1; u.normalize(); dm.u=u;
+    dm.d=_iclSnapAxis(dm.a.clone().add(dm.b).multiplyScalar(0.5), u);
+    const key=_iclAxisKey(dm.d)+'|'+_iclDomAxis(u);
+    (groups[key]=groups[key]||[]).push(dm);
+  });
+  const h=_icl.half||new THREE.Vector3(60,60,60);
+  Object.values(groups).forEach(arr=>{
+    arr.sort((x,y)=>x.len-y.len);          // shortest innermost
+    arr.forEach((dm,level)=>{
+      const d=dm.d, reach=Math.abs(d.x)*h.x+Math.abs(d.y)*h.y+Math.abs(d.z)*h.z;
+      const baseGap=Math.max(12,reach*0.28), step=Math.max(11,reach*0.22);
+      const mid=dm.a.clone().add(dm.b).multiplyScalar(0.5);
+      let shift=(reach+baseGap+level*step)-mid.dot(d);
+      if(shift<baseGap) shift=baseGap+level*step;
+      _iclBuildDimGroup(dm, shift);
+    });
+  });
+}
+
+function _iclMakeLabel(dm, pos){
+  const label=document.createElement('div'); label.textContent=_iclDimText(dm);
+  label.style.cssText="position:absolute;transform:translate(-50%,-50%);background:#CC0000;color:#fff;padding:2px 7px;border-radius:6px;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;pointer-events:none;white-space:nowrap;z-index:7;transition:transform .15s;";
+  _icl.mount.appendChild(label); dm.label=label; dm.mid=pos;
+}
+
+function _iclBuildRadial(dm){
+  const a=dm.a,b=dm.b; const u=b.clone().sub(a); dm.len=u.length()||1; u.normalize();
+  const g=new THREE.Group(); g.renderOrder=10;
+  if(dm.mode==='angle'){
+    if(dm.vertex&&dm.dir1&&dm.dir2){
+      const V=_iclToScene(dm.vertex);
+      const d1=new THREE.Vector3(dm.dir1[0],dm.dir1[1],dm.dir1[2]).normalize();
+      const d2=new THREE.Vector3(dm.dir2[0],dm.dir2[1],dm.dir2[2]).normalize();
+      const L=Math.max(14,(_icl.modelR||60)*0.32);
+      g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([V,V.clone().addScaledVector(d1,L)]),_icl.matDimLine));
+      g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([V,V.clone().addScaledVector(d2,L)]),_icl.matDimLine));
+      const seg=20,pts=[],rA=L*0.55;
+      for(let k=0;k<=seg;k++){ const dir=d1.clone().lerp(d2,k/seg).normalize(); pts.push(V.clone().addScaledVector(dir,rA)); }
+      g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),_icl.matDimLine));
+      const bis=d1.clone().add(d2); if(bis.lengthSq()<1e-6) bis.copy(d1); bis.normalize();
+      _icl.scene.add(g); dm.group=g; _iclMakeLabel(dm, V.clone().addScaledVector(bis,L*0.72));
+      return;
+    }
+    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),_icl.matWit));
+    _icl.scene.add(g); dm.group=g; _iclMakeLabel(dm, a.clone().add(b).multiplyScalar(0.5));
+    return;
+  }
+  g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),_icl.matDimLine));
+  const ah=Math.max(1.6, Math.min(4, dm.len*0.18)); const yAxis=new THREE.Vector3(0,1,0);
+  const ends = dm.type==='dia' ? [[a,u.clone().negate()],[b,u.clone()]] : [[b,u.clone()]];
+  ends.forEach(([pt,out])=>{
+    const cone=new THREE.Mesh(new THREE.ConeGeometry(ah*0.45, ah, 12), _icl.matDim);
+    cone.quaternion.setFromUnitVectors(yAxis, out);
+    cone.position.copy(pt).addScaledVector(out, -ah/2);
+    g.add(cone);
+  });
+  _icl.scene.add(g); dm.group=g;
+  _iclMakeLabel(dm, dm.type==='dia' ? a.clone().add(b).multiplyScalar(0.5) : b.clone());
+}
+
+function _iclBuildDimGroup(dm, shift){
+  const a=dm.a,b=dm.b,u=dm.u,d=dm.d;
+  const off=d.clone().multiplyScalar(shift);
+  const a2=a.clone().add(off), b2=b.clone().add(off);
+  const g=new THREE.Group(); g.renderOrder=10;
+  const over=d.clone().multiplyScalar(shift*0.06+3);
+  g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,a2.clone().add(over)]),_icl.matWit));
+  g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([b,b2.clone().add(over)]),_icl.matWit));
+  g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a2,b2]),_icl.matDimLine));
+  const ah=Math.max(1.6, Math.min(4, dm.len*0.12)); const yAxis=new THREE.Vector3(0,1,0);
+  [[a2,u.clone().negate()],[b2,u.clone()]].forEach(([pt,out])=>{
+    const cone=new THREE.Mesh(new THREE.ConeGeometry(ah*0.45, ah, 12), _icl.matDim);
+    cone.quaternion.setFromUnitVectors(yAxis, out);
+    cone.position.copy(pt).addScaledVector(out, -ah/2);
+    g.add(cone);
+  });
+  _icl.scene.add(g); dm.group=g;
+  _iclMakeLabel(dm, a2.clone().add(b2).multiplyScalar(0.5));
+}
+
+function _iclFlashEnts(ents){
+  if(!ents||!_icl.scene) return;
+  const objs=[];
+  ents.forEach(e=>{
+    let o;
+    if(e.kind==='face'){ o=new THREE.Mesh(_iclFaceGeom(e.id),_icl.matPickFace); o.userData.shared=false; }
+    else { const src=_icl.edgeLines.find(l=>l.userData.edgeId===e.id); if(src){ o=new THREE.Line(src.geometry,_icl.matPickEdge); o.userData.shared=true; } }
+    if(o){ o.renderOrder=10; _icl.scene.add(o); objs.push(o); }
+  });
+  setTimeout(()=>{ objs.forEach(o=>{ _icl.scene&&_icl.scene.remove(o); if(!o.userData.shared&&o.geometry) o.geometry.dispose(); }); }, 1400);
+}
+
+function _iclFlashCheck(i){
+  const c=_icl.checks[i]; if(!c) return;
+  if(c.checkId!=null){
+    const d=_icl.dims.find(x=>x.checkId===c.checkId);
+    if(d&&d.label){ d.label.style.transform='translate(-50%,-50%) scale(1.28)'; setTimeout(()=>{ if(d.label) d.label.style.transform='translate(-50%,-50%)'; },650); }
+  }
+  if(c.ents) _iclFlashEnts(c.ents);
 }
 
 function _iclUpdateLabels(){
   if(!_icl.camera||!_icl.dims.length||!_icl.mount)return;
   const w=_icl.mount.clientWidth,h=_icl.mount.clientHeight;
   _icl.dims.forEach(d=>{ const v=d.mid.clone().project(_icl.camera); d.label.style.left=((v.x*0.5+0.5)*w)+'px'; d.label.style.top=((-v.y*0.5+0.5)*h)+'px'; });
+}
+
+function _iclRoundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+function _iclCapture(){
+  if(!_icl.renderer||!_icl.camera){ if(window.toast)window.toast('Load a STEP file first'); return; }
+  const r=_icl.renderer, cam=_icl.camera, mount=_icl.mount;
+  const w=mount.clientWidth||600, h=mount.clientHeight||600, S=2;
+  r.setPixelRatio(1); r.setSize(w*S,h*S,false); r.render(_icl.scene,cam);
+  const cv=document.createElement('canvas'); cv.width=w*S; cv.height=h*S;
+  const ctx=cv.getContext('2d'); ctx.drawImage(r.domElement,0,0);
+  // bake the value chips (they are HTML overlays, not in the WebGL buffer)
+  ctx.font='700 '+(12*S)+"px 'JetBrains Mono', monospace"; ctx.textBaseline='middle';
+  _icl.dims.forEach(dm=>{ if(!dm.mid)return; const v=dm.mid.clone().project(cam);
+    if(v.z>1) return;
+    const x=(v.x*0.5+0.5)*w*S, y=(-v.y*0.5+0.5)*h*S;
+    const txt=_iclDimText(dm), tw=ctx.measureText(txt).width, padX=7*S, bw=tw+padX*2, bh=18*S;
+    ctx.fillStyle='#CC0000'; _iclRoundRect(ctx,x-bw/2,y-bh/2,bw,bh,6*S); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.fillText(txt,x,y);
+  });
+  const url=cv.toDataURL('image/jpeg',0.92);
+  // restore live size
+  r.setPixelRatio(Math.min(window.devicePixelRatio,2)); r.setSize(w,h,false); if(_icl.resizeHandler)_icl.resizeHandler(); r.render(_icl.scene,cam);
+  _icl.captures.push({ name:_icl.lastView||'View', url });
+  _iclRenderCaptures();
+  if(window.toast)window.toast('Captured '+(_icl.lastView||'view'));
+}
+
+function _iclRenderCaptures(){
+  const wrap=document.getElementById('icl-captures-wrap'), strip=document.getElementById('icl-captures');
+  if(!strip)return;
+  if(wrap) wrap.style.display=_icl.captures.length?'block':'none';
+  strip.innerHTML='';
+  _icl.captures.forEach((cap,i)=>{
+    const cell=document.createElement('div'); cell.style.cssText='position:relative;flex-shrink:0;width:96px;';
+    cell.innerHTML='<img src="'+cap.url+'" style="width:96px;height:72px;object-fit:cover;border:1px solid #E6E2DC;border-radius:8px;display:block;">'
+      +'<div style="font-size:10.5px;color:#6A6A6A;text-align:center;margin-top:2px;font-weight:600;">'+_iclEsc(cap.name)+'</div>'
+      +'<button data-i="'+i+'" class="icl-cap-del" title="Remove" style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(26,26,26,0.78);color:#fff;font-size:11px;line-height:1;border:none;cursor:pointer;">✕</button>';
+    strip.appendChild(cell);
+  });
+  strip.querySelectorAll('.icl-cap-del').forEach(el=>el.addEventListener('click',e=>{ _icl.captures.splice(+e.target.dataset.i,1); _iclRenderCaptures(); }));
 }
 
 function _iclTolNum(s, type){
@@ -2918,13 +3201,15 @@ function _iclRenderChecks(){
     const row=document.createElement('div');
     row.style.cssText='border:1.5px solid #ECE9E4;background:#fff;border-radius:13px;padding:12px 13px;';
     const gaugeOpts=_ICL_GAUGES.map(g=>'<option'+(g===c.gauge?' selected':'')+'>'+g+'</option>').join('');
+    const locked = c.locked!==false;   // nominal locked by default (measured from CAD)
     let measured='';
     if(!visual){
       measured='<div style="display:flex;align-items:center;gap:8px;margin-top:9px;padding-left:34px;">'
-        +'<div style="display:flex;align-items:center;background:#F7F5F2;border:1px solid #ECE9E4;border-radius:9px;padding:5px 9px;gap:3px;">'
+        +'<div style="display:flex;align-items:center;background:'+(locked?'#F2F0EC':'#FFF6F6')+';border:1px solid '+(locked?'#ECE9E4':'#F0C9C9')+';border-radius:9px;padding:5px 9px;gap:3px;">'
         +(hasPrefix?'<span style="font-size:13px;font-weight:700;color:#6A6A6A;font-family:\'JetBrains Mono\',monospace;">'+prefix+'</span>':'')
-        +'<input class="icl-nominal" data-i="'+i+'" value="'+_iclEsc(c.value)+'" inputmode="decimal" style="width:56px;border:none;background:transparent;outline:none;font-family:\'JetBrains Mono\',monospace;font-size:14px;font-weight:700;color:#1A1A1A;text-align:right;">'
-        +'<span style="font-size:12px;font-weight:600;color:#9A9A9A;font-family:\'JetBrains Mono\',monospace;">'+unit+'</span></div>'
+        +'<input class="icl-nominal" data-i="'+i+'" value="'+_iclEsc(c.value)+'" inputmode="decimal"'+(locked?' readonly':'')+' style="width:56px;border:none;background:transparent;outline:none;font-family:\'JetBrains Mono\',monospace;font-size:14px;font-weight:700;color:'+(locked?'#7A7A7A':'#1A1A1A')+';text-align:right;'+(locked?'cursor:default;':'')+'">'
+        +'<span style="font-size:12px;font-weight:600;color:#9A9A9A;font-family:\'JetBrains Mono\',monospace;">'+unit+'</span>'
+        +'<button class="icl-lock" data-i="'+i+'" title="'+(locked?'Override measured value':'Lock to measured value')+'" style="background:transparent;border:none;cursor:pointer;font-size:11px;padding:0 0 0 4px;line-height:1;">'+(locked?'🔒':'🔓')+'</button></div>'
         +'<div style="display:flex;align-items:center;background:#F7F5F2;border:1px solid #ECE9E4;border-radius:9px;padding:5px 9px;gap:2px;">'
         +'<span style="font-size:12px;font-weight:600;color:#9A9A9A;">±</span>'
         +'<input class="icl-tol" data-i="'+i+'" value="'+_iclEsc(c.tol)+'" inputmode="decimal" style="width:34px;border:none;background:transparent;outline:none;font-family:\'JetBrains Mono\',monospace;font-size:13px;font-weight:600;color:#1A1A1A;text-align:center;"></div>'
@@ -2942,12 +3227,14 @@ function _iclRenderChecks(){
       +'<select class="icl-gauge" data-i="'+i+'" style="font-family:inherit;font-size:12px;font-weight:600;color:#3A3A3A;background:#fff;border:1px solid #E6E2DC;border-radius:8px;padding:5px 8px;cursor:pointer;">'+gaugeOpts+'</select>'
       +(c.ref?'<span style="font-size:10.5px;font-weight:700;color:#8A6E2E;background:#F6EFD9;padding:3px 8px;border-radius:20px;">'+_iclEsc(c.ref)+'</span>':'')
       +'</div>';
+    if(c.ents&&c.ents.length){ row.style.cursor='pointer'; row.addEventListener('click',e=>{ if(e.target.closest('input,select,button'))return; _iclFlashCheck(i); }); }
     list.appendChild(row);
   });
   list.querySelectorAll('.icl-desc').forEach(el=>el.addEventListener('change',e=>{_icl.checks[+e.target.dataset.i].desc=e.target.value;}));
   list.querySelectorAll('.icl-nominal').forEach(el=>el.addEventListener('change',e=>{_icl.checks[+e.target.dataset.i].value=e.target.value;}));
   list.querySelectorAll('.icl-tol').forEach(el=>el.addEventListener('change',e=>{_icl.checks[+e.target.dataset.i].tol=e.target.value;}));
   list.querySelectorAll('.icl-gauge').forEach(el=>el.addEventListener('change',e=>{_icl.checks[+e.target.dataset.i].gauge=e.target.value;}));
+  list.querySelectorAll('.icl-lock').forEach(el=>el.addEventListener('click',e=>{ const c=_icl.checks[+e.currentTarget.dataset.i]; c.locked=(c.locked===false); _iclRenderChecks(); }));
   list.querySelectorAll('.icl-del').forEach(el=>el.addEventListener('click',e=>{_icl.checks.splice(+e.target.dataset.i,1);_iclRenderChecks();}));
 }
 
@@ -2974,6 +3261,7 @@ if(iclPanel){
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&_icl.picks.length){ _iclResetPick(); } });
 window._iclOnShow=function(){ if(_icl.resizeHandler) setTimeout(_icl.resizeHandler,40); };
+window._iclView=_iclView; window._iclCapture=_iclCapture;
 
 // Expose to main script (module scope is not global)
 window._lbListRender = _lbListRender;

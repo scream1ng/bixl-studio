@@ -490,13 +490,15 @@ def icl_measure_route():
     f = request.files.get("file")
     if not f:
         return jsonify({"error": "no file"}), 400
+    k2 = request.form.get("kind2")
+    i2 = request.form.get("id2")
     try:
         result = icl_measure(
             f.read(),
             kind1=request.form.get("kind1", "face"),
             id1=int(request.form.get("id1")),
-            kind2=request.form.get("kind2", "face"),
-            id2=int(request.form.get("id2")),
+            kind2=k2 if k2 else None,
+            id2=int(i2) if i2 else None,
             filename=f.filename or "part.step",
         )
     except Exception as e:
