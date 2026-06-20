@@ -15,7 +15,13 @@ def _post(endpoint: str, step_bytes: bytes, filename: str, params: dict | None =
         params=params or {},
         timeout=120,
     )
-    resp.raise_for_status()
+    if resp.status_code >= 400:
+        detail = ""
+        try:
+            detail = resp.json().get("detail", "")
+        except Exception:
+            detail = resp.text[:300]
+        raise RuntimeError(f"cad-service {resp.status_code}: {detail}")
     return resp.json()
 
 

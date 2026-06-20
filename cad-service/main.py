@@ -263,7 +263,9 @@ async def icl_mesh(file: UploadFile = File(...)):
     try:
         result = faced_mesh(load_step(tmp_path))
     except Exception as e:
-        raise HTTPException(500, f"Mesh error: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(500, f"Mesh error: {type(e).__name__}: {e}")
     finally:
         os.unlink(tmp_path)
     return JSONResponse(content=result)
