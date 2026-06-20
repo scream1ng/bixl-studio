@@ -194,6 +194,15 @@ Phases 1–2 alone give a working desktop tool. Phase 3 adds mobile capture.
 - `DATABASE_URL` comes from Railway's Postgres plugin as an env var.
 - Generated files are transient: stream the `.docx` in the response, or write to `/tmp` and delete after sending. Do not accumulate files on the service disk.
 
+### cad-service OCC gotcha (learned the hard way)
+
+The CAD service (`cad-service/`) runs OpenCASCADE via the `ocp` conda package in Docker. **Railway's `ocp` build can be older than your local one**, and the two bindings name static methods differently: newer exposes `TopoDS.Face_s(x)` / `BRep_Tool.Triangulation_s(...)`, older exposes them **without the `_s` suffix** (`TopoDS.Face(x)`). Code that works locally then 500s on Railway with `AttributeError: ... has no attribute 'Face_s'`.
+
+- Never call OCC statics directly by the `_s` name. Resolve per-binding — see the `_static()` / `_face()` / `_map_shapes()` helpers in `cad/icl.py` and `as_edge()` in `cad/loader.py`.
+- Same for version-shifted APIs: `Poly_Triangulation.Node(i)` (newer) vs `.Nodes().Value(i)` (older); prefer the 4-arg `BRepMesh_IncrementalMesh(shape, lin, rel, ang)` (the 5-arg parallel overload is missing on some builds).
+- The Docker conda layer is cached by build hash; changing the Dockerfile text does **not** reliably re-resolve `ocp`. Don't rely on a cache-bust to "get a newer version" — write binding-agnostic code instead.
+- Endpoints swallow exceptions into `HTTPException(500, ...)`; to debug Railway, `traceback.print_exc()` in the handler and surface the response `detail` through the Flask proxy (`modules/icl`), then read `railway logs -p <cad-project-id> -e production -d`.
+
 ---
 
 ## Conventions
