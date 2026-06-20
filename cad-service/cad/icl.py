@@ -31,6 +31,38 @@ from OCP.TopTools import TopTools_IndexedMapOfShape
 from cad.loader import load_step
 
 # ---------------------------------------------------------------------------
+# OCC binding compatibility
+# Newer OCP exposes static methods with a `_s` suffix (Face_s, MapShapes_s);
+# older builds (e.g. on Railway) expose them without it. Resolve per-binding.
+# ---------------------------------------------------------------------------
+
+
+def _static(cls, name):
+    fn = getattr(cls, name + "_s", None)
+    return fn if fn is not None else getattr(cls, name)
+
+
+def _face(shape):
+    return _static(TopoDS, "Face")(shape)
+
+
+def _map_shapes(shape, typ, m):
+    _static(TopExp, "MapShapes")(shape, typ, m)
+
+
+def _triangulation(face, loc):
+    return _static(BRep_Tool, "Triangulation")(face, loc)
+
+
+def _degenerated(edge):
+    return _static(BRep_Tool, "Degenerated")(edge)
+
+
+def _surface_props(face, props):
+    _static(BRepGProp, "SurfaceProperties")(face, props)
+
+
+# ---------------------------------------------------------------------------
 # Indexed maps (deterministic 1-based IDs)
 # ---------------------------------------------------------------------------
 
@@ -39,7 +71,7 @@ def _face_map(shape) -> TopTools_IndexedMapOfShape:
     from OCP.TopAbs import TopAbs_FACE
 
     m = TopTools_IndexedMapOfShape()
-    TopExp.MapShapes_s(shape, TopAbs_FACE, m)
+    _map_shapes(shape, TopAbs_FACE, m)
     return m
 
 
@@ -47,13 +79,13 @@ def _edge_map(shape) -> TopTools_IndexedMapOfShape:
     from OCP.TopAbs import TopAbs_EDGE
 
     m = TopTools_IndexedMapOfShape()
-    TopExp.MapShapes_s(shape, TopAbs_EDGE, m)
+    _map_shapes(shape, TopAbs_EDGE, m)
     return m
 
 
 def _centroid(face) -> tuple[float, float, float]:
     props = GProp_GProps()
-    BRepGProp.SurfaceProperties_s(face, props)
+    _surface_props(face, props)
     c = props.CentreOfMass()
     return (c.X(), c.Y(), c.Z())
 
@@ -124,10 +156,10 @@ def faced_mesh(shape) -> dict:
     faces: list[dict] = []
     vbase = 0
     for i in range(1, fmap.Extent() + 1):
-        face = TopoDS.Face_s(fmap.FindKey(i))
+        face = _face(fmap.FindKey(i))
         faces.append(_face_meta(face, i))
         loc = TopLoc_Location()
-        tri = BRep_Tool.Triangulation_s(face, loc)
+        tri = _triangulation(face, loc)
         if tri is None:
             continue
         trsf = loc.Transformation()
@@ -173,7 +205,7 @@ def indexed_edges(shape) -> list:
             continue
         try:
             edge = as_edge(sub)
-            if BRep_Tool.Degenerated_s(edge):
+            if _degenerated(edge):
                 continue
             curve = BRepAdaptor_Curve(edge)
             first, last = curve.FirstParameter(), curve.LastParameter()
@@ -260,7 +292,7 @@ def measure_single(shape, kind: str, ent_id: int) -> dict:
     """Smart single-entity dimension: cylinder face -> Ø (full hole) or R (arc/bend)."""
     if kind != "face":
         raise ValueError("single-entity dimension needs a cylindrical face")
-    f = TopoDS.Face_s(_sub_shape(shape, "face", ent_id))
+    f = _face(_sub_shape(shape, "face", ent_id))
     s = BRepAdaptor_Surface(f)
     if s.GetType() != GeomAbs_Cylinder:
         raise ValueError("pick a hole or cylindrical face for Ø / R")
@@ -309,7 +341,7 @@ def measure(
 
     # Parallel-plane perpendicular distance
     if kind1 == "face" and kind2 == "face":
-        f1, f2 = TopoDS.Face_s(s1), TopoDS.Face_s(s2)
+        f1, f2 = _face(s1), _face(s2)
         a1, a2 = BRepAdaptor_Surface(f1), BRepAdaptor_Surface(f2)
         if a1.GetType() == GeomAbs_Plane and a2.GetType() == GeomAbs_Plane:
             pln1 = a1.Plane()
@@ -417,7 +449,7 @@ def _bend_angles(shape) -> list:
     fmap = _face_map(shape)
     angles: list[float] = []
     for i in range(1, fmap.Extent() + 1):
-        surf = BRepAdaptor_Surface(TopoDS.Face_s(fmap.FindKey(i)))
+        surf = BRepAdaptor_Surface(_face(fmap.FindKey(i)))
         if surf.GetType() != GeomAbs_Cylinder:
             continue
         sweep = math.degrees(surf.LastUParameter() - surf.FirstUParameter())
