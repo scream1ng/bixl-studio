@@ -132,6 +132,48 @@ class Label(db.Model):
         }
 
 
+class ICL(db.Model):
+    """One saved inspection checklist — metadata + checks + screenshot refs.
+
+    Stores enough to re-generate the .xlsx (view & re-export). Screenshots live
+    in the content-addressed ImageBlob store; this row keeps [{type, hash}] refs.
+    """
+    __tablename__ = "icls"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    plant = db.Column(db.Text, nullable=False, default="")
+    part_no = db.Column(db.Text, nullable=False, default="")
+    cust_no = db.Column(db.Text, nullable=False, default="")
+    part_desc = db.Column(db.Text, nullable=False, default="")
+    checks = db.Column(db.Text, nullable=False, default="[]")        # JSON
+    screenshots = db.Column(db.Text, nullable=False, default="[]")   # JSON [{type, hash}]
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def _checks(self) -> list:
+        try:
+            return json.loads(self.checks or "[]")
+        except Exception:
+            return []
+
+    def _shots(self) -> list:
+        try:
+            return json.loads(self.screenshots or "[]")
+        except Exception:
+            return []
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "plant": self.plant,
+            "part_no": self.part_no,
+            "cust_no": self.cust_no,
+            "part_desc": self.part_desc,
+            "check_count": len(self._checks()),
+            "screenshot_count": len(self._shots()),
+            "created_at": self.created_at.isoformat(),
+        }
+
+
 class Mapping(db.Model):
     """One WIP part → the finished good(s) it rolls up into (Look Up module)."""
     __tablename__ = "mappings"
@@ -213,7 +255,7 @@ with app.app_context():
 
     # Seed Look Up master data (IXL Search DB) from lookup_seed.json on an empty table.
     if Mapping.query.count() == 0:
-        _seed_path = os.path.join(os.path.dirname(__file__), "lookup_seed.json")
+        _seed_path = os.path.join(os.path.dirname(__file__), "docx", "look-up", "lookup_seed.json")
         if os.path.exists(_seed_path):
             with open(_seed_path, encoding="utf-8") as _f:
                 for _m in json.load(_f):
@@ -507,9 +549,66 @@ def icl_measure_route():
     return jsonify(result)
 
 
+def _decode_data_url(data_url: str) -> bytes:
+    """Decode a (possibly data-URL-prefixed) base64 string to raw bytes."""
+    b64 = data_url.split(",", 1)[1] if "," in data_url else data_url
+    return base64.b64decode(b64)
+
+
+def _send_jpeg_blob(blob):
+    return send_file(io.BytesIO(_decode_data_url(blob.data)), mimetype="image/jpeg")
+
+
+def _send_icl_xlsx(part_no: str, xlsx: bytes):
+    raw = f"{part_no} - ICL" if part_no else "ICL"
+    filename = re.sub(r'[\\/:*?"<>|]', "_", raw) + ".xlsx"
+    return send_file(
+        io.BytesIO(xlsx),
+        as_attachment=True,
+        download_name=filename,
+        mimetype=(
+            "application/vnd.openxmlformats-officedocument"
+            ".spreadsheetml.sheet"
+        ),
+    )
+
+
+def _store_icl(payload: dict) -> "ICL":
+    """Persist an ICL record; screenshots go to the content-addressed blob store."""
+    refs = []
+    for s in (payload.get("screenshots") or []):
+        img = s.get("image")
+        if not img:
+            continue
+        h = hashlib.sha256(img.encode("utf-8")).hexdigest()
+        if not db.session.get(ImageBlob, h):
+            db.session.add(ImageBlob(hash=h, data=img))
+        refs.append({"type": s.get("type") or "view", "hash": h})
+    icl = ICL(
+        plant=(payload.get("plant") or "").strip(),
+        part_no=(payload.get("part_no") or "").strip(),
+        cust_no=(payload.get("cust_no") or "").strip(),
+        part_desc=(payload.get("part_desc") or "").strip(),
+        checks=json.dumps(payload.get("checks") or []),
+        screenshots=json.dumps(refs),
+    )
+    db.session.add(icl)
+    db.session.commit()
+    return icl
+
+
+def _icl_shots_for_fill(icl: "ICL") -> list:
+    out = []
+    for ref in icl._shots():
+        blob = db.session.get(ImageBlob, ref.get("hash"))
+        if blob:
+            out.append({"type": ref.get("type") or "view", "image": blob.data})
+    return out
+
+
 @app.route("/api/icl/export", methods=["POST"])
 def icl_export_route():
-    """Fill the IXL Inspection Check List template → .xlsx attachment."""
+    """Fill the IXL Inspection Check List template → .xlsx attachment (+ save to history)."""
     payload = request.get_json(silent=True) or {}
     part_no = payload.get("part_no") or ""
     try:
@@ -524,17 +623,94 @@ def icl_export_route():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-    raw = f"{part_no} - ICL" if part_no else "ICL"
-    filename = re.sub(r'[\\/:*?"<>|]', "_", raw) + ".xlsx"
-    return send_file(
-        io.BytesIO(xlsx),
-        as_attachment=True,
-        download_name=filename,
-        mimetype=(
-            "application/vnd.openxmlformats-officedocument"
-            ".spreadsheetml.sheet"
-        ),
-    )
+    try:
+        _store_icl(payload)   # best-effort history save
+    except Exception:
+        db.session.rollback()
+
+    return _send_icl_xlsx(part_no, xlsx)
+
+
+# ── ICL history (saved checklists) ────────────────────────────────────────────
+
+@app.route("/api/icls", methods=["GET"])
+def list_icls():
+    rows = ICL.query.order_by(ICL.created_at.desc()).all()
+    return jsonify([r.to_dict() for r in rows])
+
+
+@app.route("/api/icls", methods=["POST"])
+def create_icl():
+    payload = request.get_json(silent=True) or {}
+    icl = _store_icl(payload)
+    return jsonify(icl.to_dict()), 201
+
+
+@app.route("/api/icls/<icl_id>", methods=["GET"])
+def get_icl(icl_id):
+    icl = db.session.get(ICL, icl_id)
+    if not icl:
+        return jsonify({"error": "not found"}), 404
+    shots = icl._shots()
+    d = icl.to_dict()
+    d["checks"] = icl._checks()
+    d["screenshots"] = [
+        {"type": r.get("type"), "url": f"/api/icls/{icl.id}/image/{i}"}
+        for i, r in enumerate(shots)
+    ]
+    return jsonify(d)
+
+
+@app.route("/api/icls/<icl_id>/image/<int:idx>", methods=["GET"])
+def icl_image(icl_id, idx):
+    icl = db.session.get(ICL, icl_id)
+    shots = icl._shots() if icl else []
+    if not icl or idx < 0 or idx >= len(shots):
+        return jsonify({"error": "not found"}), 404
+    blob = db.session.get(ImageBlob, shots[idx].get("hash"))
+    if not blob:
+        return jsonify({"error": "not found"}), 404
+    return _send_jpeg_blob(blob)
+
+
+@app.route("/api/icls/<icl_id>/thumb", methods=["GET"])
+def icl_thumb(icl_id):
+    """First ISO screenshot (or first available) as the list thumbnail."""
+    icl = db.session.get(ICL, icl_id)
+    shots = icl._shots() if icl else []
+    if not icl or not shots:
+        return jsonify({"error": "not found"}), 404
+    pick = next((s for s in shots if s.get("type") == "iso"), shots[0])
+    blob = db.session.get(ImageBlob, pick.get("hash"))
+    if not blob:
+        return jsonify({"error": "not found"}), 404
+    return _send_jpeg_blob(blob)
+
+
+@app.route("/api/icls/<icl_id>/export", methods=["GET", "POST"])
+def icl_reexport(icl_id):
+    """Re-generate the .xlsx from a saved record."""
+    icl = db.session.get(ICL, icl_id)
+    if not icl:
+        return jsonify({"error": "not found"}), 404
+    try:
+        xlsx = _fill_icl(
+            part_no=icl.part_no, cust_no=icl.cust_no, part_desc=icl.part_desc,
+            plant=icl.plant, checks=icl._checks(),
+            screenshots=_icl_shots_for_fill(icl),
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    return _send_icl_xlsx(icl.part_no, xlsx)
+
+
+@app.route("/api/icls/<icl_id>", methods=["DELETE"])
+def delete_icl(icl_id):
+    icl = db.session.get(ICL, icl_id)
+    if icl:
+        db.session.delete(icl)
+        db.session.commit()
+    return "", 204
 
 
 # ── Label history (exported JPGs) ─────────────────────────────────────────────
@@ -571,11 +747,8 @@ def label_image(label_id):
     label = db.session.get(Label, label_id)
     if not label or not label.blob:
         return jsonify({"error": "not found"}), 404
-    data = label.blob.data
-    b64 = data.split(",", 1)[1] if "," in data else data
-    raw = base64.b64decode(b64)
     return send_file(
-        io.BytesIO(raw),
+        io.BytesIO(_decode_data_url(label.blob.data)),
         mimetype="image/jpeg",
         as_attachment=bool(request.args.get("download")),
         download_name=(label.name or "label.jpg"),

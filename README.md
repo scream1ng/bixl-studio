@@ -1,104 +1,114 @@
 # BIXL Studio
 
-Manufacturing documentation platform for IXL Group. First module: an **SOP generator** that turns shop-floor photos and short notes into a formatted Word document built from IXL's existing template.
+Manufacturing documentation platform for IXL Group — a single hosted web app (Flask on Railway) with several shop-floor modules. Responsive: desktop for building, phone for capture/viewing.
 
-Capture on a phone, build in a web app, generate a `.docx` — without ever losing track of which note belongs to which photo.
-
-> **For Claude Code:** read `CLAUDE.md` first. It is the build spec — stack, template structure, API surface, brand, build order, and status.
+> **For Claude Code:** read `CLAUDE.md` first — it is the build spec (stack, template structure, API surface, brand, conventions, gotchas).
 
 ---
 
-## What's in this repo right now
+## Modules
 
-| File | What it is |
+| Module | What it does | Status |
+|--------|--------------|--------|
+| **SOP** | Turn shop-floor photos + notes into a formatted IXL Word `.docx` (1–8 steps/page, multi-page). | ✅ |
+| **Label** | Three.js STEP viewer → wireframe label JPG at exact angle; history list. | ✅ |
+| **ICL** (Inspection Checklist) | Balloon dimensions off a STEP model → export the real IXL inspection `.xlsx`; saved history. | ✅ |
+| **Look Up** | FG ↔ WIP part-number finder. | ✅ |
+| MLB / PFC | BOM & flow. | Soon |
+
+---
+
+## Repo layout
+
+| Path | What it is |
 |------|------------|
-| `CLAUDE.md` | The build specification Claude Code reads automatically |
-| `fill_sop.py` | **Working** document engine — fills the IXL template with images + text |
-| `SOP_Template_A3.docx` | The real IXL SOP template (A3 landscape). Read-only source of truth |
-| `requirements.txt` | Python dependencies |
-| `Procfile` / `railway.json` | Railway deploy config |
-| `.gitignore` | Standard Python ignores (keeps the template tracked) |
-
-The Flask API (`app.py`), database, and frontend are **not built yet** — that's Phase 1–3 in `CLAUDE.md`.
+| `app.py` | Flask API + DB models (SQLite default, Postgres via `DATABASE_URL`) + routes |
+| `modules/sop/fill.py` | SOP `.docx` fill engine — `fill_sop(...)` |
+| `modules/label/` | STEP → wireframe / mesh helpers |
+| `modules/icl/` | cad-service proxy (`__init__.py`) + Excel export (`export.py`) |
+| `docx/sop/` | 12 pre-built `.docx` fill templates (A3/A4 × landscape/portrait × step counts) |
+| `docx/icl/Template - ICL.xlsx` | Blank IXL inspection-checklist template (filled per export) |
+| `templates/index.html` | Single-file responsive frontend (all screens + PWA) |
+| `cad-service/` | FastAPI + OpenCASCADE (`ocp`) service for STEP meshing/measuring (own Docker deploy) |
+| `Procfile` / `railway.json` | Railway deploy config (`gunicorn app:app`) |
 
 ---
 
-## The document engine (already works)
+## SOP document engine
 
-`fill_sop.py` exposes one entry point:
+`modules/sop/fill.py`:
 
 ```python
-from fill_sop import fill_sop
+from modules.sop.fill import fill_sop
 
-fill_sop(
-    steps=[{"image": "photo1.jpg", "text": "Place component on fixture"}, ...],
+docx_bytes = fill_sop(
+    steps=[{"image": b"...jpg bytes...", "text": "Place component on fixture"}, ...],
     part_no="36611",
     part_name="Tastic Luminate Heat Module",
     doc_no="A0866",
-    template_path="SOP_Template_A3.docx",
-    output_path="out.docx",          # omit to get bytes back
+    format_key="a3-landscape",
+    steps_per_page=8,
 )
 ```
 
-It handles:
-- Images placed in the correct step cells, scaled to fit (any aspect ratio), vertically centred
-- Description text in the matching cells
-- Header part number/name and footer doc number (even though Word stores them split across runs)
-- 1–8 steps on one page, unused "STEP N" headings blanked
-- More than 8 steps → extra pages (STEP 9, 10, …) with header/footer repeating automatically
+Handles: images scaled to fit (any aspect, vertically centred), description text, header part no/name + footer doc no (split-run safe), blanked headings for unused steps, multi-page for >8 steps with header/footer repeating.
 
-Run it directly to produce a demo document:
+---
 
-```bash
-pip install -r requirements.txt
-python fill_sop.py
+## ICL — ballooned inspection checklist
+
+Upload a STEP model, then **click surfaces/edges to drop numbered balloons** and build an inspection sheet.
+
+**Smart dimensioning** (geometry decides the type, no tool buttons):
+
+| You pick | You get |
+|---|---|
+| 1 cylinder face / hole | **Ø** diameter (single click) |
+| 1 bend cylinder | **R** radius / bend angle |
+| 2 parallel planar faces | **distance** (perpendicular gap) |
+| 2 non-parallel faces | **angle** |
+| 2 edges, or face + edge | **distance** |
+| cylinder/hole + face | **centre-to-surface** distance |
+
+**Workflow:**
+1. Each pick adds a numbered balloon + a row to the dimension table. Numbers run sequentially and **carry across screenshots** (never reset); deleting a row re-sequences.
+2. Frame the model in the square viewfinder, **Capture** — the balloons bake into the picture (thick lines, white bg) and clear from the viewport.
+3. Up to **4 pictures** per sheet (1 ISO overview + measurement views).
+4. **Export ICL** fills `docx/icl/Template - ICL.xlsx` (header, NO/balloon column, dimension + tolerance per row, pictures placed by count) and saves the record to history.
+
+Gauges: Vernier / Protractor / Visual (Visual takes an SOP reference → LIMITS column).
+
+**History** (`screen-icl-list`): grouped Today / This week / Earlier, thumbnail, re-download `.xlsx`, delete. On a phone, opening a checklist shows the ballooned pictures + a "what to check" list (no download) — read-only for the operator. The 3D editor is desktop-only.
+
+---
+
+## API surface (selected)
+
 ```
-
----
-
-## ICL smart dimensioning
-
-The Inspection Check List module measures dimensions off an uploaded STEP model. Picking follows a **smart-dimension** model (like SolidWorks): the geometry you select decides the dimension type — there are no separate tool buttons.
-
-| You pick | You get | Picks |
-|---|---|---|
-| 1 cylinder face / hole | **Ø** diameter | single click |
-| 1 bend cylinder | **R** radius (and bend angle from sweep) | single click |
-| 2 planar faces, parallel | **distance** (perpendicular gap) | two clicks |
-| 2 planar faces, non-parallel | **angle** (between face normals) | two clicks |
-| 2 edges, or face + edge | **distance** | two clicks |
-| cylinder/hole + planar face | **centre-to-surface** distance (from the hole axis, not the rim) | two clicks |
-
-Rules:
-- **Single-entity dimensions** (Ø, R) commit on the first click — the entity alone defines them.
-- **Two-entity dimensions** (distance, angle) need a second pick.
-- The instruction strip previews what the current hover will produce.
-- Dimensions are drawn **outside the part** in engineering-drawing style: the dimension line is offset along the nearest world axis past the silhouette, with witness (extension) lines and arrowheads.
-- Parallel dimensions sharing an axis **stack**: shortest sits closest to the part, each longer one steps further out so they don't overlap.
-- Dimensions read square in the **Front / Right / Top** ortho views; the Iso view is for orbiting/context only.
-
----
-
-## Build order (see CLAUDE.md for detail)
-
-1. **Flask API + DB + engine** on Railway — create an SOP, post steps, download a correct `.docx`
-2. **Web app editor** — document list + two-panel SOP editor + download
-3. **Phone capture PWA** — photo + annotation + note, installable to home screen
+POST /api/icl/mesh | /edges | /measure      cad-service proxy (STEP geometry)
+POST /api/icl/export                          fill template → .xlsx (+ save history)
+GET  /api/icls                                list saved checklists
+GET  /api/icls/:id  /thumb  /image/:n         fetch record / thumbnail / screenshot
+GET  /api/icls/:id/export                     re-generate .xlsx from a saved record
+DELETE /api/icls/:id
+GET/POST/PUT/DELETE /api/sops ...             SOP CRUD + /generate
+GET/POST/DELETE /api/labels ...               Label history
+GET  /healthz                                 Railway health check
+```
 
 ---
 
 ## Deploy to Railway
 
-1. Push this repo to GitHub.
-2. In Railway: **New Project → Deploy from GitHub repo** → pick this repo.
-3. Add the **Postgres** plugin (Railway injects `DATABASE_URL`).
-4. Railway reads `railway.json` / `Procfile` and starts `gunicorn app:app`.
-5. Health check is `/healthz` (add it when `app.py` is built).
+1. Push to GitHub → Railway **New Project → Deploy from GitHub repo**.
+2. Add the **Postgres** plugin (injects `DATABASE_URL`).
+3. Railway reads `railway.json` / `Procfile` → runs `gunicorn app:app`. Health check `/healthz`.
+4. The **cad-service** (`cad-service/`) deploys separately (its own Dockerfile, OpenCASCADE). Set `CAD_API_URL` on the web service to point at it.
 
-No ports are hardcoded — the app must bind to `$PORT`, which Railway provides.
+No ports hardcoded — the app binds `$PORT`. See `CLAUDE.md` for the cad-service OCC binding gotcha.
 
 ---
 
 ## Brand
 
-IXL palette: red `#CC0000`, black `#1A1A1A`, grey `#6B6B6B`, white. Logo lockup is `IXL | <module>` with a red divider bar. Full tokens in `CLAUDE.md`.
+IXL palette: red `#CC0000`, black `#1A1A1A`, grey `#6B6B6B`, light grey `#F2F2F2`, white. Logo lockup `IXL | <module>` with a red divider bar. Full tokens in `CLAUDE.md`.

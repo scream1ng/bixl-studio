@@ -549,6 +549,86 @@
   <input type="file" id="lb-file-input" accept=".step,.stp" style="display:none;">
 </div>
 
+<!-- ═══════════════════ ICL — HISTORY LIST ═══════════════════ -->
+<div id="screen-icl-list" class="screen">
+
+  <aside class="shell-rail">
+    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">
+      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
+      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
+      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
+    </div>
+    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <div class="rail-item" onclick="enterSop()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
+      </div>
+      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
+      </div>
+      <div class="rail-item" onclick="enterLookup()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#9A9A9A;">Quality checks</div></div>
+        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.2;text-align:center;flex-shrink:0;">MLB<br>PFC</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">MLB / PFC</div><div style="font-size:11px;color:#6E6E6E;">BOM &amp; flow</div></div>
+        <span style="font-size:9px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:3px 7px;border-radius:20px;flex-shrink:0;">SOON</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="shell-panel">
+    <!-- mobile header -->
+    <header class="mb-only" style="height:58px;display:flex;align-items:center;padding:0 18px;flex-shrink:0;">
+      <button onclick="openDrawer()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex-shrink:0;">
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+      </button>
+      <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Inspection</span>
+      <button disabled title="Create checklists on desktop" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;cursor:not-allowed;">+</button>
+    </header>
+    <!-- desktop header -->
+    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
+      <div style="max-width:780px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
+        <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Inspection checklists</h1>
+        <button onclick="enterIclNew()" style="background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;transition:background 0.1s;">+ New ICL</button>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
+      <div style="max-width:780px;margin:0 auto;">
+        <div id="icl-list-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
+          <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No checklists yet</div>
+          <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New ICL</strong> to measure a part and export your first sheet.</p>
+        </div>
+        <div id="icl-list-items"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- view modal (read-only, re-export) -->
+  <div id="icl-view-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(20,20,20,0.6);align-items:center;justify-content:center;padding:24px;">
+    <div style="background:#fff;border-radius:18px;max-width:900px;width:100%;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid #EEEAE4;">
+        <div style="min-width:0;"><div id="icl-view-title" style="font-size:15px;font-weight:800;">Checklist</div><div id="icl-view-sub" style="font-size:12px;color:#9B9B9B;margin-top:2px;"></div></div>
+        <button onclick="window._iclCloseViewModal&&window._iclCloseViewModal()" style="font-size:18px;background:transparent;border:none;cursor:pointer;color:#888;line-height:1;">&#10005;</button>
+      </div>
+      <div id="icl-view-body" style="padding:18px 22px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;"></div>
+      <div id="icl-view-foot" class="dt-only" style="padding:14px 22px;border-top:1px solid #EEEAE4;display:flex;justify-content:flex-end;">
+        <button id="icl-view-dl" style="background:#CC0000;color:#fff;border:none;border-radius:10px;padding:10px 26px;font-size:13.5px;font-weight:700;cursor:pointer;">Download .xlsx</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════════ ICL — INSPECTION CHECKLIST (web) ═══════════════════ -->
 <div id="screen-icl" class="screen">
 
@@ -695,8 +775,8 @@
     <div style="flex-shrink:0;border-top:1px solid #EFEDEA;padding:13px 16px;display:flex;flex-direction:column;gap:9px;">
       <button id="icl-add-visual" style="display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px dashed #D8D3CA;background:transparent;border-radius:13px;padding:11px;font-size:13px;font-weight:600;color:#8A8A8A;cursor:pointer;">&#65291; Add visual check</button>
       <div style="display:flex;gap:9px;">
-        <button id="icl-export-btn" style="flex:1;background:#fff;color:#2C2C2C;border:1px solid #E2DED7;border-radius:10px;padding:11px;font-size:13.5px;font-weight:600;cursor:pointer;">Export sheet</button>
-        <button id="icl-save-btn" style="flex:1.2;background:#CC0000;color:#fff;border:none;border-radius:10px;padding:11px;font-size:13.5px;font-weight:600;cursor:pointer;">Save checklist</button>
+        <button id="icl-export-btn" style="flex:1;background:#CC0000;color:#fff;border:none;border-radius:8px;padding:11px 0;font-size:14px;font-weight:700;cursor:pointer;">Export ICL</button>
+        <button id="icl-new-btn" style="padding:11px 16px;border-radius:8px;font-size:14px;font-weight:600;background:#fff;border:1px solid rgba(0,0,0,0.1);color:#1A1A1A;cursor:pointer;">New</button>
       </div>
       <div style="font-size:10.5px;color:#AEAAA2;text-align:center;">Generates the printed ICL &middot; 1 sheet/day &#8594; QA</div>
     </div>
@@ -1020,11 +1100,11 @@
         <div style="flex:1;min-width:0;"><div class="dw-lbl" style="font-size:13px;font-weight:600;color:#C8C8C8;">Look Up</div></div>
         <span class="dw-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
       </button>
-      <div style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;">
-        <div style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;flex-shrink:0;">ICL</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div></div>
-        <span style="font-size:8.5px;font-weight:700;color:#7A7A7A;border:1px solid #3A3A3A;padding:2px 6px;border-radius:20px;">SOON</span>
-      </div>
+      <button id="drawer-icl" onclick="enterIcl();closeDrawer();" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;text-align:left;width:100%;transition:background 0.1s;">
+        <div class="dw-tile" style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;flex-shrink:0;">ICL</div>
+        <div style="flex:1;min-width:0;"><div class="dw-lbl" style="font-size:13px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div></div>
+        <span class="dw-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
+      </button>
       <div style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;">
         <div style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">MLB</div>
         <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#C8C8C8;">MLB / PFC</div></div>
@@ -1198,7 +1278,7 @@ function showScreen(name) {
 }
 
 function setDrawerActive(key) {
-  ['sop', 'label', 'lookup'].forEach(k => {
+  ['sop', 'label', 'lookup', 'icl'].forEach(k => {
     const btn = $('drawer-' + k);
     if (!btn) return;
     const active = k === key;
@@ -1216,6 +1296,7 @@ function openDrawer() {
   const s = state.screen;
   const key = ['lookup', 'lookup-mobile', 'lookup-new'].includes(s) ? 'lookup'
             : ['label', 'label-list'].includes(s) ? 'label'
+            : ['icl', 'icl-list'].includes(s) ? 'icl'
             : 'sop';
   setDrawerActive(key);
   $('drawer-overlay').style.display = 'block';
@@ -1379,10 +1460,15 @@ function enterLabelNew() {
 }
 
 function enterIcl() {
+  if (window._iclRefresh) window._iclRefresh();
+  showScreen('icl-list');
+}
+function enterIclNew() {
   if (isMobile()) {
     toast('Measure dimensions on desktop — STEP upload not supported on phone');
     return;
   }
+  if (window._iclNew) window._iclNew();
   showScreen('icl');
   if (window._iclOnShow) window._iclOnShow();
 }
@@ -3320,12 +3406,16 @@ function _iclAddVisual(){
   if(inputs.length) inputs[inputs.length-1].focus();
 }
 
-async function _iclExport(){
-  if(!_icl.checks.length){ if(window.toast)window.toast('Add at least one check first'); return; }
+function _iclPayload(){
   const v=id=>{ const el=document.getElementById(id); return el?el.value.trim():''; };
   const checks=_icl.checks.map(c=>({balloon:c.balloon!=null?c.balloon:null, type:c.type||'dist', desc:c.desc||'', value:c.value, tol:c.tol||'', gauge:c.gauge||'', ref:c.ref||''}));
   const screenshots=_icl.captures.map(c=>({type:c.type||'view', name:c.name||'View', image:c.url}));
-  const payload={ part_no:v('icl-part-no'), cust_no:v('icl-cust-no'), part_desc:v('icl-part-desc'), plant:v('icl-plant'), checks, screenshots };
+  return { part_no:v('icl-part-no'), cust_no:v('icl-cust-no'), part_desc:v('icl-part-desc'), plant:v('icl-plant'), checks, screenshots };
+}
+
+async function _iclExport(){
+  if(!_icl.checks.length){ if(window.toast)window.toast('Add at least one check first'); return; }
+  const payload=_iclPayload();
   const btn=document.getElementById('icl-export-btn'); const old=btn?btn.textContent:'';
   if(btn){ btn.disabled=true; btn.textContent='Exporting…'; }
   try{
@@ -3335,10 +3425,101 @@ async function _iclExport(){
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
     a.download=(payload.part_no?payload.part_no+' - ICL':'ICL')+'.xlsx'; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(a.href),2000);
-    if(window.toast)window.toast('Exported inspection sheet');
+    if(window.toast)window.toast('Exported & saved to history');
   }catch(e){ if(window.toast)window.toast('Export failed: '+e.message); }
   finally{ if(btn){ btn.disabled=false; btn.textContent=old; } }
 }
+
+function _iclNew(){
+  if(typeof _iclCleanup==='function') _iclCleanup();
+  _icl.file=null; _icl.checks=[]; _icl.captures=[]; _icl.seq=0; _icl.sessionId=1;
+  _iclShow('drop'); _iclStatus('');
+  _iclRenderChecks(); _iclRenderCaptures();
+  const fn=document.getElementById('icl-filename'); if(fn) fn.textContent='No file loaded';
+  const fs=document.getElementById('icl-filesub'); if(fs) fs.textContent='Import a STEP file to begin';
+  ['icl-plant','icl-part-no','icl-cust-no','icl-part-desc'].forEach(id=>{const e=document.getElementById(id); if(e) e.value='';});
+  _iclInstruction('Import a STEP file, then pick surfaces or edges to add a check.', false);
+}
+
+// ── ICL history list ──
+let _iclHistory=[];
+async function _iclRefresh(){
+  try{ _iclHistory=(await api('GET','/api/icls'))||[]; }catch(e){ _iclHistory=[]; }
+  _iclListRender();
+}
+function _iclListRender(){
+  const list=document.getElementById('icl-list-items'), empty=document.getElementById('icl-list-empty');
+  if(!list) return;
+  if(!_iclHistory.length){ if(empty) empty.style.display='block'; list.innerHTML=''; return; }
+  if(empty) empty.style.display='none';
+  const now=new Date(), today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const weekAgo=new Date(today); weekAgo.setDate(weekAgo.getDate()-7);
+  const groups=[{label:'Today',items:[]},{label:'This week',items:[]},{label:'Earlier',items:[]}];
+  for(const r of _iclHistory){ const d=new Date(r.created_at||0); groups[d>=today?0:d>=weekAgo?1:2].items.push(r); }
+  list.innerHTML=groups.filter(g=>g.items.length).map(g=>`
+    <div style="font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.1px;margin:20px 0 8px;">${esc(g.label)}</div>
+    <div style="display:flex;flex-direction:column;gap:7px;">
+      ${g.items.map(r=>{
+        const id=esc(r.id);
+        const title=r.part_no||r.part_desc||'Untitled';
+        const sub=[r.part_desc, (r.check_count||0)+' check'+(r.check_count===1?'':'s'), (r.screenshot_count||0)+' pic'+(r.screenshot_count===1?'':'s')].filter(Boolean).join(' · ');
+        const thumb = r.screenshot_count ? `<img src="/api/icls/${id}/thumb" loading="lazy" style="width:38px;height:38px;object-fit:contain;background:#fff;border-radius:8px;flex-shrink:0;border:1px solid rgba(0,0,0,0.06);">`
+          : `<div style="width:38px;height:38px;border-radius:8px;flex-shrink:0;background:#F2F0EC;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#BBB;">ICL</div>`;
+        return `<div style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:11px 14px;display:flex;align-items:center;gap:12px;">
+          <div onclick="iclViewIcl('${id}')" title="View" style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;cursor:pointer;">
+            ${thumb}
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1A1A1A;">${esc(title)}</div>
+              <div style="color:#9B9B9B;font-size:12px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(sub)}</div>
+            </div>
+          </div>
+          <button class="dt-only" onclick="iclDownloadIcl('${id}')" style="color:#9B9B9B;font-size:15px;padding:4px 6px;border-radius:6px;flex-shrink:0;" title="Download .xlsx">&#8681;</button>
+          <button onclick="iclDeleteIcl('${id}')" style="color:#C8C8C8;font-size:14px;padding:4px 6px;border-radius:6px;flex-shrink:0;" title="Delete">&#128465;</button>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+}
+function iclDownloadIcl(id){ window.location.href='/api/icls/'+encodeURIComponent(id)+'/export'; }
+async function iclDeleteIcl(id){
+  try{ await api('DELETE','/api/icls/'+encodeURIComponent(id)); }
+  catch(e){ if(window.toast)window.toast('Delete failed: '+e.message); return; }
+  await _iclRefresh();
+}
+async function iclViewIcl(id){
+  let d; try{ d=await api('GET','/api/icls/'+encodeURIComponent(id)); }catch(e){ if(window.toast)window.toast('Load failed'); return; }
+  const t=document.getElementById('icl-view-title'), s=document.getElementById('icl-view-sub'), body=document.getElementById('icl-view-body'), dl=document.getElementById('icl-view-dl');
+  if(t) t.textContent=d.part_no||d.part_desc||'Checklist';
+  if(s) s.textContent=[d.part_desc, d.plant, (d.check_count||0)+' checks'].filter(Boolean).join(' · ');
+  if(dl) dl.onclick=()=>iclDownloadIcl(id);
+  if(body){
+    const shots=d.screenshots||[];
+    const pics = shots.length
+      ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">`
+        + shots.map(sh=>`<div style="border:1px solid #E6E2DC;border-radius:12px;overflow:hidden;background:#fff;"><img src="${esc(sh.url)}" style="width:100%;display:block;"><div style="padding:7px 10px;font-size:12px;font-weight:600;color:#555;">${sh.type==='iso'?'ISO overview':'View'}</div></div>`).join('')
+        + `</div>`
+      : '<div style="text-align:center;color:#9B9B9B;padding:24px;">No pictures in this checklist.</div>';
+    const checks=d.checks||[];
+    const rows = checks.map(c=>{
+      const no = c.balloon!=null?c.balloon:'';
+      const t=c.type||'dist';
+      const val = t==='visual'?'' : (t==='dia'?'Ø ':t==='rad'?'R ':'')+(c.value!=null?c.value:'')+(t==='angle'?'°':' mm');
+      const lim = (c.gauge==='Visual') ? (c.ref||'') : (c.tol?('± '+c.tol+(t==='angle'?'°':' mm')):'');
+      const meta=[val,lim,c.gauge].filter(Boolean).join('  ·  ');
+      return `<div style="display:flex;align-items:flex-start;gap:11px;padding:10px 0;border-bottom:1px solid #EEEAE4;">
+        <span style="width:24px;height:24px;flex-shrink:0;border-radius:50%;background:${no!==''?'#CC0000':'#9B9B9B'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;">${esc(no)}</span>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#1A1A1A;">${esc(c.desc||'Check')}</div>${meta?`<div style="font-size:12px;color:#9B9B9B;margin-top:2px;font-family:'JetBrains Mono',monospace;">${esc(meta)}</div>`:''}</div>
+      </div>`;
+    }).join('');
+    const checksBlock = checks.length
+      ? `<div><div style="font-size:11px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.1px;margin-bottom:4px;">What to check</div>${rows}</div>`
+      : '';
+    body.innerHTML = pics + checksBlock;
+  }
+  const foot=document.getElementById('icl-view-foot');
+  if(foot && window.isMobile) foot.style.display = window.isMobile() ? 'none' : 'flex';
+  const m=document.getElementById('icl-view-modal'); if(m) m.style.display='flex';
+}
+function _iclCloseViewModal(){ const m=document.getElementById('icl-view-modal'); if(m) m.style.display='none'; }
 
 // ICL wiring
 const iclInp=document.getElementById('icl-file-input');
@@ -3347,7 +3528,7 @@ const iclReset=document.getElementById('icl-reset-btn'); if(iclReset) iclReset.a
 const iclAddV=document.getElementById('icl-add-visual'); if(iclAddV) iclAddV.addEventListener('click',_iclAddVisual);
 const iclDxf=document.getElementById('icl-dxf-btn'); if(iclDxf) iclDxf.addEventListener('click',()=>{ if(window.toast)window.toast('DXF flat-pattern — coming soon'); });
 const iclExport=document.getElementById('icl-export-btn'); if(iclExport) iclExport.addEventListener('click',_iclExport);
-const iclSave=document.getElementById('icl-save-btn'); if(iclSave) iclSave.addEventListener('click',()=>{ if(window.toast)window.toast('Save checklist — coming soon'); });
+const iclNewBtn=document.getElementById('icl-new-btn'); if(iclNewBtn) iclNewBtn.addEventListener('click',_iclNew);
 const iclPanel=document.getElementById('icl-preview-panel');
 if(iclPanel){
   iclPanel.addEventListener('dragover',e=>e.preventDefault());
@@ -3357,6 +3538,8 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&_icl.picks.length)
 window._iclOnShow=function(){ if(_icl.resizeHandler) setTimeout(_icl.resizeHandler,40); };
 window._iclView=_iclView; window._iclCapture=_iclCapture;
 window._iclOpenCapModal=_iclOpenCapModal; window._iclCloseCapModal=_iclCloseCapModal;
+window._iclRefresh=_iclRefresh; window._iclNew=_iclNew; window._iclCloseViewModal=_iclCloseViewModal;
+window.iclViewIcl=iclViewIcl; window.iclDeleteIcl=iclDeleteIcl; window.iclDownloadIcl=iclDownloadIcl;
 
 // Expose to main script (module scope is not global)
 window._lbListRender = _lbListRender;
