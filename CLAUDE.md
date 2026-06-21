@@ -247,6 +247,4 @@ The CAD service (`cad-service/`) runs OpenCASCADE via the `ocp` conda package in
 ## Reference assets
 
 - `modules/sop/fill.py` — the fill engine. Entry point: `fill_sop(steps, part_no, part_name, doc_no, format_key, steps_per_page)`.
-- `docx/sop/templates/` — 12 pre-built `.docx` fill templates (source of truth for layout).
-- `docx/sop/source/` — blank IXL master templates (reference only, do not fill directly).
-- `dev/` — debug/generation scripts, not deployed.
+- `docx/sop/` — 12 pre-built `.docx` fill templates (source of truth for layout).

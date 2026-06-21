@@ -9,7 +9,7 @@ Entry point:
 steps is a list of dicts: {"image": path|bytes, "text": str}
 
 Template selection:
-  Picks from docx/sop/templates/{format_key}__{steps_per_page}steps.docx.
+  Picks from docx/sop/{format_key}__{steps_per_page}steps.docx.
   Pass template_path to override.
 
 Template layout:
@@ -36,7 +36,7 @@ from docx.oxml.ns import qn
 from PIL import Image as PILImage
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-TEMPLATE_DIR = os.path.join(ROOT, "docx", "sop", "templates")
+TEMPLATE_DIR = os.path.join(ROOT, "docx", "sop")
 
 IMG_PADDING_CM = 0.18   # vertical breathing room inside image cell
 BODY_FONT = "Century Gothic"
