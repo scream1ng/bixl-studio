@@ -1445,6 +1445,23 @@ function enterSop() {
 
 function isMobile() { return window.matchMedia('(max-width: 767px)').matches; }
 
+// Mobile only: after 15 min idle/backgrounded, reopen on the landing page.
+(function () {
+  const IDLE_MS = 15 * 60 * 1000, KEY = 'bixl_last_active';
+  const stamp = () => { try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} };
+  const maybeReset = () => {
+    if (!isMobile()) return;
+    let last = 0; try { last = parseInt(localStorage.getItem(KEY) || '0', 10); } catch (e) {}
+    if (last && Date.now() - last > IDLE_MS) goLanding();
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') stamp(); else maybeReset();
+  });
+  window.addEventListener('pagehide', stamp);
+  window.addEventListener('focus', maybeReset);
+  stamp();
+})();
+
 function enterLabel() {
   if (window._lbRefresh) window._lbRefresh();
   showScreen('label-list');
