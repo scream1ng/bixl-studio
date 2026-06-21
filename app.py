@@ -18,6 +18,7 @@ from sqlalchemy import text
 from modules.sop.fill import fill_sop as _fill_sop
 from modules.label import step_to_wireframe, step_to_mesh_and_edges
 from modules.icl import icl_mesh, icl_edges, icl_suggest, icl_measure
+from modules.icl.export import fill_icl as _fill_icl
 
 app = Flask(__name__)
 
@@ -504,6 +505,36 @@ def icl_measure_route():
     except Exception as e:
         return jsonify({"error": str(e)}), 502
     return jsonify(result)
+
+
+@app.route("/api/icl/export", methods=["POST"])
+def icl_export_route():
+    """Fill the IXL Inspection Check List template → .xlsx attachment."""
+    payload = request.get_json(silent=True) or {}
+    part_no = payload.get("part_no") or ""
+    try:
+        xlsx = _fill_icl(
+            part_no=part_no,
+            cust_no=payload.get("cust_no") or "",
+            part_desc=payload.get("part_desc") or "",
+            plant=payload.get("plant") or "",
+            checks=payload.get("checks") or [],
+            screenshots=payload.get("screenshots") or [],
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    raw = f"{part_no} - ICL" if part_no else "ICL"
+    filename = re.sub(r'[\\/:*?"<>|]', "_", raw) + ".xlsx"
+    return send_file(
+        io.BytesIO(xlsx),
+        as_attachment=True,
+        download_name=filename,
+        mimetype=(
+            "application/vnd.openxmlformats-officedocument"
+            ".spreadsheetml.sheet"
+        ),
+    )
 
 
 # ── Label history (exported JPGs) ─────────────────────────────────────────────

@@ -595,9 +595,9 @@
   </aside>
 
   <!-- Center: CAD viewer stage -->
-  <main id="icl-preview-panel" style="flex:1;min-width:0;display:flex;flex-direction:column;background:#FCFBFA;border:1px solid #E6E3DE;border-radius:20px;overflow:hidden;position:relative;">
+  <main id="icl-preview-panel" style="flex:1;min-width:0;display:flex;flex-direction:column;background:#F5F4F1;border-radius:18px;overflow:hidden;position:relative;">
     <!-- top bar -->
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 18px;flex-shrink:0;border-bottom:1px solid #ECEAE6;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 18px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);">
       <div style="display:flex;align-items:center;gap:11px;min-width:0;">
         <div style="min-width:0;">
           <div id="icl-filename" style="font-size:13.5px;font-weight:600;color:#1A1A1A;font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">No file loaded</div>
@@ -605,7 +605,7 @@
         </div>
       </div>
       <!-- file-type toggle -->
-      <div style="display:flex;align-items:center;background:#F2F0EC;border:1px solid #E6E3DE;border-radius:11px;padding:3px;gap:3px;flex-shrink:0;">
+      <div style="display:flex;align-items:center;background:#E8E7E3;border-radius:9px;padding:3px;gap:3px;flex-shrink:0;">
         <button id="icl-step-btn" style="display:flex;align-items:center;gap:7px;padding:8px 15px;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;background:#161616;color:#fff;">STEP &middot; 3D</button>
         <button id="icl-dxf-btn" title="DXF flat-pattern — coming soon" style="display:flex;align-items:center;gap:7px;padding:8px 15px;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;background:transparent;color:#B7B2AA;">DXF &middot; flat</button>
       </div>
@@ -620,12 +620,15 @@
 
     <!-- stage -->
     <div id="icl-body" style="flex:1;min-height:0;position:relative;padding:2px 20px 16px;overflow:hidden;">
-      <div style="position:absolute;top:8px;left:14px;width:17px;height:17px;border-top:2px solid #CC0000;border-left:2px solid #CC0000;z-index:5;pointer-events:none;"></div>
-      <div style="position:absolute;top:8px;right:14px;width:17px;height:17px;border-top:2px solid #CC0000;border-right:2px solid #CC0000;z-index:5;pointer-events:none;"></div>
-      <div style="position:absolute;bottom:10px;left:14px;width:17px;height:17px;border-bottom:2px solid #CC0000;border-left:2px solid #CC0000;z-index:5;pointer-events:none;"></div>
-      <div style="position:absolute;bottom:10px;right:14px;width:17px;height:17px;border-bottom:2px solid #CC0000;border-right:2px solid #CC0000;z-index:5;pointer-events:none;"></div>
-
-      <div id="icl-mount" style="display:none;position:absolute;inset:0;"></div>
+      <div id="icl-mount" style="display:none;position:absolute;inset:0;">
+        <div id="icl-capframe" style="display:none;position:absolute;pointer-events:none;z-index:6;">
+          <div style="position:absolute;inset:0;border:1px dashed rgba(0,0,0,0.18);"></div>
+          <div style="position:absolute;top:0;left:0;width:22px;height:22px;border-top:2px solid #CC0000;border-left:2px solid #CC0000;"></div>
+          <div style="position:absolute;top:0;right:0;width:22px;height:22px;border-top:2px solid #CC0000;border-right:2px solid #CC0000;"></div>
+          <div style="position:absolute;bottom:0;left:0;width:22px;height:22px;border-bottom:2px solid #CC0000;border-left:2px solid #CC0000;"></div>
+          <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-bottom:2px solid #CC0000;border-right:2px solid #CC0000;"></div>
+        </div>
+      </div>
 
       <!-- dropzone -->
       <div id="icl-dropzone" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;">
@@ -642,9 +645,7 @@
         <button onclick="window._iclView&&window._iclView('front')" style="padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:600;color:#3A3A3A;cursor:pointer;background:transparent;">Front</button>
         <button onclick="window._iclView&&window._iclView('right')" style="padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:600;color:#3A3A3A;cursor:pointer;background:transparent;">Right</button>
         <button onclick="window._iclView&&window._iclView('top')" style="padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:600;color:#3A3A3A;cursor:pointer;background:transparent;">Top</button>
-        <button onclick="window._iclView&&window._iclView('iso')" style="padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:600;color:#3A3A3A;cursor:pointer;background:transparent;">Iso</button>
-        <span style="width:1px;align-self:stretch;background:#E6E3DE;margin:2px 2px;"></span>
-        <button id="icl-capture-btn" onclick="window._iclCapture&&window._iclCapture()" style="padding:6px 10px;border-radius:7px;font-size:11.5px;font-weight:700;color:#fff;background:#CC0000;cursor:pointer;">&#9673; Capture</button>
+        <button onclick="window._iclView&&window._iclView('iso')" style="padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:600;color:#3A3A3A;cursor:pointer;background:transparent;">ISO</button>
       </div>
 
       <!-- zoom hint + scale -->
@@ -656,26 +657,26 @@
     </div>
 
     <!-- rules legend -->
-    <div class="dt-only" style="flex-shrink:0;display:flex;align-items:center;gap:6px;padding:10px 18px;border-top:1px solid #ECEAE6;overflow-x:auto;">
-      <span style="font-size:10px;font-weight:700;color:#A8A49C;letter-spacing:1.2px;flex-shrink:0;">RULES</span>
-      <span style="font-size:10.5px;font-weight:600;color:#6A6A6A;background:#F2F0EC;border:1px solid #E6E3DE;padding:4px 9px;border-radius:7px;font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0;">surface+surface &#8741; &#8594; distance</span>
-      <span style="font-size:10.5px;font-weight:600;color:#6A6A6A;background:#F2F0EC;border:1px solid #E6E3DE;padding:4px 9px;border-radius:7px;font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0;">surface+edge &#8594; distance</span>
-      <span style="font-size:10.5px;font-weight:600;color:#6A6A6A;background:#F2F0EC;border:1px solid #E6E3DE;padding:4px 9px;border-radius:7px;font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0;">edge+edge &#8594; distance</span>
-      <span style="font-size:10.5px;font-weight:600;color:#6A6A6A;background:#F2F0EC;border:1px solid #E6E3DE;padding:4px 9px;border-radius:7px;font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0;">auto &#8594; &#216; / R / bend</span>
+    <div class="dt-only" style="flex-shrink:0;display:flex;align-items:center;gap:10px;padding:11px 18px;border-top:1px solid #ECEAE6;">
+      <div style="flex:1;min-width:0;"></div>
+      <button id="icl-capture-btn" onclick="window._iclCapture&&window._iclCapture()" style="flex-shrink:0;display:flex;align-items:center;gap:8px;background:#CC0000;color:#fff;border:none;border-radius:12px;padding:13px 42px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 2px 10px rgba(204,0,0,0.32);">&#9673; Capture</button>
+      <div style="flex:1;min-width:0;"></div>
     </div>
   </main>
 
   <!-- Right: Inspection Check List card -->
-  <aside style="width:392px;flex-shrink:0;display:flex;flex-direction:column;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 2px 14px rgba(0,0,0,0.05);">
+  <aside style="width:392px;flex-shrink:0;display:flex;flex-direction:column;background:#F5F4F1;border-radius:18px;overflow:hidden;">
     <div style="padding:18px 20px 16px;border-bottom:1px solid #EFEDEA;flex-shrink:0;">
       <div style="font-size:15px;font-weight:800;letter-spacing:-0.2px;margin-bottom:15px;">Inspection Check List</div>
       <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;font-size:12px;">
+        <span style="color:#9A9A9A;font-weight:600;">Plant</span>
+        <input id="icl-plant" placeholder="—" style="font-weight:600;color:#1A1A1A;border:1px solid #E0E0E0;border-radius:8px;padding:8px 10px;font-size:13px;width:100%;background:#fff;">
         <span style="color:#9A9A9A;font-weight:600;">IXL Part #</span>
-        <input id="icl-part-no" placeholder="—" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#1A1A1A;border:1px solid #E6E2DC;border-radius:7px;padding:5px 8px;font-size:12px;width:100%;background:#fff;">
+        <input id="icl-part-no" placeholder="—" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#1A1A1A;border:1px solid #E0E0E0;border-radius:8px;padding:8px 10px;font-size:13px;width:100%;background:#fff;">
         <span style="color:#9A9A9A;font-weight:600;">Cust Part #</span>
-        <input id="icl-cust-no" placeholder="—" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#1A1A1A;border:1px solid #E6E2DC;border-radius:7px;padding:5px 8px;font-size:12px;width:100%;background:#fff;">
+        <input id="icl-cust-no" placeholder="—" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#1A1A1A;border:1px solid #E0E0E0;border-radius:8px;padding:8px 10px;font-size:13px;width:100%;background:#fff;">
         <span style="color:#9A9A9A;font-weight:600;">Description</span>
-        <input id="icl-part-desc" placeholder="—" style="font-weight:600;color:#1A1A1A;border:1px solid #E6E2DC;border-radius:7px;padding:5px 8px;font-size:12px;width:100%;background:#fff;">
+        <input id="icl-part-desc" placeholder="—" style="font-weight:600;color:#1A1A1A;border:1px solid #E0E0E0;border-radius:8px;padding:8px 10px;font-size:13px;width:100%;background:#fff;">
       </div>
     </div>
 
@@ -702,6 +703,20 @@
   </aside>
 
   <input type="file" id="icl-file-input" accept=".step,.stp" style="display:none;">
+
+  <!-- capture review modal -->
+  <div id="icl-cap-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(20,20,20,0.6);align-items:center;justify-content:center;padding:24px;">
+    <div style="background:#fff;border-radius:18px;max-width:900px;width:100%;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid #EEEAE4;">
+        <span style="font-size:15px;font-weight:800;">Captured pictures</span>
+        <button onclick="window._iclCloseCapModal&&window._iclCloseCapModal()" style="font-size:18px;background:transparent;border:none;cursor:pointer;color:#888;line-height:1;">&#10005;</button>
+      </div>
+      <div id="icl-cap-modal-body" style="padding:18px 22px;overflow-y:auto;display:grid;grid-template-columns:repeat(2,1fr);gap:14px;"></div>
+      <div style="padding:14px 22px;border-top:1px solid #EEEAE4;display:flex;justify-content:flex-end;">
+        <button onclick="window._iclCloseCapModal&&window._iclCloseCapModal()" style="background:#CC0000;color:#fff;border:none;border-radius:10px;padding:10px 26px;font-size:13.5px;font-weight:700;cursor:pointer;">Done</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════ LOOK UP — LIBRARY (web) ═══════════════════ -->
@@ -2735,7 +2750,7 @@ const _icl = {
   mount:null, raycaster:null, mesh:null, triFace:null, faces:null,
   edgeLines:[], pickMarkers:[], dims:[], checks:[],
   center:new THREE.Vector3(), scale:1, picking:false, picks:[],
-  animId:0, resizeHandler:null, orthoD:80, seq:0, captures:[], lastView:'Iso',
+  animId:0, resizeHandler:null, orthoD:80, seq:0, sessionId:1, captures:[], lastView:'Iso',
 };
 
 function _iclStatus(msg){ const el=document.getElementById('icl-status'),inner=document.getElementById('icl-status-inner'); if(!el)return; if(msg){inner.textContent=msg; el.style.display='flex';} else el.style.display='none'; }
@@ -2749,10 +2764,20 @@ function _iclShow(which){
   if(dz) dz.style.display = which==='drop'?'flex':'none';
   if(mt) mt.style.display = which==='mount'?'block':'none';
   if(vb) vb.style.display = which==='mount'?'flex':'none';
+  const cf=document.getElementById('icl-capframe'); if(cf) cf.style.display = which==='mount'?'block':'none';
+}
+function _iclLayoutCapFrame(){
+  const mount=_icl.mount; if(!mount) return;
+  const W=mount.clientWidth||600, H=mount.clientHeight||600;
+  const bw=Math.min(W,H), bh=bw;          // square, full height, like Label
+  const x=(W-bw)/2, y=(H-bh)/2;
+  _icl.capFrame={x,y,w:bw,h:bh};
+  const el=document.getElementById('icl-capframe');
+  if(el){ el.style.left=x+'px'; el.style.top=y+'px'; el.style.width=bw+'px'; el.style.height=bh+'px'; }
 }
 function _iclToScene(p){ return new THREE.Vector3((p[0]-_icl.center.x)*_icl.scale,(p[1]-_icl.center.y)*_icl.scale,(p[2]-_icl.center.z)*_icl.scale); }
 function _iclEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
-const _ICL_GAUGES=['Vernier','Protractor','Micrometer','Height Gauge','Radius Gauge','Bore Gauge','Go / No-Go','Visual','Reference'];
+const _ICL_GAUGES=['Vernier','Protractor','Visual'];
 
 function _iclCleanup(){
   cancelAnimationFrame(_icl.animId);
@@ -2771,6 +2796,7 @@ async function _iclLoad(file){
   const fs=document.getElementById('icl-filesub'); if(fs) fs.textContent='Reading geometry…';
   _icl.checks=[]; _iclRenderChecks();
   _icl.captures=[]; _iclRenderCaptures();
+  _icl.seq=0; _icl.sessionId=1;
   _iclInstruction('Loading model…', false);
   const form=new FormData(); form.append('file',file);
   let data;
@@ -2784,13 +2810,13 @@ async function _iclLoad(file){
   _iclStatus('');
   if(fs) fs.textContent=(data.mesh.face_count||0)+' faces · '+(data.edges||[]).length+' edges';
   _iclInstruction('Pick a surface or edge to start a dimension.', false);
-  _iclSuggest(file);
+  const pn=document.getElementById('icl-part-no'); if(pn&&!pn.value) pn.value=file.name.replace(/\.[^.]+$/,'');
 }
 
 function _iclBuildScene(mesh, edges){
   const mount=document.getElementById('icl-mount'); if(!mount)return; _icl.mount=mount;
   const width=mount.clientWidth||600,height=mount.clientHeight||600;
-  const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(Math.min(window.devicePixelRatio,2)); renderer.setSize(width,height); renderer.setClearColor(0xf5f4f1,1); renderer.outputColorSpace=THREE.SRGBColorSpace; mount.appendChild(renderer.domElement); _icl.renderer=renderer;
+  const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(Math.min(window.devicePixelRatio,2)); renderer.setSize(width,height); renderer.setClearColor(0xffffff,1); renderer.outputColorSpace=THREE.SRGBColorSpace; mount.appendChild(renderer.domElement); _icl.renderer=renderer;
   const scene=new THREE.Scene(); _icl.scene=scene;
   scene.add(new THREE.AmbientLight(0xffffff,0.8));
   const dl=new THREE.DirectionalLight(0xffffff,0.55); dl.position.set(1,1,2); scene.add(dl);
@@ -2837,7 +2863,7 @@ function _iclBuildScene(mesh, edges){
   geo.computeBoundingSphere(); _icl.modelR=(geo.boundingSphere&&geo.boundingSphere.radius)||_icl.fitD;
   _icl.half=ext.clone().multiplyScalar(0.5);
 
-  const onResize=()=>{ const w=mount.clientWidth||600,h=mount.clientHeight||600,a=w/h; camera.left=-_icl.orthoD*a; camera.right=_icl.orthoD*a; camera.top=_icl.orthoD; camera.bottom=-_icl.orthoD; camera.updateProjectionMatrix(); renderer.setSize(w,h); };
+  const onResize=()=>{ const w=mount.clientWidth||600,h=mount.clientHeight||600,a=w/h; camera.left=-_icl.orthoD*a; camera.right=_icl.orthoD*a; camera.top=_icl.orthoD; camera.bottom=-_icl.orthoD; camera.updateProjectionMatrix(); renderer.setSize(w,h); _iclLayoutCapFrame(); };
   _icl.resizeHandler=onResize; window.addEventListener('resize',onResize);
   _iclView('iso'); onResize();
 
@@ -2949,10 +2975,10 @@ async function _iclRunMeasure(){
     type:isAngle?'angle':'dist',
     desc:isAngle?'Ensure bend angle':'Check distance',
     value:r.value_mm, tol:isAngle?'1':'0.5',
-    gauge:r.suggested_gauge||(isAngle?'Protractor':'Vernier'),
+    gauge:isAngle?'Protractor':'Vernier',
     entityLabel:p1.kind+' #'+p1.id+' → '+p2.kind+' #'+p2.id,
     source:'manual',
-    checkId,
+    checkId, balloon:checkId, session:_icl.sessionId,
     ents:[{kind:p1.kind,id:p1.id},{kind:p2.kind,id:p2.id}],
   });
   _iclRenderChecks();
@@ -2973,9 +2999,9 @@ async function _iclRunSingle(pick){
     type:isDia?'dia':'rad',
     desc:isDia?'Check hole diameter':'Check radius',
     value:r.value_mm, tol:isDia?'0.1':'0.5',
-    gauge:r.suggested_gauge||(isDia?'Vernier':'Radius Gauge'),
+    gauge:'Vernier',
     entityLabel:'face #'+pick.id,
-    source:'manual', checkId,
+    source:'manual', checkId, balloon:checkId, session:_icl.sessionId,
     ents:[{kind:pick.kind,id:pick.id}],
   });
   _iclRenderChecks();
@@ -3035,8 +3061,8 @@ function _iclLayoutDims(){
 }
 
 function _iclMakeLabel(dm, pos){
-  const label=document.createElement('div'); label.textContent=_iclDimText(dm);
-  label.style.cssText="position:absolute;transform:translate(-50%,-50%);background:#CC0000;color:#fff;padding:2px 7px;border-radius:6px;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;pointer-events:none;white-space:nowrap;z-index:7;transition:transform .15s;";
+  const label=document.createElement('div'); label.textContent=(dm.checkId!=null?dm.checkId:'');
+  label.style.cssText="position:absolute;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;font-family:'JetBrains Mono',monospace;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.3);pointer-events:none;z-index:7;transition:transform .15s;";
   _icl.mount.appendChild(label); dm.label=label; dm.mid=pos;
 }
 
@@ -3122,30 +3148,62 @@ function _iclUpdateLabels(){
   _icl.dims.forEach(d=>{ const v=d.mid.clone().project(_icl.camera); d.label.style.left=((v.x*0.5+0.5)*w)+'px'; d.label.style.top=((-v.y*0.5+0.5)*h)+'px'; });
 }
 
-function _iclRoundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function _iclClearDims(){
+  _icl.dims.forEach(dm=>{ if(dm.group&&_icl.scene) _icl.scene.remove(dm.group); if(dm.label&&dm.label.parentNode) dm.label.parentNode.removeChild(dm.label); });
+  _icl.dims=[];
+}
 
 function _iclCapture(){
   if(!_icl.renderer||!_icl.camera){ if(window.toast)window.toast('Load a STEP file first'); return; }
+  if(_icl.captures.length>=4){ if(window.toast)window.toast('Max 4 pictures — delete one to capture again'); return; }
   const r=_icl.renderer, cam=_icl.camera, mount=_icl.mount;
   const w=mount.clientWidth||600, h=mount.clientHeight||600, S=2;
+  // white background for the exported image
+  const prevClear=new THREE.Color(); r.getClearColor(prevClear); const prevAlpha=r.getClearAlpha();
+  r.setClearColor(0xffffff,1);
   r.setPixelRatio(1); r.setSize(w*S,h*S,false); r.render(_icl.scene,cam);
-  const cv=document.createElement('canvas'); cv.width=w*S; cv.height=h*S;
-  const ctx=cv.getContext('2d'); ctx.drawImage(r.domElement,0,0);
-  // bake the value chips (they are HTML overlays, not in the WebGL buffer)
-  ctx.font='700 '+(12*S)+"px 'JetBrains Mono', monospace"; ctx.textBaseline='middle';
-  _icl.dims.forEach(dm=>{ if(!dm.mid)return; const v=dm.mid.clone().project(cam);
+  // crop to the capture viewfinder
+  const f=_icl.capFrame||{x:0,y:0,w:w,h:h};
+  const cw=Math.round(f.w), ch=Math.round(f.h);
+  const cv=document.createElement('canvas'); cv.width=cw*S; cv.height=ch*S;
+  const ctx=cv.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.drawImage(r.domElement, f.x*S, f.y*S, f.w*S, f.h*S, 0, 0, cw*S, ch*S);
+  // project a scene point into the cropped canvas
+  const _proj=p=>{ const v=p.clone().project(cam); return {x:(v.x*0.5+0.5)*w*S-f.x*S, y:(-v.y*0.5+0.5)*h*S-f.y*S, z:v.z}; };
+  // bake dimension lines thick (WebGL lines render only ~1px and vanish when scaled down)
+  ctx.strokeStyle='#CC0000'; ctx.lineWidth=4*S; ctx.lineJoin='round'; ctx.lineCap='round';
+  const _v=new THREE.Vector3();
+  _icl.dims.forEach(dm=>{ if(!dm.group) return;
+    dm.group.traverse(o=>{
+      if(o.isLine && o.geometry && o.geometry.attributes && o.geometry.attributes.position){
+        const pos=o.geometry.attributes.position; ctx.beginPath(); let started=false;
+        for(let k=0;k<pos.count;k++){ _v.fromBufferAttribute(pos,k); const s=_proj(_v); if(s.z>1){ started=false; continue; }
+          if(!started){ ctx.moveTo(s.x,s.y); started=true; } else ctx.lineTo(s.x,s.y); }
+        ctx.stroke();
+      }
+    });
+  });
+  // bake the numbered balloons (they are HTML overlays, not in the WebGL buffer)
+  const RB=44*S; ctx.textBaseline='middle'; ctx.textAlign='center'; ctx.font='800 '+(48*S)+"px 'JetBrains Mono', monospace";
+  const balloons=[];
+  _icl.dims.forEach(dm=>{ if(!dm.mid||dm.checkId==null)return; const v=dm.mid.clone().project(cam);
     if(v.z>1) return;
-    const x=(v.x*0.5+0.5)*w*S, y=(-v.y*0.5+0.5)*h*S;
-    const txt=_iclDimText(dm), tw=ctx.measureText(txt).width, padX=7*S, bw=tw+padX*2, bh=18*S;
-    ctx.fillStyle='#CC0000'; _iclRoundRect(ctx,x-bw/2,y-bh/2,bw,bh,6*S); ctx.fill();
-    ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.fillText(txt,x,y);
+    const x=(v.x*0.5+0.5)*w*S-f.x*S, y=(-v.y*0.5+0.5)*h*S-f.y*S;
+    if(x<-RB||y<-RB||x>cv.width+RB||y>cv.height+RB) return;
+    ctx.beginPath(); ctx.arc(x,y,RB,0,Math.PI*2); ctx.fillStyle='#CC0000'; ctx.fill();
+    ctx.lineWidth=3*S; ctx.strokeStyle='#fff'; ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.fillText(String(dm.checkId),x,y);
+    balloons.push(dm.checkId);
   });
   const url=cv.toDataURL('image/jpeg',0.92);
-  // restore live size
+  // restore live clear color + size
+  r.setClearColor(prevClear,prevAlpha);
   r.setPixelRatio(Math.min(window.devicePixelRatio,2)); r.setSize(w,h,false); if(_icl.resizeHandler)_icl.resizeHandler(); r.render(_icl.scene,cam);
-  _icl.captures.push({ name:_icl.lastView||'View', url });
+  const hadBalloons=balloons.length>0;
+  _icl.captures.push({ name:_icl.lastView||'View', url, type:hadBalloons?'view':'iso', session:_icl.sessionId, balloons });
+  if(hadBalloons){ _iclClearDims(); _iclClearPicks(); _icl.sessionId++; _iclInstruction('Captured — balloons cleared. Pick again to continue (numbers carry on).', false); }
   _iclRenderCaptures();
-  if(window.toast)window.toast('Captured '+(_icl.lastView||'view'));
+  if(window.toast)window.toast(hadBalloons?'Captured view · balloons cleared':'Captured iso view');
 }
 
 function _iclRenderCaptures(){
@@ -3161,30 +3219,25 @@ function _iclRenderCaptures(){
     strip.appendChild(cell);
   });
   strip.querySelectorAll('.icl-cap-del').forEach(el=>el.addEventListener('click',e=>{ _icl.captures.splice(+e.target.dataset.i,1); _iclRenderCaptures(); }));
+  strip.querySelectorAll('img').forEach(el=>el.addEventListener('click',_iclOpenCapModal));
 }
 
-function _iclTolNum(s, type){
-  const m=String(s==null?'':s).match(/[\d.]+/);
-  if(m) return m[0];
-  return type==='angle'?'1':type==='dia'?'0.1':type==='rad'?'0.5':'0.5';
+function _iclRenderCapModal(){
+  const body=document.getElementById('icl-cap-modal-body'); if(!body)return;
+  if(!_icl.captures.length){ body.innerHTML='<div style="grid-column:1/-1;text-align:center;color:#9A9A9A;padding:40px;">No pictures yet.</div>'; return; }
+  body.innerHTML='';
+  _icl.captures.forEach((cap,i)=>{
+    const cell=document.createElement('div');
+    cell.style.cssText='border:1px solid #E6E2DC;border-radius:12px;overflow:hidden;background:#FAFAF8;';
+    cell.innerHTML='<div style="position:relative;"><img src="'+cap.url+'" style="width:100%;display:block;background:#fff;">'
+      +'<button data-i="'+i+'" class="icl-capm-del" title="Remove" style="position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(26,26,26,0.8);color:#fff;border:none;cursor:pointer;font-size:13px;line-height:1;">&#10005;</button></div>'
+      +'<div style="padding:8px 11px;font-size:12px;font-weight:600;color:#555;">'+(cap.type==='iso'?'ISO overview':'View')+' &middot; #'+(i+1)+(cap.balloons&&cap.balloons.length?' &middot; balloons '+cap.balloons.join(', '):'')+'</div>';
+    body.appendChild(cell);
+  });
+  body.querySelectorAll('.icl-capm-del').forEach(el=>el.addEventListener('click',e=>{ _icl.captures.splice(+e.currentTarget.dataset.i,1); _iclRenderCaptures(); _iclRenderCapModal(); }));
 }
-
-async function _iclSuggest(file){
-  const form=new FormData(); form.append('file',file);
-  try{
-    const res=await fetch('/api/icl/suggest',{method:'POST',body:form}); if(!res.ok)return; const d=await res.json();
-    const TYPE={bbox:'dist',hole:'dia',bend:'angle'};
-    (d.checks||[]).forEach(c=>{
-      const t=TYPE[c.source]||'dist';
-      _icl.checks.push({type:t, desc:c.desc, value:c.value_mm, tol:_iclTolNum(c.tol,t), gauge:c.gauge, entityLabel:'auto · '+c.source, source:c.source});
-    });
-    // part metadata (editable inputs)
-    const p=d.part||{};
-    const pn=document.getElementById('icl-part-no'); if(pn) pn.value=p.part_number||file.name.replace(/\.[^.]+$/,'');
-    const pd=document.getElementById('icl-part-desc'); if(pd) pd.value=p.description||'';
-    _iclRenderChecks();
-  }catch(e){}
-}
+function _iclOpenCapModal(){ const m=document.getElementById('icl-cap-modal'); if(!m)return; _iclRenderCapModal(); m.style.display='flex'; }
+function _iclCloseCapModal(){ const m=document.getElementById('icl-cap-modal'); if(m) m.style.display='none'; }
 
 function _iclRenderChecks(){
   const list=document.getElementById('icl-check-list');
@@ -3217,7 +3270,7 @@ function _iclRenderChecks(){
     }
     row.innerHTML=
       '<div style="display:flex;align-items:center;gap:10px;">'
-      +'<span style="width:24px;height:24px;flex-shrink:0;border-radius:7px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:\'JetBrains Mono\',monospace;">'+(i+1)+'</span>'
+      +'<span title="'+(c.balloon!=null?'Balloon '+c.balloon:'')+'" style="width:24px;height:24px;flex-shrink:0;border-radius:'+(c.balloon!=null?'50%':'7px')+';background:'+(c.balloon!=null?'#CC0000':'#9B9B9B')+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:\'JetBrains Mono\',monospace;">'+(c.balloon!=null?c.balloon:(i+1))+'</span>'
       +'<input class="icl-desc" data-i="'+i+'" value="'+_iclEsc(c.desc)+'" placeholder="Describe the check…" style="flex:1;min-width:0;border:1px solid #E6E2DC;border-radius:7px;background:#fff;outline:none;padding:6px 9px;font-size:13.5px;font-weight:600;color:#1A1A1A;">'
       +'<button class="icl-del" data-i="'+i+'" title="Remove" style="flex-shrink:0;color:#C8C4BC;font-size:14px;background:transparent;border:none;cursor:pointer;padding:2px 3px;line-height:1;">✕</button>'
       +'</div>'
@@ -3225,7 +3278,7 @@ function _iclRenderChecks(){
       +'<div style="display:flex;align-items:center;gap:8px;margin-top:9px;padding-left:34px;">'
       +'<span style="font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.6px;">Gauge</span>'
       +'<select class="icl-gauge" data-i="'+i+'" style="font-family:inherit;font-size:12px;font-weight:600;color:#3A3A3A;background:#fff;border:1px solid #E6E2DC;border-radius:8px;padding:5px 8px;cursor:pointer;">'+gaugeOpts+'</select>'
-      +(c.ref?'<span style="font-size:10.5px;font-weight:700;color:#8A6E2E;background:#F6EFD9;padding:3px 8px;border-radius:20px;">'+_iclEsc(c.ref)+'</span>':'')
+      +(c.gauge==='Visual'?'<input class="icl-ref" data-i="'+i+'" value="'+_iclEsc(c.ref||'')+'" placeholder="SOP no." style="flex:1;min-width:60px;font-family:inherit;font-size:12px;font-weight:600;color:#1A1A1A;background:#fff;border:1px solid #E6E2DC;border-radius:8px;padding:5px 8px;outline:none;">':'')
       +'</div>';
     if(c.ents&&c.ents.length){ row.style.cursor='pointer'; row.addEventListener('click',e=>{ if(e.target.closest('input,select,button'))return; _iclFlashCheck(i); }); }
     list.appendChild(row);
@@ -3233,17 +3286,58 @@ function _iclRenderChecks(){
   list.querySelectorAll('.icl-desc').forEach(el=>el.addEventListener('change',e=>{_icl.checks[+e.target.dataset.i].desc=e.target.value;}));
   list.querySelectorAll('.icl-nominal').forEach(el=>el.addEventListener('change',e=>{_icl.checks[+e.target.dataset.i].value=e.target.value;}));
   list.querySelectorAll('.icl-tol').forEach(el=>el.addEventListener('change',e=>{_icl.checks[+e.target.dataset.i].tol=e.target.value;}));
-  list.querySelectorAll('.icl-gauge').forEach(el=>el.addEventListener('change',e=>{_icl.checks[+e.target.dataset.i].gauge=e.target.value;}));
+  list.querySelectorAll('.icl-gauge').forEach(el=>el.addEventListener('change',e=>{_icl.checks[+e.target.dataset.i].gauge=e.target.value;_iclRenderChecks();}));
+  list.querySelectorAll('.icl-ref').forEach(el=>el.addEventListener('change',e=>{_icl.checks[+e.target.dataset.i].ref=e.target.value;}));
   list.querySelectorAll('.icl-lock').forEach(el=>el.addEventListener('click',e=>{ const c=_icl.checks[+e.currentTarget.dataset.i]; c.locked=(c.locked===false); _iclRenderChecks(); }));
-  list.querySelectorAll('.icl-del').forEach(el=>el.addEventListener('click',e=>{_icl.checks.splice(+e.target.dataset.i,1);_iclRenderChecks();}));
+  list.querySelectorAll('.icl-del').forEach(el=>el.addEventListener('click',e=>{_iclRemoveCheck(+e.target.dataset.i);}));
+}
+
+function _iclRemoveCheck(i){
+  const c=_icl.checks[i]; if(!c) return;
+  if(c.checkId!=null){
+    const di=_icl.dims.findIndex(d=>d.checkId===c.checkId);
+    if(di>=0){ const dm=_icl.dims[di]; if(dm.group&&_icl.scene)_icl.scene.remove(dm.group); if(dm.label&&dm.label.parentNode)dm.label.parentNode.removeChild(dm.label); _icl.dims.splice(di,1); }
+  }
+  _icl.checks.splice(i,1);
+  _iclRenumber();
+  _iclRenderChecks();
+}
+
+function _iclRenumber(){
+  // re-sequence balloon numbers 1..N so deleting a step closes the gap
+  const map={}; let n=0;
+  _icl.checks.forEach(c=>{ if(c.balloon!=null){ n++; map[c.checkId]=n; } });
+  _icl.checks.forEach(c=>{ if(c.balloon!=null){ const nn=map[c.checkId]; c.balloon=nn; c.checkId=nn; } });
+  _icl.dims.forEach(dm=>{ if(dm.checkId!=null && map[dm.checkId]!=null){ dm.checkId=map[dm.checkId]; if(dm.label) dm.label.textContent=dm.checkId; } });
+  _icl.seq=n;
 }
 
 function _iclAddVisual(){
   if(!_icl.file){ if(window.toast)window.toast('Load a STEP file first'); return; }
-  _icl.checks.push({type:'visual', desc:'', value:null, tol:'', gauge:'Visual', entityLabel:'Visual check', source:'manual'});
+  _icl.checks.push({type:'visual', desc:'Ensure No Burrs and sharp edges', value:null, tol:'', gauge:'Visual', ref:'SOP 008', entityLabel:'Visual check', source:'manual', session:_icl.sessionId});
   _iclRenderChecks();
   const inputs=document.querySelectorAll('#icl-check-list .icl-desc');
   if(inputs.length) inputs[inputs.length-1].focus();
+}
+
+async function _iclExport(){
+  if(!_icl.checks.length){ if(window.toast)window.toast('Add at least one check first'); return; }
+  const v=id=>{ const el=document.getElementById(id); return el?el.value.trim():''; };
+  const checks=_icl.checks.map(c=>({balloon:c.balloon!=null?c.balloon:null, type:c.type||'dist', desc:c.desc||'', value:c.value, tol:c.tol||'', gauge:c.gauge||'', ref:c.ref||''}));
+  const screenshots=_icl.captures.map(c=>({type:c.type||'view', name:c.name||'View', image:c.url}));
+  const payload={ part_no:v('icl-part-no'), cust_no:v('icl-cust-no'), part_desc:v('icl-part-desc'), plant:v('icl-plant'), checks, screenshots };
+  const btn=document.getElementById('icl-export-btn'); const old=btn?btn.textContent:'';
+  if(btn){ btn.disabled=true; btn.textContent='Exporting…'; }
+  try{
+    const res=await fetch('/api/icl/export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!res.ok){ const j=await res.json().catch(()=>({})); throw new Error(j.error||('Server error '+res.status)); }
+    const blob=await res.blob();
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download=(payload.part_no?payload.part_no+' - ICL':'ICL')+'.xlsx'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+    if(window.toast)window.toast('Exported inspection sheet');
+  }catch(e){ if(window.toast)window.toast('Export failed: '+e.message); }
+  finally{ if(btn){ btn.disabled=false; btn.textContent=old; } }
 }
 
 // ICL wiring
@@ -3252,7 +3346,7 @@ if(iclInp) iclInp.addEventListener('change',e=>{const f=e.target.files[0]; if(f)
 const iclReset=document.getElementById('icl-reset-btn'); if(iclReset) iclReset.addEventListener('click',_iclResetPick);
 const iclAddV=document.getElementById('icl-add-visual'); if(iclAddV) iclAddV.addEventListener('click',_iclAddVisual);
 const iclDxf=document.getElementById('icl-dxf-btn'); if(iclDxf) iclDxf.addEventListener('click',()=>{ if(window.toast)window.toast('DXF flat-pattern — coming soon'); });
-const iclExport=document.getElementById('icl-export-btn'); if(iclExport) iclExport.addEventListener('click',()=>{ if(window.toast)window.toast('Export sheet — coming soon'); });
+const iclExport=document.getElementById('icl-export-btn'); if(iclExport) iclExport.addEventListener('click',_iclExport);
 const iclSave=document.getElementById('icl-save-btn'); if(iclSave) iclSave.addEventListener('click',()=>{ if(window.toast)window.toast('Save checklist — coming soon'); });
 const iclPanel=document.getElementById('icl-preview-panel');
 if(iclPanel){
@@ -3262,6 +3356,7 @@ if(iclPanel){
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&_icl.picks.length){ _iclResetPick(); } });
 window._iclOnShow=function(){ if(_icl.resizeHandler) setTimeout(_icl.resizeHandler,40); };
 window._iclView=_iclView; window._iclCapture=_iclCapture;
+window._iclOpenCapModal=_iclOpenCapModal; window._iclCloseCapModal=_iclCloseCapModal;
 
 // Expose to main script (module scope is not global)
 window._lbListRender = _lbListRender;
