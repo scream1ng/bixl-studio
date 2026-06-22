@@ -197,6 +197,40 @@ class Mapping(db.Model):
         }
 
 
+class PFC(db.Model):
+    """One saved process flow chart — header + parsed model + chart image.
+
+    Stores the full parsed BOM model (JSON) plus the rendered chart PNG (in the
+    content-addressed ImageBlob store) so it can be listed, viewed, and
+    re-exported to .xlsx.
+    """
+    __tablename__ = "pfcs"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    part_no = db.Column(db.Text, nullable=False, default="")
+    part_name = db.Column(db.Text, nullable=False, default="")
+    model = db.Column(db.Text, nullable=False, default="{}")   # JSON parsed BOM model
+    image_hash = db.Column(db.String(64), db.ForeignKey("image_blobs.hash"), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def _model(self) -> dict:
+        try:
+            return json.loads(self.model or "{}")
+        except Exception:
+            return {}
+
+    def to_dict(self) -> dict:
+        m = self._model()
+        return {
+            "id": self.id,
+            "part_no": self.part_no,
+            "part_name": self.part_name,
+            "op_count": len([o for o in m.get("operations", []) if o.get("op_no")]),
+            "has_chart": bool(self.image_hash),
+            "created_at": self.created_at.isoformat(),
+        }
+
+
 def _migrate():
     """Migrate steps.image → image_blobs + steps.image_hash if needed."""
     is_sqlite = db.engine.dialect.name == "sqlite"
@@ -881,9 +915,41 @@ def lookup_wip():
 
 # ── API: PFC (BOM transaction export → process flow chart) ────────────────────
 
+def _send_pfc_xlsx(part_no: str, xlsx: bytes):
+    raw = f"{part_no} - PFC" if part_no else "PFC"
+    filename = re.sub(r'[\\/:*?"<>|]', "_", raw) + ".xlsx"
+    return send_file(
+        io.BytesIO(xlsx),
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+def _store_pfc(payload: dict) -> "PFC":
+    """Persist a PFC record; the chart PNG goes to the content-addressed store."""
+    model = payload.get("model") or {}
+    header = model.get("header") or {}
+    img_hash = None
+    chart = payload.get("chart_png")
+    if chart:
+        img_hash = hashlib.sha256(chart.encode("utf-8")).hexdigest()
+        if not db.session.get(ImageBlob, img_hash):
+            db.session.add(ImageBlob(hash=img_hash, data=chart))
+    pfc = PFC(
+        part_no=(header.get("part_no") or "").strip(),
+        part_name=(header.get("part_name") or "").strip(),
+        model=json.dumps(model),
+        image_hash=img_hash,
+    )
+    db.session.add(pfc)
+    db.session.commit()
+    return pfc
+
+
 @app.route("/api/pfc/parse", methods=["POST"])
 def pfc_parse_route():
-    """Parse an uploaded BOM transaction export into a flow model + Mermaid text."""
+    """Parse an uploaded BOM transaction export into a flow model + SVG chart."""
     f = request.files.get("file")
     if not f:
         return jsonify({"error": "no file"}), 400
@@ -894,28 +960,69 @@ def pfc_parse_route():
     return jsonify({"model": model, "svg": _pfc_svg(model)})
 
 
-@app.route("/api/pfc/export", methods=["POST"])
-def pfc_export_route():
-    """Fill the IXL PFC template (header + embedded flowchart PNG) → .xlsx attachment."""
+@app.route("/api/pfcs", methods=["GET"])
+def list_pfcs():
+    rows = PFC.query.order_by(PFC.created_at.desc()).all()
+    return jsonify([r.to_dict() for r in rows])
+
+
+@app.route("/api/pfcs", methods=["POST"])
+def create_pfc():
+    """Save a PFC (model + chart PNG) to history. Returns the new record."""
     payload = request.get_json(silent=True) or {}
-    model = payload.get("model") or {}
-    if not model.get("operations"):
+    if not (payload.get("model") or {}).get("operations"):
         return jsonify({"error": "no model"}), 400
+    pfc = _store_pfc(payload)
+    return jsonify(pfc.to_dict()), 201
+
+
+@app.route("/api/pfcs/<pfc_id>", methods=["GET"])
+def get_pfc(pfc_id):
+    pfc = db.session.get(PFC, pfc_id)
+    if not pfc:
+        return jsonify({"error": "not found"}), 404
+    d = pfc.to_dict()
+    d["model"] = pfc._model()
+    d["chart_url"] = f"/api/pfcs/{pfc.id}/thumb" if pfc.image_hash else None
+    return jsonify(d)
+
+
+@app.route("/api/pfcs/<pfc_id>/thumb", methods=["GET"])
+def pfc_thumb(pfc_id):
+    pfc = db.session.get(PFC, pfc_id)
+    if not pfc or not pfc.image_hash:
+        return jsonify({"error": "not found"}), 404
+    blob = db.session.get(ImageBlob, pfc.image_hash)
+    if not blob:
+        return jsonify({"error": "not found"}), 404
+    return send_file(io.BytesIO(_decode_data_url(blob.data)), mimetype="image/png")
+
+
+@app.route("/api/pfcs/<pfc_id>/export", methods=["GET", "POST"])
+def pfc_reexport(pfc_id):
+    """Re-generate the .xlsx from a saved PFC record."""
+    pfc = db.session.get(PFC, pfc_id)
+    if not pfc:
+        return jsonify({"error": "not found"}), 404
+    png = ""
+    if pfc.image_hash:
+        blob = db.session.get(ImageBlob, pfc.image_hash)
+        if blob:
+            png = blob.data
     try:
-        xlsx = _fill_pfc(model, payload.get("chart_png") or "")
+        xlsx = _fill_pfc(pfc._model(), png)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    part_no = ((model.get("header") or {}).get("part_no") or "").strip()
-    raw = f"{part_no} - PFC" if part_no else "PFC"
-    filename = re.sub(r'[\\/:*?"<>|]', "_", raw) + ".xlsx"
-    return send_file(
-        io.BytesIO(xlsx),
-        as_attachment=True,
-        download_name=filename,
-        mimetype=(
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        ),
-    )
+    return _send_pfc_xlsx(pfc.part_no, xlsx)
+
+
+@app.route("/api/pfcs/<pfc_id>", methods=["DELETE"])
+def delete_pfc(pfc_id):
+    pfc = db.session.get(PFC, pfc_id)
+    if pfc:
+        db.session.delete(pfc)
+        db.session.commit()
+    return "", 204
 
 
 if __name__ == "__main__":

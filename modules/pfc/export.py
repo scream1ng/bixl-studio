@@ -108,10 +108,10 @@ def fill_pfc(model: dict, chart_png: str | bytes = b"") -> bytes:
     plant = (header.get("plant") or "").strip()
 
     if part_no:
-        ws["G2"] = part_no
-    pd = "    ".join(x for x in (part_name, desc) if x)
-    if pd:
-        ws["G3"] = pd
+        ws["G2"] = part_no                       # IXL Part Number
+    g3 = desc or "    ".join(x for x in (part_name, desc) if x)
+    if g3:
+        ws["G3"] = g3                            # Part # / Description
     if plant:
         ws["U1"] = plant
     ws["R2"] = date.today()

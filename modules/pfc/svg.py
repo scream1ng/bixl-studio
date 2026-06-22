@@ -17,15 +17,16 @@ from __future__ import annotations
 from html import escape
 
 # geometry (px)
-_MARGIN = 22
-_OP_W = 210
-_RAW_W = 192
-_GAP_H = 58          # horizontal gap between raw stack and op spine
-_GAP_V = 46          # vertical gap between operations
-_RAW_VGAP = 16       # vertical gap between stacked raws of one op
-_LINE_H = 14
-_PAD_Y = 11
-_MIN_BOX_H = 46
+_MARGIN = 26
+_OP_W = 272
+_RAW_W = 248
+_GAP_H = 72          # horizontal gap between raw stack and op spine
+_GAP_V = 56          # vertical gap between operations
+_RAW_VGAP = 18       # vertical gap between stacked raws of one op
+_LINE_H = 18
+_PAD_Y = 13
+_MIN_BOX_H = 58
+_FONT = 13           # box text size
 
 # colours — white cards, red border (brand), black text
 _OP_FILL, _OP_STROKE, _OP_TEXT = "#FFFFFF", "#CC0000", "#1A1A1A"
@@ -97,7 +98,7 @@ def _text(cx, top, h, lines, color) -> str:
         dy = 0 if k == 0 else _LINE_H
         spans.append(f'<tspan x="{cx:.1f}" dy="{dy}"{weight}>{escape(txt)}</tspan>')
     return (f'<text x="{cx:.1f}" y="{start:.1f}" text-anchor="middle" '
-            f'font-size="10.5" fill="{color}">{"".join(spans)}</text>')
+            f'font-size="{_FONT}" fill="{color}">{"".join(spans)}</text>')
 
 
 def model_to_svg(model: dict) -> str:
