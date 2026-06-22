@@ -726,6 +726,8 @@
         <button onclick="window._iclView&&window._iclView('right')" style="padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:600;color:#3A3A3A;cursor:pointer;background:transparent;">Right</button>
         <button onclick="window._iclView&&window._iclView('top')" style="padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:600;color:#3A3A3A;cursor:pointer;background:transparent;">Top</button>
         <button onclick="window._iclView&&window._iclView('iso')" style="padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:600;color:#3A3A3A;cursor:pointer;background:transparent;">ISO</button>
+        <span style="width:1px;background:#E6E3DE;margin:2px 2px;"></span>
+        <button id="icl-wire-btn" onclick="window._iclWireframe&&window._iclWireframe()" title="Wireframe (hidden lines removed)" style="padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:600;color:#3A3A3A;cursor:pointer;background:transparent;">Wireframe</button>
       </div>
 
       <!-- zoom hint + scale -->
@@ -2935,6 +2937,7 @@ function _iclBuildScene(mesh, edges){
   geo.translate(-center.x,-center.y,-center.z); geo.scale(scale,scale,scale); geo.computeVertexNormals();
   const mat=new THREE.MeshPhongMaterial({color:0xc9ccd1,flatShading:true,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1});
   const m=new THREE.Mesh(geo,mat); scene.add(m); _icl.mesh=m; _icl.triFace=mesh.tri_face;
+  _icl.wireframe=false; const _wb=document.getElementById('icl-wire-btn'); if(_wb){ _wb.style.background='transparent'; _wb.style.color='#3A3A3A'; }
   _icl.faces=[]; (mesh.faces||[]).forEach(f=>{_icl.faces[f.id]=f;});
 
   // face -> triangle list, for full-face highlight
@@ -3018,6 +3021,17 @@ function _iclView(name){
   else if(name==='top'){ pos=[0,0,d]; up=[0,1,0]; }
   c.up.set(up[0],up[1],up[2]); c.position.set(pos[0],pos[1],pos[2]); ctr.target.set(0,0,0); c.zoom=1; c.updateProjectionMatrix(); ctr.update();
   if(_icl.resizeHandler) _icl.resizeHandler();
+}
+
+// Toggle SolidWorks-style wireframe (hidden lines removed): faces stop shading
+// but keep writing depth, so edges behind the body are still occluded.
+function _iclWireframe(){
+  if(!_icl.mesh) return;
+  _icl.wireframe=!_icl.wireframe;
+  const mat=_icl.mesh.material;
+  mat.colorWrite=!_icl.wireframe; mat.needsUpdate=true;
+  const btn=document.getElementById('icl-wire-btn');
+  if(btn){ btn.style.background=_icl.wireframe?'#CC0000':'transparent'; btn.style.color=_icl.wireframe?'#fff':'#3A3A3A'; }
 }
 
 function _iclClearPicks(){
@@ -3553,7 +3567,7 @@ if(iclPanel){
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&_icl.picks.length){ _iclResetPick(); } });
 window._iclOnShow=function(){ if(_icl.resizeHandler) setTimeout(_icl.resizeHandler,40); };
-window._iclView=_iclView; window._iclCapture=_iclCapture;
+window._iclView=_iclView; window._iclWireframe=_iclWireframe; window._iclCapture=_iclCapture;
 window._iclOpenCapModal=_iclOpenCapModal; window._iclCloseCapModal=_iclCloseCapModal;
 window._iclRefresh=_iclRefresh; window._iclNew=_iclNew; window._iclCloseViewModal=_iclCloseViewModal;
 window.iclViewIcl=iclViewIcl; window.iclDeleteIcl=iclDeleteIcl; window.iclDownloadIcl=iclDownloadIcl;

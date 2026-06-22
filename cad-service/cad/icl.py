@@ -369,12 +369,17 @@ def measure(
                 }
             # non-parallel planes -> angle, drawn at the shared (dihedral) edge
             n1u, n2u = _unit(n1), _unit(n2)
-            ang = math.degrees(math.acos(min(1.0, abs(_dot(n1u, n2u)))))
             c1, c2 = _centroid(f1), _centroid(f2)
             P1 = (pln1.Location().X(), pln1.Location().Y(), pln1.Location().Z())
             pln2 = a2.Plane()
             P2 = (pln2.Location().X(), pln2.Location().Y(), pln2.Location().Z())
             e = _cross(n1u, n2u)
+            # Fallback angle from normals (orientation-independent): the dihedral
+            # between two planes is acos(|n1.n2|)'s supplement, but face normals can
+            # point either way, so the normals alone are ambiguous. Keep this only as
+            # a fallback; the true surface-to-surface angle is measured below from the
+            # in-plane stub directions (what a protractor actually reads).
+            ang = math.degrees(math.acos(min(1.0, max(-1.0, abs(_dot(n1u, n2u))))))
             res = {
                 "type": "angle", "value_mm": round(ang, 1),
                 "mode": "angle", "method": "face-angle", "suggested_gauge": "Protractor",
@@ -391,9 +396,17 @@ def measure(
                         w = [c[i] - vtx[i] for i in range(3)]
                         w = [w[i] - e[i] * _dot(w, e) for i in range(3)]
                         return _unit(w)
+                    d1, d2 = _stub(c1), _stub(c2)
                     res["vertex"] = _rnd3(vtx)
-                    res["dir1"] = _rnd3(_stub(c1))
-                    res["dir2"] = _rnd3(_stub(c2))
+                    res["dir1"] = _rnd3(d1)
+                    res["dir2"] = _rnd3(d2)
+                    # True surface-to-surface angle: the angle subtended at the shared
+                    # edge between the two faces, measured from the edge toward each
+                    # face centroid. This reports the real opening angle (e.g. 135deg),
+                    # not just the acute one.
+                    res["value_mm"] = round(
+                        math.degrees(math.acos(min(1.0, max(-1.0, _dot(d1, d2))))), 1
+                    )
             return res
 
         # cylinder (hole) + plane -> centre-to-surface distance
