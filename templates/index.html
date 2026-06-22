@@ -979,7 +979,7 @@
     <div style="font-size:15px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.1px;margin-bottom:16px;">Enter WIP number</div>
     <div style="height:78px;background:#fff;border:2px solid #CC0000;border-radius:18px;display:flex;align-items:center;padding:0 20px;gap:15px;box-shadow:0 4px 14px rgba(204,0,0,0.10);">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CC0000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
-      <input id="lu-m-input" placeholder="2xxxxx" onkeydown="if(event.key==='Enter')lookupMobileGo()" style="flex:1;border:none;background:transparent;font-size:28px;font-family:'JetBrains Mono',monospace;color:#1A1A1A;min-width:0;">
+      <input id="lu-m-input" placeholder="2xxxxx" inputmode="numeric" pattern="[0-9]*" onkeydown="if(event.key==='Enter')lookupMobileGo()" style="flex:1;border:none;background:transparent;font-size:28px;font-family:'JetBrains Mono',monospace;color:#1A1A1A;min-width:0;">
     </div>
     <button onclick="lookupMobileGo()" class="btn-red" style="margin-top:18px;background:#CC0000;color:#fff;text-align:center;padding:22px;border-radius:18px;font-size:22px;font-weight:700;transition:background 0.1s;">Look up</button>
   </div>
