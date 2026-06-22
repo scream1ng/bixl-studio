@@ -117,7 +117,7 @@ def model_to_svg(model: dict) -> str:
         op_lines = _op_lines(op)
         op_h = _box_h(len(op_lines))
         raws = op.get("raws") or []
-        raw_boxes = [(_raw_lines(r), _box_h(len(_raw_lines(r)))) for r in raws]
+        raw_boxes = [(rl, _box_h(len(rl))) for rl in (_raw_lines(r) for r in raws)]
         stack_h = sum(h for _, h in raw_boxes) + max(0, len(raw_boxes) - 1) * _RAW_VGAP
         row_h = max(op_h, stack_h)
         # bottom-align the op in its row so it is the lowest element in the row;

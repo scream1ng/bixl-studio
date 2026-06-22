@@ -1708,8 +1708,9 @@ async function pfcRender(svg) {
 }
 
 function pfcRenderMeta(model) {
-  const n = (model.operations || []).filter(o => o.op_no).length;
-  const ops = (model.operations || []).filter(o => o.op_no).map(o =>
+  const numbered = (model.operations || []).filter(o => o.op_no);
+  const n = numbered.length;
+  const ops = numbered.map(o =>
     `<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #EEEAE4;">
        <span style="width:46px;flex-shrink:0;font-size:11px;font-weight:700;color:#CC0000;font-family:'JetBrains Mono',monospace;">${esc('Op ' + o.op_no)}</span>
        <span style="flex:1;min-width:0;font-size:13px;font-weight:600;color:#1A1A1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc((o.machines && o.machines[0]) || o.name || '')}</span>

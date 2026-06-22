@@ -109,7 +109,7 @@ def fill_pfc(model: dict, chart_png: str | bytes = b"") -> bytes:
 
     if part_no:
         ws["G2"] = part_no                       # IXL Part Number
-    g3 = desc or "    ".join(x for x in (part_name, desc) if x)
+    g3 = desc or part_name                       # description, or part code if blank
     if g3:
         ws["G3"] = g3                            # Part # / Description
     if plant:
