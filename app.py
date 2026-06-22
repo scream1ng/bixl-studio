@@ -19,6 +19,7 @@ from modules.sop.fill import fill_sop as _fill_sop
 from modules.label import step_to_wireframe, step_to_mesh_and_edges
 from modules.icl import icl_mesh, icl_edges, icl_suggest, icl_measure
 from modules.icl.export import fill_icl as _fill_icl
+from modules.pfc import parse_bom as _parse_bom, model_to_svg as _pfc_svg, fill_pfc as _fill_pfc
 
 app = Flask(__name__)
 
@@ -876,6 +877,45 @@ def lookup_wip():
     if m:
         return jsonify(m.to_dict())
     return jsonify({"error": "not found", "query": q.upper()}), 404
+
+
+# ── API: PFC (BOM transaction export → process flow chart) ────────────────────
+
+@app.route("/api/pfc/parse", methods=["POST"])
+def pfc_parse_route():
+    """Parse an uploaded BOM transaction export into a flow model + Mermaid text."""
+    f = request.files.get("file")
+    if not f:
+        return jsonify({"error": "no file"}), 400
+    try:
+        model = _parse_bom(f.read())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 422
+    return jsonify({"model": model, "svg": _pfc_svg(model)})
+
+
+@app.route("/api/pfc/export", methods=["POST"])
+def pfc_export_route():
+    """Fill the IXL PFC template (header + embedded flowchart PNG) → .xlsx attachment."""
+    payload = request.get_json(silent=True) or {}
+    model = payload.get("model") or {}
+    if not model.get("operations"):
+        return jsonify({"error": "no model"}), 400
+    try:
+        xlsx = _fill_pfc(model, payload.get("chart_png") or "")
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    part_no = ((model.get("header") or {}).get("part_no") or "").strip()
+    raw = f"{part_no} - PFC" if part_no else "PFC"
+    filename = re.sub(r'[\\/:*?"<>|]', "_", raw) + ".xlsx"
+    return send_file(
+        io.BytesIO(xlsx),
+        as_attachment=True,
+        download_name=filename,
+        mimetype=(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ),
+    )
 
 
 if __name__ == "__main__":
