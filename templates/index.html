@@ -244,6 +244,10 @@
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
       <div style="max-width:780px;margin:0 auto;">
+      <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
+        <input id="home-search" oninput="renderHomeList()" placeholder="Search SOPs…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
+      </div>
       <div id="home-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
         <div style="font-size:36px;margin-bottom:14px;opacity:0.2;line-height:1;">📄</div>
         <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No documents yet</div>
@@ -310,6 +314,10 @@
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
       <div style="max-width:780px;margin:0 auto;">
+        <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
+          <input id="lb-search" oninput="_lbListRender()" placeholder="Search labels…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
+        </div>
         <div id="lb-list-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
           <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No labels yet</div>
           <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New Label</strong> to generate your first label.</p>
@@ -589,6 +597,10 @@
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
       <div style="max-width:780px;margin:0 auto;">
+        <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
+          <input id="icl-search" oninput="_iclListRender()" placeholder="Search checklists…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
+        </div>
         <div id="icl-list-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
           <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No checklists yet</div>
           <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New ICL</strong> to measure a part and export your first sheet.</p>
@@ -1107,6 +1119,10 @@
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
       <div style="max-width:780px;margin:0 auto;">
+        <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
+          <input id="pfc-search" oninput="pfcListRender()" placeholder="Search flow charts…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
+        </div>
         <div id="pfc-list-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
           <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No flow charts yet</div>
           <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New PFC</strong> to turn a BOM into a flow chart.</p>
@@ -1771,15 +1787,27 @@ async function pfcRefresh() {
   try { _pfcHistory = (await api('GET', '/api/pfcs')) || []; } catch (e) { _pfcHistory = []; }
   pfcListRender();
 }
+// shared history-list search: filter `arr` by the search input's text over `fields`
+function _histFilter(arr, inputId, fields) {
+  const q = ($(inputId)?.value || '').trim().toLowerCase();
+  if (!q) return arr;
+  return arr.filter(r => fields.some(f => String(r[f] || '').toLowerCase().includes(q)));
+}
+window._histFilter = _histFilter;
+const _histNoMatch = '<div style="text-align:center;padding:40px 20px;color:#9B9B9B;font-size:14px;">No matches.</div>';
+window._histNoMatch = _histNoMatch;
+
 function pfcListRender() {
   const list = $('pfc-list-items'), empty = $('pfc-list-empty');
   if (!list) return;
   if (!_pfcHistory.length) { if (empty) empty.style.display = 'block'; list.innerHTML = ''; return; }
   if (empty) empty.style.display = 'none';
+  const src = _histFilter(_pfcHistory, 'pfc-search', ['part_no', 'part_name']);
+  if (!src.length) { list.innerHTML = _histNoMatch; return; }
   const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
   const groups = [{ label: 'Today', items: [] }, { label: 'This week', items: [] }, { label: 'Earlier', items: [] }];
-  for (const r of _pfcHistory) { const d = new Date(r.created_at || 0); groups[d >= today ? 0 : d >= weekAgo ? 1 : 2].items.push(r); }
+  for (const r of src) { const d = new Date(r.created_at || 0); groups[d >= today ? 0 : d >= weekAgo ? 1 : 2].items.push(r); }
   list.innerHTML = groups.filter(g => g.items.length).map(g => `
     <div style="font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.1px;margin:20px 0 8px;">${esc(g.label)}</div>
     <div style="display:flex;flex-direction:column;gap:7px;">
@@ -2161,7 +2189,9 @@ function renderHomeList() {
   if (!list) return;
   if (!state.sops.length) { empty.style.display = 'block'; list.innerHTML = ''; return; }
   empty.style.display = 'none';
-  list.innerHTML = computeGroups(state.sops).map(g => `
+  const src = _histFilter(state.sops, 'home-search', ['doc_no', 'part_name']);
+  if (!src.length) { list.innerHTML = _histNoMatch; return; }
+  list.innerHTML = computeGroups(src).map(g => `
     <div style="font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.1px;margin:20px 0 8px;">${esc(g.label)}</div>
     <div style="display:flex;flex-direction:column;gap:7px;">
       ${g.items.map(s => `
@@ -3072,10 +3102,12 @@ function _lbListRender() {
     return;
   }
   if (empty) empty.style.display = 'none';
+  const src = window._histFilter(_lbHistory, 'lb-search', ['name', 'part_name']);
+  if (!src.length) { list.innerHTML = window._histNoMatch; return; }
   const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
   const groups = [{ label: 'Today', items: [] }, { label: 'This week', items: [] }, { label: 'Earlier', items: [] }];
-  for (const r of _lbHistory) {
+  for (const r of src) {
     const d = new Date(r.created_at || 0);
     groups[d >= today ? 0 : d >= weekAgo ? 1 : 2].items.push(r);
   }
@@ -3831,10 +3863,12 @@ function _iclListRender(){
   if(!list) return;
   if(!_iclHistory.length){ if(empty) empty.style.display='block'; list.innerHTML=''; return; }
   if(empty) empty.style.display='none';
+  const src=window._histFilter(_iclHistory,'icl-search',['part_no','part_desc','cust_no']);
+  if(!src.length){ list.innerHTML=window._histNoMatch; return; }
   const now=new Date(), today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
   const weekAgo=new Date(today); weekAgo.setDate(weekAgo.getDate()-7);
   const groups=[{label:'Today',items:[]},{label:'This week',items:[]},{label:'Earlier',items:[]}];
-  for(const r of _iclHistory){ const d=new Date(r.created_at||0); groups[d>=today?0:d>=weekAgo?1:2].items.push(r); }
+  for(const r of src){ const d=new Date(r.created_at||0); groups[d>=today?0:d>=weekAgo?1:2].items.push(r); }
   list.innerHTML=groups.filter(g=>g.items.length).map(g=>`
     <div style="font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.1px;margin:20px 0 8px;">${esc(g.label)}</div>
     <div style="display:flex;flex-direction:column;gap:7px;">
@@ -3917,7 +3951,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&_icl.picks.length)
 window._iclOnShow=function(){ if(_icl.resizeHandler) setTimeout(_icl.resizeHandler,40); };
 window._iclView=_iclView; window._iclWireframe=_iclWireframe; window._iclCapture=_iclCapture;
 window._iclOpenCapModal=_iclOpenCapModal; window._iclCloseCapModal=_iclCloseCapModal;
-window._iclRefresh=_iclRefresh; window._iclNew=_iclNew; window._iclCloseViewModal=_iclCloseViewModal;
+window._iclRefresh=_iclRefresh; window._iclNew=_iclNew; window._iclCloseViewModal=_iclCloseViewModal; window._iclListRender=_iclListRender;
 window.iclViewIcl=iclViewIcl; window.iclDeleteIcl=iclDeleteIcl; window.iclDownloadIcl=iclDownloadIcl;
 
 // Expose to main script (module scope is not global)
