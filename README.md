@@ -10,11 +10,15 @@ Manufacturing documentation platform for IXL Group — a single hosted web app (
 
 | Module | What it does | Status |
 |--------|--------------|--------|
+| **Topics** | Team discussion channels — text/photo posts per thread. | ✅ |
+| **Look Up** | FG ↔ WIP part-number finder. | ✅ |
 | **SOP** | Turn shop-floor photos + notes into a formatted IXL Word `.docx` (1–8 steps/page, multi-page). | ✅ |
 | **Label** | Three.js STEP viewer → wireframe label JPG at exact angle; history list. | ✅ |
 | **ICL** (Inspection Checklist) | Balloon dimensions off a STEP model → export the real IXL inspection `.xlsx`; saved history. | ✅ |
-| **Look Up** | FG ↔ WIP part-number finder. | ✅ |
-| MLB / PFC | BOM & flow. | Soon |
+| **PFC** (Process Flow Chart) | BOM transaction export → process flow chart (SVG renderer); saved history. | ✅ |
+| MLB | Material label batch. | Soon |
+
+Access is gated by a shared **PIN** (`POST /api/login`) with an 8-hour hard session cap; mobile re-locks after 15 min idle.
 
 ---
 
@@ -26,6 +30,7 @@ Manufacturing documentation platform for IXL Group — a single hosted web app (
 | `modules/sop/fill.py` | SOP `.docx` fill engine — `fill_sop(...)` |
 | `modules/label/` | STEP → wireframe / mesh helpers |
 | `modules/icl/` | cad-service proxy (`__init__.py`) + Excel export (`export.py`) |
+| `modules/pfc/` | BOM transaction parse (`parse.py`) → SVG flow chart (`svg.py`) + export (`export.py`) |
 | `docx/sop/` | 12 pre-built `.docx` fill templates (A3/A4 × landscape/portrait × step counts) |
 | `docx/icl/Template - ICL.xlsx` | Blank IXL inspection-checklist template (filled per export) |
 | `templates/index.html` | Single-file responsive frontend (all screens + PWA) |
@@ -85,6 +90,8 @@ Gauges: Vernier / Protractor / Visual (Visual takes an SOP reference → LIMITS 
 ## API surface (selected)
 
 ```
+POST /api/login | /logout                     PIN auth (8-hour session cap)
+GET  /api/session                             current auth state
 POST /api/icl/mesh | /edges | /measure      cad-service proxy (STEP geometry)
 POST /api/icl/export                          fill template → .xlsx (+ save history)
 GET  /api/icls                                list saved checklists
@@ -93,6 +100,9 @@ GET  /api/icls/:id/export                     re-generate .xlsx from a saved rec
 DELETE /api/icls/:id
 GET/POST/PUT/DELETE /api/sops ...             SOP CRUD + /generate
 GET/POST/DELETE /api/labels ...               Label history
+POST /api/pfc/parse                           BOM transaction export → flow chart
+GET/POST/DELETE /api/pfcs ... /thumb /export  PFC history + re-export
+GET/POST/DELETE /api/channels ...             Topics channels + messages
 GET  /healthz                                 Railway health check
 ```
 

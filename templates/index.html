@@ -112,6 +112,14 @@
 </head>
 <body>
 
+<style>
+  .pin-dot { width:14px;height:14px;border-radius:50%;border:1.5px solid #C8C8C8;background:transparent;transition:background .12s,border-color .12s; }
+  .pin-dot.filled { background:#1A1A1A;border-color:#1A1A1A; }
+  .pin-key { font-size:24px;font-weight:600;color:#1A1A1A;background:#F2F2F2;border:none;border-radius:14px;min-height:58px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;transition:background .1s; }
+  .pin-key:active { background:#E2E2E2; }
+  .pin-key-del { font-size:20px;color:#6B6B6B; }
+  .spinner-dark { border-color:rgba(0,0,0,0.25);border-top-color:#CC0000; }
+</style>
 <!-- ═══════════════════ LOGIN (PIN gate) ═══════════════════ -->
 <div id="screen-login" class="screen" style="flex-direction:column;align-items:center;justify-content:center;background:#F5F4F1;">
   <div style="width:100%;max-width:340px;padding:34px 28px;background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:20px;box-shadow:0 18px 50px rgba(0,0,0,0.08);text-align:center;">
@@ -120,10 +128,27 @@
       <div style="width:2px;height:18px;background:#CC0000;border-radius:1px;"></div>
       <span style="font-size:18px;font-weight:700;color:#1A1A1A;">Studio</span>
     </div>
-    <p style="font-size:13px;color:#6B6B6B;margin-bottom:22px;">Enter PIN to continue</p>
-    <input id="login-pin" type="password" inputmode="numeric" pattern="\d*" autocomplete="off" maxlength="4" placeholder="&bull;&bull;&bull;&bull;" onkeydown="if(event.key==='Enter')submitLogin();" oninput="$('login-error').style.display='none'; if(this.value.length===4) submitLogin();" style="width:100%;text-align:center;letter-spacing:10px;font-size:22px;padding:13px;border:1px solid #E0E0E0;border-radius:12px;color:#1A1A1A;">
-    <div id="login-error" style="display:none;color:#CC0000;font-size:12.5px;margin-top:10px;">Wrong PIN — try again.</div>
-    <button id="login-btn" onclick="submitLogin()" class="btn-red" style="width:100%;margin-top:16px;background:#CC0000;color:#fff;padding:13px;border-radius:12px;font-size:14px;font-weight:700;min-height:46px;">Unlock</button>
+    <p style="font-size:13px;color:#6B6B6B;margin-bottom:20px;">Enter PIN to continue</p>
+    <input id="login-pin" type="hidden">
+    <div id="pin-dots" style="display:flex;justify-content:center;gap:16px;margin-bottom:6px;height:18px;">
+      <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+    </div>
+    <div id="login-error" style="display:none;color:#CC0000;font-size:12.5px;margin-top:8px;">Wrong PIN — try again.</div>
+    <div id="pin-pad" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px;">
+      <button class="pin-key" onclick="pinDigit('1')">1</button>
+      <button class="pin-key" onclick="pinDigit('2')">2</button>
+      <button class="pin-key" onclick="pinDigit('3')">3</button>
+      <button class="pin-key" onclick="pinDigit('4')">4</button>
+      <button class="pin-key" onclick="pinDigit('5')">5</button>
+      <button class="pin-key" onclick="pinDigit('6')">6</button>
+      <button class="pin-key" onclick="pinDigit('7')">7</button>
+      <button class="pin-key" onclick="pinDigit('8')">8</button>
+      <button class="pin-key" onclick="pinDigit('9')">9</button>
+      <span></span>
+      <button class="pin-key" onclick="pinDigit('0')">0</button>
+      <button class="pin-key pin-key-del" onclick="pinDel()">&#9003;</button>
+    </div>
+    <div id="login-btn" style="display:none;"></div>
   </div>
 </div>
 
@@ -1440,10 +1465,38 @@ function goLanding() {
 }
 
 // ── PIN gate ──────────────────────────────────────────────────────────────────
-function showLogin() {
-  showScreen('login');
-  setTimeout(() => $('login-pin')?.focus(), 60);
+function clearLoginError() { $('login-error').style.display = 'none'; }
+function renderPinDots() {
+  const n = ($('login-pin').value || '').length;
+  document.querySelectorAll('#pin-dots .pin-dot').forEach((d, i) => d.classList.toggle('filled', i < n));
 }
+function pinDigit(d) {
+  if (_loggingIn) return;
+  const el = $('login-pin');
+  if (el.value.length >= 4) return;
+  el.value += d;
+  clearLoginError();
+  renderPinDots();
+  if (el.value.length === 4) submitLogin();
+}
+function pinDel() {
+  if (_loggingIn) return;
+  const el = $('login-pin');
+  el.value = el.value.slice(0, -1);
+  clearLoginError();
+  renderPinDots();
+}
+function showLogin() {
+  $('login-pin').value = '';
+  clearLoginError();
+  renderPinDots();
+  showScreen('login');
+}
+document.addEventListener('keydown', (e) => {
+  if (state.screen !== 'login') return;
+  if (e.key >= '0' && e.key <= '9') { pinDigit(e.key); e.preventDefault(); }
+  else if (e.key === 'Backspace') { pinDel(); e.preventDefault(); }
+});
 
 function enterApp() {
   showScreen('landing');
@@ -1456,21 +1509,22 @@ async function submitLogin() {
   if (!pin || _loggingIn) return;
   _loggingIn = true;
   const btn = $('login-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>';
-  $('login-error').style.display = 'none';
+  btn.style.display = 'block';
+  btn.style.marginTop = '16px';
+  btn.innerHTML = '<span class="spinner spinner-dark"></span>';
+  clearLoginError();
   await new Promise(r => setTimeout(r, 450));  // brief beat so the spinner reads
   $('login-pin').value = '';
+  renderPinDots();
   try {
     await api('POST', '/api/login', { pin });
     enterApp();
   } catch (e) {
     $('login-error').style.display = 'block';
-    $('login-pin').focus();
   } finally {
     _loggingIn = false;
-    btn.disabled = false;
-    btn.textContent = 'Unlock';
+    btn.style.display = 'none';
+    btn.innerHTML = '';
   }
 }
 
