@@ -9,7 +9,7 @@ import json
 import os
 import re
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import Flask, jsonify, render_template, request, send_file, send_from_directory, session
 from flask_sqlalchemy import SQLAlchemy
@@ -28,6 +28,10 @@ app = Flask(__name__)
 # local dev only — without a stable SECRET_KEY, sessions reset on every restart.
 app.secret_key = os.environ.get("SECRET_KEY", "dev-insecure-change-me")
 APP_PIN = os.environ.get("APP_PIN", "1858")
+# Hard session cap: re-PIN 8h after login (a shift), regardless of activity.
+# Mobile additionally locks after 15 min idle (client-side, see index.html).
+app.permanent_session_lifetime = timedelta(hours=8)
+app.config["SESSION_REFRESH_EACH_REQUEST"] = False  # expire from login, not sliding
 
 # ── Database ─────────────────────────────────────────────────────────────────
 _db_url = os.environ.get("DATABASE_URL", "sqlite:///bixl.db")
@@ -398,6 +402,7 @@ def session_status():
 def login():
     pin = (request.get_json(silent=True) or {}).get("pin", "")
     if str(pin) == APP_PIN:
+        session.permanent = True   # apply the 8h lifetime
         session["authed"] = True
         return jsonify({"ok": True})
     return jsonify({"error": "invalid pin"}), 401
