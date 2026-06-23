@@ -143,55 +143,8 @@
 
       <h1 style="font-size:26px;font-weight:800;letter-spacing:-0.4px;color:#1A1A1A;line-height:1.22;text-align:center;">One workspace for the factory floor.</h1>
       <p style="color:#6B6B6B;font-size:14px;margin-top:8px;text-align:center;">Choose a tool from the menu to get started.</p>
-      <!-- Module cards: only on mobile, where the product rail is hidden. Desktop uses the rail. -->
-      <div class="mb-only" style="display:flex;flex-direction:column;gap:10px;margin-top:28px;">
-        <!-- SOP live -->
-        <div class="module-card" id="landing-sop-card" style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow 0.12s;">
-          <div style="width:44px;height:44px;border-radius:12px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:15px;font-weight:700;color:#1A1A1A;">SOP</div>
-            <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">Operating procedures</div>
-          </div>        </div>
-        <!-- Label live -->
-        <div class="module-card" id="landing-label-card" onclick="enterLabel()" style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow 0.12s;">
-          <div style="width:44px;height:44px;border-radius:12px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LB</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:15px;font-weight:700;color:#1A1A1A;">Label</div>
-            <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">Part labels</div>
-          </div>
-        </div>
-        <!-- Look Up live -->
-        <div class="module-card" id="landing-lookup-card" onclick="enterLookup()" style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow 0.12s;">
-          <div style="width:44px;height:44px;border-radius:12px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:15px;font-weight:700;color:#1A1A1A;">Look Up</div>
-            <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">Finish Good &#8596; WIP finder</div>
-          </div>        </div>
-        <!-- ICL -->
-        <div class="module-card" id="landing-icl-card" onclick="enterIcl()" style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow 0.12s;">
-          <div style="width:44px;height:44px;border-radius:12px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">ICL</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:15px;font-weight:700;color:#1A1A1A;">Inspection Checklist</div>
-            <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">Measure dimensions from CAD</div>
-          </div>
-        </div>
-        <!-- PFC live -->
-        <div class="module-card" id="landing-pfc-card" onclick="enterPfc()" style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow 0.12s;">
-          <div style="width:44px;height:44px;border-radius:12px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">PFC</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:15px;font-weight:700;color:#1A1A1A;">Process Flow Chart</div>
-            <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">BOM &#8594; flow chart</div>
-          </div>
-        </div>
-        <!-- Topics live -->
-        <div class="module-card" id="landing-topic-card" onclick="enterTopics()" style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow 0.12s;">
-          <div style="width:44px;height:44px;border-radius:12px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">TP</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:15px;font-weight:700;color:#1A1A1A;">Topics</div>
-            <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">Team discussion threads</div>
-          </div>
-        </div>
-      </div>
+      <!-- Module cards (desktop + mobile). Rendered from RAIL_PRODUCTS so order matches the menu. -->
+      <div id="landing-cards" style="display:flex;flex-direction:column;gap:10px;margin-top:28px;"></div>
     </div>
   </main>
 </div>
@@ -1045,38 +998,7 @@
       <button id="drawer-close" style="width:28px;height:28px;border-radius:50%;background:#2C2C2C;color:#9A9A9A;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">&#10005;</button>
     </div>
     <div style="font-size:10px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 9px 9px;">PRODUCTS</div>
-    <div style="display:flex;flex-direction:column;gap:4px;">
-      <button id="drawer-sop" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;text-align:left;width:100%;transition:background 0.1s;">
-        <div class="dw-tile" style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">SOP</div>
-        <div style="flex:1;min-width:0;"><div class="dw-lbl" style="font-size:13px;font-weight:600;color:#C8C8C8;">SOP</div></div>
-        <span class="dw-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </button>
-      <button id="drawer-label" onclick="enterLabel();closeDrawer();" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;text-align:left;width:100%;transition:background 0.1s;">
-        <div class="dw-tile" style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">LB</div>
-        <div style="flex:1;"><div class="dw-lbl" style="font-size:13px;font-weight:600;color:#C8C8C8;">Label</div></div>
-        <span class="dw-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </button>
-      <button id="drawer-lookup" onclick="enterLookup();closeDrawer();" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;text-align:left;width:100%;transition:background 0.1s;">
-        <div class="dw-tile" style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LU</div>
-        <div style="flex:1;min-width:0;"><div class="dw-lbl" style="font-size:13px;font-weight:600;color:#C8C8C8;">Look Up</div></div>
-        <span class="dw-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </button>
-      <button id="drawer-icl" onclick="enterIcl();closeDrawer();" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;text-align:left;width:100%;transition:background 0.1s;">
-        <div class="dw-tile" style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;flex-shrink:0;">ICL</div>
-        <div style="flex:1;min-width:0;"><div class="dw-lbl" style="font-size:13px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div></div>
-        <span class="dw-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </button>
-      <button id="drawer-pfc" onclick="enterPfc();closeDrawer();" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;text-align:left;width:100%;transition:background 0.1s;">
-        <div class="dw-tile" style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">PFC</div>
-        <div style="flex:1;min-width:0;"><div class="dw-lbl" style="font-size:13px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Process Flow Chart</div></div>
-        <span class="dw-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </button>
-      <button id="drawer-topic" onclick="enterTopics();closeDrawer();" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;text-align:left;width:100%;transition:background 0.1s;">
-        <div class="dw-tile" style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">TP</div>
-        <div style="flex:1;min-width:0;"><div class="dw-lbl" style="font-size:13px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Topics</div></div>
-        <span class="dw-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </button>
-    </div>
+    <div id="drawer-items" style="display:flex;flex-direction:column;gap:4px;"></div>
   </aside>
 </div>
 
@@ -1344,6 +1266,27 @@ function showScreen(name) {
       loadCaptureStep();
     }, 60);
   }
+}
+
+// Mobile landing cards — same source/order as the rail.
+function landingCardsHtml() {
+  return RAIL_PRODUCTS.map(p =>
+    '<div class="module-card" onclick="' + p.fn + '()" style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow 0.12s;">'
+    + '<div style="width:44px;height:44px;border-radius:12px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
+    + '<div style="flex:1;min-width:0;"><div style="font-size:15px;font-weight:700;color:#1A1A1A;">' + p.label + '</div><div style="font-size:12px;color:#7A7A7A;margin-top:2px;">' + p.sub + '</div></div>'
+    + '</div>'
+  ).join('');
+}
+
+// Mobile drawer items — same source/order as the rail.
+function drawerHtml() {
+  return RAIL_PRODUCTS.map(p =>
+    '<button id="drawer-' + p.key + '" onclick="' + p.fn + '();closeDrawer();" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;text-align:left;width:100%;transition:background 0.1s;">'
+    + '<div class="dw-tile" style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
+    + '<div style="flex:1;min-width:0;"><div class="dw-lbl" style="font-size:13px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div></div>'
+    + '<span class="dw-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>'
+    + '</button>'
+  ).join('');
 }
 
 function setDrawerActive(key) {
@@ -2806,17 +2749,17 @@ async function topicCreate() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Landing
-  $('landing-sop-card').addEventListener('click', enterSop);
+  // Landing module cards (mobile) — rendered from RAIL_PRODUCTS so order matches the menu.
+  $('landing-cards').innerHTML = landingCardsHtml();
 
   // Home (mobile)
   $('home-hamburger').addEventListener('click', openDrawer);
   $('home-new-btn').addEventListener('click', openModal);
 
   // Drawer
+  $('drawer-items').innerHTML = drawerHtml();   // render mobile menu from RAIL_PRODUCTS
   $('drawer-close').addEventListener('click', closeDrawer);
   $('drawer-scrim').addEventListener('click', closeDrawer);
-  $('drawer-sop').addEventListener('click', () => { enterSop(); closeDrawer(); });
 
   // Modal
   $('modal-overlay').addEventListener('click', e => { if (e.target === $('modal-overlay')) closeModal(); });
