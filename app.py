@@ -11,7 +11,7 @@ import re
 import uuid
 from datetime import datetime
 
-from flask import Flask, jsonify, render_template, request, send_file, send_from_directory
+from flask import Flask, jsonify, render_template, request, send_file, send_from_directory, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 
@@ -22,6 +22,12 @@ from modules.icl.export import fill_icl as _fill_icl
 from modules.pfc import parse_bom as _parse_bom, model_to_svg as _pfc_svg, fill_pfc as _fill_pfc
 
 app = Flask(__name__)
+
+# ── Auth (single shared PIN gate) ─────────────────────────────────────────────
+# Set SECRET_KEY + APP_PIN as env vars in production (Railway). Defaults are for
+# local dev only — without a stable SECRET_KEY, sessions reset on every restart.
+app.secret_key = os.environ.get("SECRET_KEY", "dev-insecure-change-me")
+APP_PIN = os.environ.get("APP_PIN", "1858")
 
 # ── Database ─────────────────────────────────────────────────────────────────
 _db_url = os.environ.get("DATABASE_URL", "sqlite:///bixl.db")
@@ -231,6 +237,52 @@ class PFC(db.Model):
         }
 
 
+class Channel(db.Model):
+    """One Topics thread — an open feed the team posts to."""
+    __tablename__ = "channels"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    slug = db.Column(db.String(64), nullable=False, unique=True)
+    description = db.Column(db.Text, nullable=False, default="")
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    messages = db.relationship(
+        "Message", backref="channel", lazy=True,
+        order_by="Message.created_at", cascade="all, delete-orphan",
+    )
+
+    def to_dict(self) -> dict:
+        last = self.messages[-1] if self.messages else None
+        return {
+            "id": self.id,
+            "slug": self.slug,
+            "description": self.description,
+            "message_count": len(self.messages),
+            "last_text": (last.text if last else ""),
+            "last_at": (last.created_at.isoformat() if last else None),
+            "created_at": self.created_at.isoformat(),
+        }
+
+
+class Message(db.Model):
+    """One post in a topic — text and/or photo, with a timestamp."""
+    __tablename__ = "messages"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    channel_id = db.Column(db.String(36), db.ForeignKey("channels.id"), nullable=False)
+    text = db.Column(db.Text, nullable=False, default="")
+    image_hash = db.Column(db.String(64), db.ForeignKey("image_blobs.hash"), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "channel_id": self.channel_id,
+            "text": self.text or "",
+            "has_image": bool(self.image_hash),
+            "created_at": self.created_at.isoformat(),
+        }
+
+
 def _migrate():
     """Migrate steps.image → image_blobs + steps.image_hash if needed."""
     is_sqlite = db.engine.dialect.name == "sqlite"
@@ -301,12 +353,60 @@ with app.app_context():
                     ))
             db.session.commit()
 
+    # Seed default Topics threads on an empty table.
+    if Channel.query.count() == 0:
+        for _slug, _desc in (
+            ("general", "Plant-wide announcements"),
+            ("shift-handoff", "Pass the line between shifts"),
+            ("maintenance", "Breakdowns, repairs, spare parts"),
+            ("quality", "Scrap, defects, inspection notes"),
+            ("line-2-coater", "Watching the edge sensor closely"),
+        ):
+            db.session.add(Channel(slug=_slug, description=_desc))
+        db.session.commit()
+
 
 # ── Health check ──────────────────────────────────────────────────────────────
 
 @app.route("/healthz")
 def healthz():
     return jsonify({"status": "ok"})
+
+
+# ── Auth gate ─────────────────────────────────────────────────────────────────
+
+@app.before_request
+def _require_pin():
+    # Deny-by-default on the data API: every /api/* route needs an authenticated
+    # session except the two login doorways. Non-/api routes (index, static,
+    # sw.js, healthz) are public. Gating on the URL keeps this stable across
+    # endpoint renames and auto-protects any new /api route.
+    p = request.path
+    if not p.startswith("/api/") or p in ("/api/login", "/api/session"):
+        return None
+    if not session.get("authed"):
+        return jsonify({"error": "auth required"}), 401
+    return None
+
+
+@app.route("/api/session")
+def session_status():
+    return jsonify({"authed": bool(session.get("authed"))})
+
+
+@app.route("/api/login", methods=["POST"])
+def login():
+    pin = (request.get_json(silent=True) or {}).get("pin", "")
+    if str(pin) == APP_PIN:
+        session["authed"] = True
+        return jsonify({"ok": True})
+    return jsonify({"error": "invalid pin"}), 401
+
+
+@app.route("/api/logout", methods=["POST"])
+def logout():
+    session.clear()
+    return jsonify({"ok": True})
 
 
 # ── Frontend ──────────────────────────────────────────────────────────────────
@@ -373,6 +473,8 @@ def update_sop(sop_id: str):
     if "steps" in data:
         existing = {s.id: s for s in sop.steps}
         seen_ids: set[str] = set()
+        # Hashes this SOP referenced before the update — GC the ones it drops.
+        prior_hashes = {st.image_hash for st in existing.values() if st.image_hash}
 
         for i, s in enumerate(data["steps"]):
             sid = s.get("id") or str(uuid.uuid4())
@@ -404,13 +506,9 @@ def update_sop(sop_id: str):
             if sid not in seen_ids:
                 db.session.delete(step)
 
-        # GC orphaned blobs after step deletions.
+        # GC only the blobs this SOP dropped, and only if nothing else uses them.
         db.session.flush()
-        orphans = (ImageBlob.query
-                   .outerjoin(Step, Step.image_hash == ImageBlob.hash)
-                   .filter(Step.id.is_(None)).all())
-        for b in orphans:
-            db.session.delete(b)
+        _gc_blobs(prior_hashes)
 
     sop.updated_at = datetime.utcnow()
     db.session.commit()
@@ -423,7 +521,10 @@ def update_sop(sop_id: str):
 @app.route("/api/sops/<sop_id>", methods=["DELETE"])
 def delete_sop(sop_id: str):
     sop = db.get_or_404(SOP, sop_id)
+    hashes = {s.image_hash for s in sop.steps if s.image_hash}
     db.session.delete(sop)
+    db.session.flush()
+    _gc_blobs(hashes)
     db.session.commit()
     return "", 204
 
@@ -590,6 +691,28 @@ def _decode_data_url(data_url: str) -> bytes:
     return base64.b64decode(b64)
 
 
+def _gc_blobs(hashes) -> None:
+    """Delete each given image blob iff nothing references it anymore.
+
+    Call after the owning rows are deleted/flushed. Reclaims Postgres storage
+    without touching blobs still shared by another module.
+    """
+    cands = {x for x in (hashes or []) if x}
+    if not cands:
+        return
+    # ICL keeps screenshot hashes in a JSON text column — scan it once, not per hash.
+    icl_hashes = {s.get("hash") for icl in ICL.query.all() for s in icl._shots()}
+    for h in cands:
+        if h in icl_hashes:
+            continue
+        if any(db.session.query(m.id).filter_by(image_hash=h).first()
+               for m in (Step, Label, PFC, Message)):
+            continue
+        b = db.session.get(ImageBlob, h)
+        if b:
+            db.session.delete(b)
+
+
 def _send_jpeg_blob(blob):
     return send_file(io.BytesIO(_decode_data_url(blob.data)), mimetype="image/jpeg")
 
@@ -743,7 +866,10 @@ def icl_reexport(icl_id):
 def delete_icl(icl_id):
     icl = db.session.get(ICL, icl_id)
     if icl:
+        hashes = {s.get("hash") for s in icl._shots()}
         db.session.delete(icl)
+        db.session.flush()
+        _gc_blobs(hashes)
         db.session.commit()
     return "", 204
 
@@ -794,7 +920,10 @@ def label_image(label_id):
 def delete_label(label_id):
     label = db.session.get(Label, label_id)
     if label:
+        h = label.image_hash
         db.session.delete(label)
+        db.session.flush()
+        _gc_blobs([h])
         db.session.commit()
     return "", 204
 
@@ -1020,9 +1149,92 @@ def pfc_reexport(pfc_id):
 def delete_pfc(pfc_id):
     pfc = db.session.get(PFC, pfc_id)
     if pfc:
+        h = pfc.image_hash
         db.session.delete(pfc)
+        db.session.flush()
+        _gc_blobs([h])
         db.session.commit()
     return "", 204
+
+
+# ── API: Topics (team discussion threads) ────────────────────────────────────
+
+_SLUG_RE = re.compile(r"[^a-z0-9-]+")
+
+
+@app.route("/api/channels", methods=["GET"])
+def list_channels():
+    rows = Channel.query.order_by(Channel.created_at).all()
+    return jsonify([c.to_dict() for c in rows])
+
+
+@app.route("/api/channels", methods=["POST"])
+def create_channel():
+    d = request.get_json(silent=True) or {}
+    slug = _SLUG_RE.sub("-", (d.get("slug") or "").strip().lower()).strip("-")
+    if not slug:
+        return jsonify({"error": "invalid slug"}), 400
+    if Channel.query.filter_by(slug=slug).first():
+        return jsonify({"error": "slug exists"}), 409
+    ch = Channel(slug=slug, description=(d.get("description") or "").strip())
+    db.session.add(ch)
+    db.session.commit()
+    return jsonify(ch.to_dict()), 201
+
+
+@app.route("/api/channels/<channel_id>", methods=["DELETE"])
+def delete_channel(channel_id):
+    ch = db.session.get(Channel, channel_id)
+    if ch:
+        hashes = {m.image_hash for m in ch.messages if m.image_hash}
+        db.session.delete(ch)  # cascades to its messages
+        db.session.flush()
+        _gc_blobs(hashes)
+        db.session.commit()
+    return "", 204
+
+
+@app.route("/api/channels/<channel_id>/messages", methods=["GET"])
+def list_messages(channel_id):
+    if not db.session.get(Channel, channel_id):
+        return jsonify({"error": "not found"}), 404
+    q = Message.query.filter_by(channel_id=channel_id)
+    after = request.args.get("after")
+    if after:
+        q = q.filter(Message.created_at > datetime.fromisoformat(after))
+    rows = q.order_by(Message.created_at).all()
+    return jsonify([m.to_dict() for m in rows])
+
+
+@app.route("/api/channels/<channel_id>/messages", methods=["POST"])
+def create_message(channel_id):
+    if not db.session.get(Channel, channel_id):
+        return jsonify({"error": "not found"}), 404
+    d = request.get_json(silent=True) or {}
+    text_val = (d.get("text") or "").strip()
+    image = d.get("image")  # optional photo as a data URL
+    if not text_val and not image:
+        return jsonify({"error": "empty message"}), 400
+    img_hash = None
+    if image:
+        img_hash = _sha256(image)
+        if not db.session.get(ImageBlob, img_hash):
+            db.session.add(ImageBlob(hash=img_hash, data=image))
+    msg = Message(channel_id=channel_id, text=text_val, image_hash=img_hash)
+    db.session.add(msg)
+    db.session.commit()
+    return jsonify(msg.to_dict()), 201
+
+
+@app.route("/api/messages/<message_id>/image", methods=["GET"])
+def message_image(message_id):
+    msg = db.session.get(Message, message_id)
+    if not msg or not msg.image_hash:
+        return jsonify({"error": "not found"}), 404
+    blob = db.session.get(ImageBlob, msg.image_hash)
+    if not blob:
+        return jsonify({"error": "not found"}), 404
+    return _send_jpeg_blob(blob)
 
 
 if __name__ == "__main__":

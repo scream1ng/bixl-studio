@@ -76,6 +76,16 @@
     .rail-item:hover { background: #1E1E1E !important; }
     .add-step-cell:hover { border-color: #CC0000 !important; color: #CC0000 !important; }
     .trash-btn:hover { color: #CC0000 !important; }
+    /* Unified wireframe icon button (row actions: download / delete) */
+    .ico-btn {
+      width: 34px; height: 34px; flex-shrink: 0;
+      border: 1px solid rgba(0,0,0,0.14); border-radius: 9px;
+      background: #fff; color: #7A7A7A;
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: border-color 0.1s, color 0.1s, background 0.1s;
+    }
+    .ico-btn:hover { border-color: rgba(0,0,0,0.28); color: #1A1A1A; background: #FAFAF8; }
+    .ico-btn.ico-del:hover { color: #CC0000; border-color: rgba(204,0,0,0.4); background: #FFF6F6; }
     .step-photo:hover { opacity: 0.85; }
     .module-card:hover { border-color: rgba(0,0,0,0.16) !important; box-shadow: 0 4px 14px rgba(0,0,0,0.07) !important; }
     input:focus, textarea:focus { border-color: #CC0000 !important; outline: none; }
@@ -96,43 +106,31 @@
     .sync-pill.error  { color: #CC0000; background: rgba(204,0,0,0.08); }
     .sync-pill.error  .dot { background: #CC0000; }
     @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { display:inline-block; width:18px; height:18px; border:2.5px solid rgba(255,255,255,0.45); border-top-color:#fff; border-radius:50%; animation: spin 0.6s linear infinite; vertical-align:middle; }
   </style>
 </head>
 <body>
 
+<!-- ═══════════════════ LOGIN (PIN gate) ═══════════════════ -->
+<div id="screen-login" class="screen" style="flex-direction:column;align-items:center;justify-content:center;background:#F5F4F1;">
+  <div style="width:100%;max-width:340px;padding:34px 28px;background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:20px;box-shadow:0 18px 50px rgba(0,0,0,0.08);text-align:center;">
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;">
+      <img src="/static/IXL.png" style="height:26px;width:auto;" alt="IXL">
+      <div style="width:2px;height:18px;background:#CC0000;border-radius:1px;"></div>
+      <span style="font-size:18px;font-weight:700;color:#1A1A1A;">Studio</span>
+    </div>
+    <p style="font-size:13px;color:#6B6B6B;margin-bottom:22px;">Enter PIN to continue</p>
+    <input id="login-pin" type="password" inputmode="numeric" pattern="\d*" autocomplete="off" maxlength="4" placeholder="&bull;&bull;&bull;&bull;" onkeydown="if(event.key==='Enter')submitLogin();" oninput="$('login-error').style.display='none'; if(this.value.length===4) submitLogin();" style="width:100%;text-align:center;letter-spacing:10px;font-size:22px;padding:13px;border:1px solid #E0E0E0;border-radius:12px;color:#1A1A1A;">
+    <div id="login-error" style="display:none;color:#CC0000;font-size:12.5px;margin-top:10px;">Wrong PIN — try again.</div>
+    <button id="login-btn" onclick="submitLogin()" class="btn-red" style="width:100%;margin-top:16px;background:#CC0000;color:#fff;padding:13px;border-radius:12px;font-size:14px;font-weight:700;min-height:46px;">Unlock</button>
+  </div>
+</div>
+
 <!-- ═══════════════════ LANDING ═══════════════════ -->
 <div id="screen-landing" class="screen">
 
-  <aside class="shell-rail">
-    <div style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;">
-      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
-      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
-      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
-    </div>
-    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>
-    <div style="display:flex;flex-direction:column;gap:5px;">
-      <div class="rail-item" id="landing-sop-rail" onclick="enterSop()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
-      </div>
-      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
-      </div>
-      <div class="rail-item" onclick="enterLookup()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
-      </div>
-      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-      </div>
-      <div class="rail-item" onclick="enterPfc()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">PFC</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Process Flow Chart</div><div style="font-size:11px;color:#6E6E6E;">BOM &#8594; flow</div></div>
-      </div>
-    </div>
-  </aside>
+  <aside class="shell-rail"></aside>
 
   <main class="shell-panel" style="overflow-y:auto;padding:40px 40px 60px;">
     <!-- mobile header -->
@@ -144,8 +142,9 @@
     <div style="max-width:780px;margin:0 auto;width:100%;">
 
       <h1 style="font-size:26px;font-weight:800;letter-spacing:-0.4px;color:#1A1A1A;line-height:1.22;text-align:center;">One workspace for the factory floor.</h1>
-      <p style="color:#6B6B6B;font-size:14px;margin-top:8px;text-align:center;">Choose a tool to get started.</p>
-      <div style="display:flex;flex-direction:column;gap:10px;margin-top:28px;">
+      <p style="color:#6B6B6B;font-size:14px;margin-top:8px;text-align:center;">Choose a tool from the menu to get started.</p>
+      <!-- Module cards: only on mobile, where the product rail is hidden. Desktop uses the rail. -->
+      <div class="mb-only" style="display:flex;flex-direction:column;gap:10px;margin-top:28px;">
         <!-- SOP live -->
         <div class="module-card" id="landing-sop-card" style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow 0.12s;">
           <div style="width:44px;height:44px;border-radius:12px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
@@ -184,6 +183,14 @@
             <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">BOM &#8594; flow chart</div>
           </div>
         </div>
+        <!-- Topics live -->
+        <div class="module-card" id="landing-topic-card" onclick="enterTopics()" style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow 0.12s;">
+          <div style="width:44px;height:44px;border-radius:12px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">TP</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:15px;font-weight:700;color:#1A1A1A;">Topics</div>
+            <div style="font-size:12px;color:#7A7A7A;margin-top:2px;">Team discussion threads</div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -192,37 +199,7 @@
 <!-- ═══════════════════ HOME (SOP list) ═══════════════════ -->
 <div id="screen-home" class="screen">
 
-  <aside class="shell-rail">
-    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">
-      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
-      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
-      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
-    </div>
-    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>
-    <div style="display:flex;flex-direction:column;gap:5px;">
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;">SOP</div><div style="font-size:11px;color:#9A9A9A;">Operating procedures</div></div>
-        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </div>
-      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
-      </div>
-      <div class="rail-item" onclick="enterLookup()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
-      </div>
-      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-      </div>
-      <div class="rail-item" onclick="enterPfc()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">PFC</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Process Flow Chart</div><div style="font-size:11px;color:#6E6E6E;">BOM &#8594; flow</div></div>
-      </div>
-    </div>
-  </aside>
+  <aside class="shell-rail"></aside>
 
   <main class="shell-panel">
     <!-- mobile header -->
@@ -262,37 +239,7 @@
 <!-- ═══════════════════ LABEL LIST ═══════════════════ -->
 <div id="screen-label-list" class="screen">
 
-  <aside class="shell-rail">
-    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">
-      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
-      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
-      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
-    </div>
-    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>
-    <div style="display:flex;flex-direction:column;gap:5px;">
-      <div class="rail-item" onclick="enterSop()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;">Label</div><div style="font-size:11px;color:#9A9A9A;">Part labels</div></div>
-        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </div>
-      <div class="rail-item" onclick="enterLookup()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
-      </div>
-      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-      </div>
-      <div class="rail-item" onclick="enterPfc()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">PFC</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Process Flow Chart</div><div style="font-size:11px;color:#6E6E6E;">BOM &#8594; flow</div></div>
-      </div>
-    </div>
-  </aside>
+  <aside class="shell-rail"></aside>
 
   <main class="shell-panel">
     <!-- mobile header -->
@@ -331,37 +278,7 @@
 <!-- ═══════════════════ EDITOR ═══════════════════ -->
 <div id="screen-editor" class="screen">
 
-  <aside class="shell-rail">
-    <div id="sidebar-logo" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">
-      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
-      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
-      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
-    </div>
-    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;flex-shrink:0;">PRODUCTS</div>
-    <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;">SOP</div><div style="font-size:11px;color:#9A9A9A;">Operating procedures</div></div>
-        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </div>
-      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
-      </div>
-      <div class="rail-item" onclick="enterLookup()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
-      </div>
-      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-      </div>
-      <div class="rail-item" onclick="enterPfc()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">PFC</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Process Flow Chart</div><div style="font-size:11px;color:#6E6E6E;">BOM &#8594; flow</div></div>
-      </div>
-    </div>
-  </aside>
+  <aside class="shell-rail"></aside>
 
   <main class="shell-panel">
     <div style="padding:26px 28px 20px;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
@@ -409,37 +326,7 @@
   </header>
 
   <!-- Left: module nav + recent labels -->
-  <aside class="shell-rail" style="display:flex;flex-direction:column;">
-    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;flex-shrink:0;">
-      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
-      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
-      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
-    </div>
-    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;flex-shrink:0;">PRODUCTS</div>
-    <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
-      <div class="rail-item" onclick="enterSop()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
-      </div>
-      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;">Label</div><div style="font-size:11px;color:#9A9A9A;">Part labels</div></div>
-        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </div>
-      <div class="rail-item" onclick="enterLookup()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
-      </div>
-      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-      </div>
-      <div class="rail-item" onclick="enterPfc()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">PFC</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Process Flow Chart</div><div style="font-size:11px;color:#6E6E6E;">BOM &#8594; flow</div></div>
-      </div>
-    </div>
-  </aside>
+  <aside class="shell-rail"></aside>
 
   <!-- Center: preview panel -->
   <div id="lb-preview-panel" class="lb-empty" style="flex:1;min-width:0;display:flex;flex-direction:column;background:#F5F4F1;border-radius:18px;overflow:hidden;">
@@ -545,37 +432,7 @@
 <!-- ═══════════════════ ICL — HISTORY LIST ═══════════════════ -->
 <div id="screen-icl-list" class="screen">
 
-  <aside class="shell-rail">
-    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">
-      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
-      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
-      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
-    </div>
-    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>
-    <div style="display:flex;flex-direction:column;gap:5px;">
-      <div class="rail-item" onclick="enterSop()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
-      </div>
-      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
-      </div>
-      <div class="rail-item" onclick="enterLookup()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#9A9A9A;">Quality checks</div></div>
-        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </div>
-      <div class="rail-item" onclick="enterPfc()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">PFC</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Process Flow Chart</div><div style="font-size:11px;color:#6E6E6E;">BOM &#8594; flow</div></div>
-      </div>
-    </div>
-  </aside>
+  <aside class="shell-rail"></aside>
 
   <main class="shell-panel">
     <!-- mobile header -->
@@ -636,38 +493,7 @@
   </header>
 
   <!-- Left: module nav -->
-  <aside class="shell-rail" style="display:flex;flex-direction:column;">
-    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;flex-shrink:0;">
-      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
-      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
-      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
-    </div>
-    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;flex-shrink:0;">PRODUCTS</div>
-    <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
-      <div class="rail-item" onclick="enterSop()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
-      </div>
-      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
-      </div>
-      <div class="rail-item" onclick="enterLookup()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
-      </div>
-      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#9A9A9A;">Quality checks</div></div>
-        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </div>
-      <div class="rail-item" onclick="enterPfc()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">PFC</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Process Flow Chart</div><div style="font-size:11px;color:#6E6E6E;">BOM &#8594; flow</div></div>
-      </div>
-    </div>
-    <div style="flex:1;min-height:0;"></div>
-  </aside>
+  <aside class="shell-rail"></aside>
 
   <!-- Center: CAD viewer stage -->
   <main id="icl-preview-panel" style="flex:1;min-width:0;display:flex;flex-direction:column;background:#F5F4F1;border-radius:18px;overflow:hidden;position:relative;">
@@ -799,37 +625,7 @@
 <!-- ═══════════════════ LOOK UP — LIBRARY (web) ═══════════════════ -->
 <div id="screen-lookup" class="screen">
 
-  <aside class="shell-rail">
-    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">
-      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
-      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
-      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
-    </div>
-    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>
-    <div style="display:flex;flex-direction:column;gap:5px;">
-      <div class="rail-item" onclick="enterSop()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
-      </div>
-      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;">Look Up</div><div style="font-size:11px;color:#9A9A9A;">FG &#8596; WIP finder</div></div>
-        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </div>
-      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-      </div>
-      <div class="rail-item" onclick="enterPfc()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">PFC</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Process Flow Chart</div><div style="font-size:11px;color:#6E6E6E;">BOM &#8594; flow</div></div>
-      </div>
-    </div>
-  </aside>
+  <aside class="shell-rail"></aside>
 
   <main class="shell-panel">
     <!-- mobile header -->
@@ -875,37 +671,7 @@
 <!-- ═══════════════════ LOOK UP — NEW / EDIT MAPPING (web) ═══════════════════ -->
 <div id="screen-lookup-new" class="screen">
 
-  <aside class="shell-rail">
-    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">
-      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
-      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
-      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
-    </div>
-    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>
-    <div style="display:flex;flex-direction:column;gap:5px;">
-      <div class="rail-item" onclick="enterSop()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
-      </div>
-      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;">Look Up</div><div style="font-size:11px;color:#9A9A9A;">FG &#8596; WIP finder</div></div>
-        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </div>
-      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-      </div>
-      <div class="rail-item" onclick="enterPfc()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">PFC</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Process Flow Chart</div><div style="font-size:11px;color:#6E6E6E;">BOM &#8594; flow</div></div>
-      </div>
-    </div>
-  </aside>
+  <aside class="shell-rail"></aside>
 
   <main class="shell-panel">
     <!-- mobile header -->
@@ -1069,37 +835,7 @@
 <!-- ═══════════════════ PFC LIST (history) ═══════════════════ -->
 <div id="screen-pfc-list" class="screen">
 
-  <aside class="shell-rail">
-    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">
-      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
-      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
-      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
-    </div>
-    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>
-    <div style="display:flex;flex-direction:column;gap:5px;">
-      <div class="rail-item" onclick="enterSop()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
-      </div>
-      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
-      </div>
-      <div class="rail-item" onclick="enterLookup()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
-      </div>
-      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">PFC</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Process Flow Chart</div><div style="font-size:11px;color:#9A9A9A;">BOM &#8594; flow</div></div>
-        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </div>
-    </div>
-  </aside>
+  <aside class="shell-rail"></aside>
 
   <main class="shell-panel">
     <header class="mb-only" style="height:58px;display:flex;align-items:center;padding:0 18px;flex-shrink:0;">
@@ -1150,37 +886,7 @@
 <!-- ═══════════════════ PFC (Process Flow Chart) ═══════════════════ -->
 <div id="screen-pfc" class="screen">
 
-  <aside class="shell-rail">
-    <div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">
-      <img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">
-      <div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>
-      <span style="font-size:16px;font-weight:700;color:#fff;">Studio</span>
-    </div>
-    <div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>
-    <div style="display:flex;flex-direction:column;gap:5px;">
-      <div class="rail-item" onclick="enterSop()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">SOP</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">SOP</div><div style="font-size:11px;color:#6E6E6E;">Operating procedures</div></div>
-      </div>
-      <div class="rail-item" onclick="enterLabel()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">LB</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Label</div><div style="font-size:11px;color:#6E6E6E;">Part labels</div></div>
-      </div>
-      <div class="rail-item" onclick="enterLookup()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">LU</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;">Look Up</div><div style="font-size:11px;color:#6E6E6E;">FG &#8596; WIP finder</div></div>
-      </div>
-      <div class="rail-item" onclick="enterIcl()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">ICL</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inspection Checklist</div><div style="font-size:11px;color:#6E6E6E;">Quality checks</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">PFC</div>
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Process Flow Chart</div><div style="font-size:11px;color:#9A9A9A;">BOM &#8594; flow</div></div>
-        <span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
-      </div>
-    </div>
-  </aside>
+  <aside class="shell-rail"></aside>
 
   <!-- Center: flow chart preview -->
   <main id="pfc-preview-panel" style="flex:1;min-width:0;display:flex;flex-direction:column;background:#F5F4F1;border-radius:18px;overflow:hidden;position:relative;">
@@ -1239,6 +945,93 @@
   </aside>
 </div>
 
+<!-- ═══════════════════ TOPICS LIST (module landing) ═══════════════════ -->
+<div id="screen-topic-list" class="screen">
+  <aside class="shell-rail"></aside>
+
+  <main class="shell-panel">
+    <header class="mb-only" style="height:58px;display:flex;align-items:center;padding:0 18px;flex-shrink:0;">
+      <button onclick="openDrawer()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex-shrink:0;">
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+      </button>
+      <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Topics</span>
+      <button onclick="topicOpenModal()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;color:#CC0000;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
+    </header>
+    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
+      <div style="max-width:780px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
+        <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Topics</h1>
+        <button onclick="topicOpenModal()" style="background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;transition:background 0.1s;">+ New topic</button>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
+      <div style="max-width:780px;margin:0 auto;">
+        <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
+          <input id="topic-list-search" oninput="topicListRender()" placeholder="Search topics&hellip;" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
+        </div>
+        <div id="topic-list-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
+          <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No topics yet</div>
+          <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New topic</strong> to start one.</p>
+        </div>
+        <div id="topic-list-items"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════ TOPICS (chat) ═══════════════════ -->
+<div id="screen-topic" class="screen">
+  <aside class="shell-rail"></aside>
+
+  <main class="shell-panel">
+    <!-- mobile header -->
+    <header class="mb-only" style="height:58px;display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);background:#F5F4F1;">
+      <button onclick="enterTopics()" style="color:#CC0000;font-size:22px;font-weight:400;flex-shrink:0;padding:0 4px;">&#8249;</button>
+      <div style="flex:1;min-width:0;display:flex;align-items:center;gap:5px;"><span style="font-size:16px;font-weight:800;color:#BCBCBC;">#</span><span id="topic-title-mb" style="font-size:16px;font-weight:800;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">general</span></div>
+    </header>
+
+    <!-- desktop header -->
+    <div class="dt-only" style="padding:14px 26px 16px;border-bottom:1px solid rgba(0,0,0,0.07);flex-shrink:0;">
+      <div style="max-width:720px;margin:0 auto;width:100%;">
+        <button onclick="enterTopics()" style="color:#9B9B9B;font-size:12.5px;font-weight:600;margin-bottom:8px;display:inline-flex;align-items:center;gap:4px;">&#8249; All topics</button>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:19px;font-weight:800;color:#BCBCBC;">#</span><h1 id="topic-title" style="font-size:19px;font-weight:800;letter-spacing:-0.3px;">general</h1></div>
+        <p style="color:#8A8A8A;font-size:12.5px;margin-top:2px;">Post updates, photos, and replies for the team.</p>
+      </div>
+    </div>
+
+    <div id="topic-messages" style="flex:1;min-height:0;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:16px;max-width:720px;width:100%;margin:0 auto;"></div>
+
+    <!-- composer -->
+    <div style="padding:0 18px 16px;flex-shrink:0;max-width:720px;width:100%;margin:0 auto;">
+      <input id="topic-file" type="file" accept="image/*" style="display:none;" onchange="topicAttach(this.files[0])">
+      <input id="topic-camera" type="file" accept="image/*" capture="environment" style="display:none;" onchange="topicAttach(this.files[0])">
+      <div id="topic-chip" style="display:none;margin-bottom:10px;">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:11px;padding:6px 8px;">
+          <img id="topic-chip-img" style="width:46px;height:46px;border-radius:8px;object-fit:cover;" alt="">
+          <button onclick="topicClearAttach()" style="width:22px;height:22px;border-radius:50%;background:#1A1A1A;color:#fff;font-size:12px;flex-shrink:0;">&times;</button>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:15px;padding:9px;display:flex;align-items:center;gap:8px;box-shadow:0 2px 10px rgba(0,0,0,0.04);">
+        <button onclick="$('topic-file').click()" title="Upload photo" style="width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,0,0,0.08);flex-shrink:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"></rect><circle cx="8.5" cy="9" r="1.6"></circle><path d="m21 16-4.5-4.5L7 21"></path></svg></button>
+        <button onclick="$('topic-camera').click()" title="Take photo" style="width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,0,0,0.08);flex-shrink:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5A1.5 1.5 0 0 1 5 7h2l1.2-2h7.6L17 7h2a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5z"></path><circle cx="12" cy="13" r="3.2"></circle></svg></button>
+        <input id="topic-input" placeholder="Write a message&hellip;" onkeydown="if(event.key==='Enter'){event.preventDefault();topicSend();}" style="flex:1;border:none;background:transparent;font-size:15px;color:#1A1A1A;min-width:0;padding-left:4px;">
+        <button onclick="topicSend()" style="width:40px;height:38px;border-radius:9px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">&#10148;</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- topics list (3rd card, desktop) -->
+  <aside class="dt-only" style="width:300px;flex-shrink:0;background:#fff;border-radius:18px;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:18px 20px 15px;border-bottom:1px solid #EFEDEA;flex-shrink:0;">
+      <div style="font-size:15px;font-weight:800;letter-spacing:-0.2px;">Topics</div>
+      <div id="topic-channels-sub" style="font-size:11.5px;color:#9A9A9A;margin-top:1px;">&mdash;</div>
+    </div>
+    <div id="topic-channels" style="flex:1;min-height:0;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:3px;"></div>
+  </aside>
+</div>
+
 <!-- ═══════════════════ DRAWER (mobile) ═══════════════════ -->
 <div id="drawer-overlay" style="display:none;position:fixed;inset:0;z-index:400;">
   <div id="drawer-scrim" style="position:absolute;inset:0;background:rgba(0,0,0,0.45);animation:fadeIn 0.15s ease;"></div>
@@ -1276,6 +1069,11 @@
       <button id="drawer-pfc" onclick="enterPfc();closeDrawer();" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;text-align:left;width:100%;transition:background 0.1s;">
         <div class="dw-tile" style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">PFC</div>
         <div style="flex:1;min-width:0;"><div class="dw-lbl" style="font-size:13px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Process Flow Chart</div></div>
+        <span class="dw-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
+      </button>
+      <button id="drawer-topic" onclick="enterTopics();closeDrawer();" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;text-align:left;width:100%;transition:background 0.1s;">
+        <div class="dw-tile" style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">TP</div>
+        <div style="flex:1;min-width:0;"><div class="dw-lbl" style="font-size:13px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Topics</div></div>
         <span class="dw-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>
       </button>
     </div>
@@ -1327,6 +1125,34 @@
     <div style="display:flex;gap:10px;">
       <button id="modal-cancel" style="flex:1;background:#fff;color:#2C2C2C;border:1px solid rgba(0,0,0,0.12);padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;transition:background 0.1s;">Cancel</button>
       <button id="modal-create" class="btn-red" style="flex:1;background:#CC0000;color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;transition:background 0.1s;">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- New topic modal -->
+<div id="topic-modal" onclick="if(event.target===this)topicModalClose()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:500;padding:20px;animation:fadeIn 0.15s ease;">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:420px;padding:28px 24px;box-shadow:0 24px 60px rgba(0,0,0,0.22);">
+    <h3 style="font-size:18px;font-weight:800;letter-spacing:-0.2px;margin-bottom:20px;color:#1A1A1A;text-align:center;">New topic</h3>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:22px;">
+      <label style="font-size:11px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">Topic name</label>
+      <input id="topic-modal-name" placeholder="e.g. line-3, packing" onkeydown="if(event.key==='Enter')topicCreate();" style="padding:12px;border:1px solid #E0E0E0;border-radius:10px;font-size:14px;color:#1A1A1A;width:100%;transition:border-color 0.1s;">
+      <div style="font-size:11.5px;color:#9B9B9B;">Lowercase letters, numbers and dashes. Shown as #name.</div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="topicModalClose()" style="flex:1;background:#fff;color:#2C2C2C;border:1px solid rgba(0,0,0,0.12);padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;transition:background 0.1s;">Cancel</button>
+      <button onclick="topicCreate()" class="btn-red" style="flex:1;background:#CC0000;color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;transition:background 0.1s;">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shared delete-confirm modal (every delete routes through askDelete) -->
+<div id="confirm-modal" onclick="if(event.target===this)confirmResolve(false)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:600;padding:20px;animation:fadeIn 0.15s ease;">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:380px;padding:26px 24px;box-shadow:0 24px 60px rgba(0,0,0,0.22);">
+    <h3 style="font-size:17px;font-weight:800;color:#1A1A1A;margin-bottom:8px;">Delete?</h3>
+    <p id="confirm-msg" style="font-size:13.5px;color:#6B6B6B;line-height:1.5;margin-bottom:22px;">This cannot be undone.</p>
+    <div style="display:flex;gap:10px;">
+      <button onclick="confirmResolve(false)" style="flex:1;background:#fff;color:#2C2C2C;border:1px solid rgba(0,0,0,0.12);padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;transition:background 0.1s;">Cancel</button>
+      <button onclick="confirmResolve(true)" class="btn-red" style="flex:1;background:#CC0000;color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;font-weight:700;transition:background 0.1s;">Delete</button>
     </div>
   </div>
 </div>
@@ -1398,6 +1224,31 @@ function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// Unified row-action icon buttons (download / delete). On window so module scripts share them.
+const _ICO = {
+  download: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="m7 12 5 5 5-5"/><path d="M5 21h14"/></svg>',
+  delete:   '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>',
+};
+window.btnIco = function (kind, onclick, title, extraClass) {
+  const cls = 'ico-btn' + (kind === 'delete' ? ' ico-del' : '') + (extraClass ? ' ' + extraClass : '');
+  return '<button class="' + cls + '" onclick="' + (onclick || '') + '" title="' + (title || '') + '">' + _ICO[kind] + '</button>';
+};
+
+// Shared delete-confirm modal. `await askDelete('…')` → true if confirmed.
+let _confirmResolve = null;
+window.askDelete = function (message) {
+  return new Promise(resolve => {
+    _confirmResolve = resolve;
+    $('confirm-msg').textContent = message || 'This cannot be undone.';
+    $('confirm-modal').style.display = 'flex';
+  });
+};
+function confirmResolve(ok) {
+  $('confirm-modal').style.display = 'none';
+  const r = _confirmResolve; _confirmResolve = null;
+  if (r) r(ok);
+}
+
 function toast(msg, kind) {
   const el = $('toast');
   el.textContent = msg;
@@ -1422,6 +1273,8 @@ async function api(method, path, body) {
     try { j = await res.json(); d = j.error || j.message || ''; } catch (_) {}
     const err = new Error(d || `${method} ${path} (${res.status})`);
     err.status = res.status; err.body = j;
+    // Session expired/lost mid-use → drop back to the PIN screen (not on login itself).
+    if (res.status === 401 && path !== '/api/login' && state.screen !== 'login') showLogin();
     if (res.status === 409) err.stale = true;
     else if (res.status >= 500) err.transient = true;
     else err.permanent = true;
@@ -1431,11 +1284,59 @@ async function api(method, path, body) {
   return res.headers.get('content-type')?.includes('json') ? res.json() : res;
 }
 
+// Single source of truth for the product rail (order + styling). Rendered into
+// each screen's .shell-rail on show, so all 13 rails stay identical.
+const RAIL_PRODUCTS = [
+  { key: 'topic',  abbr: 'TP',  label: 'Topics',               sub: 'Team discussion',       fn: 'enterTopics' },
+  { key: 'lookup', abbr: 'LU',  label: 'Look Up',              sub: 'FG &#8596; WIP finder',  fn: 'enterLookup' },
+  { key: 'sop',    abbr: 'SOP', label: 'SOP',                  sub: 'Operating procedures',  fn: 'enterSop' },
+  { key: 'label',  abbr: 'LB',  label: 'Label',                sub: 'Part labels',           fn: 'enterLabel' },
+  { key: 'icl',    abbr: 'ICL', label: 'Inspection Checklist', sub: 'Quality checks',        fn: 'enterIcl' },
+  { key: 'pfc',    abbr: 'PFC', label: 'Process Flow Chart',   sub: 'BOM &#8594; flow',       fn: 'enterPfc' },
+];
+
+function railKeyFor(s) {
+  if (['lookup', 'lookup-mobile', 'lookup-new'].includes(s)) return 'lookup';
+  if (['label', 'label-list'].includes(s)) return 'label';
+  if (['icl', 'icl-list'].includes(s)) return 'icl';
+  if (['pfc', 'pfc-list'].includes(s)) return 'pfc';
+  if (['topic', 'topic-list'].includes(s)) return 'topic';
+  if (['home', 'editor', 'capture'].includes(s)) return 'sop';
+  return '';
+}
+
+function railHtml(active) {
+  const items = RAIL_PRODUCTS.map(p => {
+    if (p.key === active) {
+      return '<div onclick="' + p.fn + '()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;cursor:pointer;">'
+        + '<div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
+        + '<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div><div style="font-size:11px;color:#9A9A9A;">' + p.sub + '</div></div>'
+        + '<span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span></div>';
+    }
+    return '<div class="rail-item" onclick="' + p.fn + '()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">'
+      + '<div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
+      + '<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div><div style="font-size:11px;color:#6E6E6E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.sub + '</div></div></div>';
+  }).join('');
+  return '<div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">'
+    + '<img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">'
+    + '<div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>'
+    + '<span style="font-size:16px;font-weight:700;color:#fff;">Studio</span></div>'
+    + '<div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>'
+    + '<div style="display:flex;flex-direction:column;gap:5px;">' + items + '</div>'
+    + '<button onclick="logout()" title="Lock" class="rail-item" style="margin-top:auto;display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:transparent;color:#8A8A8A;cursor:pointer;width:100%;text-align:left;border:none;">'
+    + '<span style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></span>'
+    + '<span style="font-size:13px;font-weight:600;color:#C8C8C8;">Lock</span></button>';
+}
+
 function showScreen(name) {
+  if (state.screen === 'topic' && name !== 'topic') topicStopPoll();
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
   const el = $('screen-' + name);
   if (el) el.classList.add('active');
   state.screen = name;
+  // Overwrite this screen's static rail with the single-source render (correct order + font).
+  const rail = el && el.querySelector('.shell-rail');
+  if (rail) rail.innerHTML = railHtml(railKeyFor(name));
   if (name === 'capture') {
     setTimeout(() => {
       _canvas = $('cap-canvas');
@@ -1446,7 +1347,7 @@ function showScreen(name) {
 }
 
 function setDrawerActive(key) {
-  ['sop', 'label', 'lookup', 'icl', 'pfc'].forEach(k => {
+  ['sop', 'label', 'lookup', 'icl', 'pfc', 'topic'].forEach(k => {
     const btn = $('drawer-' + k);
     if (!btn) return;
     const active = k === key;
@@ -1461,13 +1362,7 @@ function setDrawerActive(key) {
 }
 
 function openDrawer() {
-  const s = state.screen;
-  const key = ['lookup', 'lookup-mobile', 'lookup-new'].includes(s) ? 'lookup'
-            : ['label', 'label-list'].includes(s) ? 'label'
-            : ['icl', 'icl-list'].includes(s) ? 'icl'
-            : ['pfc', 'pfc-list'].includes(s) ? 'pfc'
-            : 'sop';
-  setDrawerActive(key);
+  setDrawerActive(railKeyFor(state.screen) || 'sop');
   $('drawer-overlay').style.display = 'block';
 }
 function closeDrawer() { $('drawer-overlay').style.display = 'none'; }
@@ -1601,6 +1496,46 @@ function goLanding() {
   showScreen('landing');
 }
 
+// ── PIN gate ──────────────────────────────────────────────────────────────────
+function showLogin() {
+  showScreen('login');
+  setTimeout(() => $('login-pin')?.focus(), 60);
+}
+
+function enterApp() {
+  showScreen('landing');
+  loadSops();
+}
+
+let _loggingIn = false;
+async function submitLogin() {
+  const pin = $('login-pin').value.trim();
+  if (!pin || _loggingIn) return;
+  _loggingIn = true;
+  const btn = $('login-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+  $('login-error').style.display = 'none';
+  await new Promise(r => setTimeout(r, 450));  // brief beat so the spinner reads
+  $('login-pin').value = '';
+  try {
+    await api('POST', '/api/login', { pin });
+    enterApp();
+  } catch (e) {
+    $('login-error').style.display = 'block';
+    $('login-pin').focus();
+  } finally {
+    _loggingIn = false;
+    btn.disabled = false;
+    btn.textContent = 'Unlock';
+  }
+}
+
+function logout() {
+  api('POST', '/api/logout').catch(() => {});
+  showLogin();
+}
+
 function goHome() {
   state.currentSop = null;
   loadSops();
@@ -1614,14 +1549,14 @@ function enterSop() {
 
 function isMobile() { return window.matchMedia('(max-width: 767px)').matches; }
 
-// Mobile only: after 15 min idle/backgrounded, reopen on the landing page.
+// Mobile only: after 15 min idle/backgrounded, lock back to the PIN screen.
 (function () {
   const IDLE_MS = 15 * 60 * 1000, KEY = 'bixl_last_active';
   const stamp = () => { try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} };
   const maybeReset = () => {
     if (!isMobile()) return;
     let last = 0; try { last = parseInt(localStorage.getItem(KEY) || '0', 10); } catch (e) {}
-    if (last && Date.now() - last > IDLE_MS) goLanding();
+    if (last && Date.now() - last > IDLE_MS) logout();
   };
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') stamp(); else maybeReset();
@@ -1826,14 +1761,15 @@ function pfcListRender() {
               <div style="color:#9B9B9B;font-size:12px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(sub)}</div>
             </div>
           </div>
-          <button class="dt-only" onclick="pfcDownloadSaved('${id}')" style="color:#9B9B9B;font-size:15px;padding:4px 6px;border-radius:6px;flex-shrink:0;" title="Download .xlsx">&#8681;</button>
-          <button onclick="pfcDeletePfc('${id}')" style="color:#C8C8C8;font-size:14px;padding:4px 6px;border-radius:6px;flex-shrink:0;" title="Delete">&#128465;</button>
+          ${window.btnIco('download', `pfcDownloadSaved('${id}')`, 'Download .xlsx')}
+          ${window.btnIco('delete', `pfcDeletePfc('${id}')`, 'Delete')}
         </div>`;
       }).join('')}
     </div>`).join('');
 }
 function pfcDownloadSaved(id) { window.location.href = '/api/pfcs/' + encodeURIComponent(id) + '/export'; }
 async function pfcDeletePfc(id) {
+  if (!(await askDelete('Delete this flow chart? This cannot be undone.'))) return;
   try { await api('DELETE', '/api/pfcs/' + encodeURIComponent(id)); }
   catch (e) { toast('Delete failed: ' + e.message); return; }
   await pfcRefresh();
@@ -1919,11 +1855,21 @@ function renderLookupList() {
         <span style="font-size:13px;color:#7A7A7A;line-height:1.4;">${esc(m.wip_description)}</span>
       </div>
       <div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:9px;">${fgs}</div>
+      ${window.btnIco('delete', `event.stopPropagation();lookupDelete('${m.id}')`, 'Delete mapping')}
     </div>`;
   }).join('') || `<div style="text-align:center;padding:40px 20px;color:#9B9B9B;font-size:14px;">No mappings match “${esc($('lu-search').value)}”.</div>`;
 }
 
 function lookupFilter() { renderLookupList(); }
+
+async function lookupDelete(id) {
+  if (!(await askDelete('Delete this WIP mapping? This cannot be undone.'))) return;
+  try { await api('DELETE', '/api/mappings/' + encodeURIComponent(id)); }
+  catch (e) { toast('Delete failed: ' + e.message); return; }
+  _luMappings = _luMappings.filter(m => m.id !== id);
+  renderLookupList();
+  toast('Mapping deleted', 'success');
+}
 
 function lookupNew() {
   if (isMobile()) {
@@ -2097,7 +2043,7 @@ async function openSop(id) {
 }
 
 async function deleteSop(id) {
-  if (!confirm('Delete this SOP? This cannot be undone.')) return;
+  if (!(await askDelete('Delete this SOP? This cannot be undone.'))) return;
   try {
     await api('DELETE', '/api/sops/' + id);
     toast('Deleted', 'success');
@@ -2202,7 +2148,7 @@ function renderHomeList() {
             <div style="color:#9B9B9B;font-size:12px;margin-top:1px;">${esc(s.part_name||'Untitled SOP')}</div>
           </div>
           <span style="color:#CCC;font-size:16px;flex-shrink:0;">&#8250;</span>
-          <button class="trash-btn" data-del="${esc(s.id)}" style="color:#C8C8C8;font-size:14px;padding:3px 5px;border-radius:4px;flex-shrink:0;transition:color 0.1s;" title="Delete">&#128465;</button>
+          <button class="ico-btn ico-del trash-btn" data-del="${esc(s.id)}" title="Delete">${_ICO.delete}</button>
         </div>`).join('')}
     </div>`).join('');
   list.querySelectorAll('.doc-card').forEach(card => {
@@ -2329,8 +2275,9 @@ function addStep() {
   queueSave();
 }
 
-function deleteStep(i) {
-  if (!state.currentSop || !confirm(`Remove step ${i+1}?`)) return;
+async function deleteStep(i) {
+  if (!state.currentSop) return;
+  if (!(await askDelete(`Remove step ${i+1}? This cannot be undone.`))) return;
   state.currentSop.steps.splice(i, 1);
   renderEditorSteps();
   queueSave();
@@ -2654,6 +2601,210 @@ function onPhotoSelected(file) {
   reader.readAsDataURL(file);
 }
 
+// ── Topics (team discussion threads) ─────────────────────────────────────────
+const _topic = { channelId: null, channels: [], lastAt: null, poll: null, image: null };
+
+// Topic row subtitle: latest message, else description, else placeholder.
+function topicSub(c) {
+  return c.last_text ? esc(c.last_text) : (esc(c.description) || 'No messages yet');
+}
+
+// Module landing: list every topic. Click one to open its chat.
+function enterTopics() {
+  showScreen('topic-list');
+  topicListLoad();
+}
+
+async function topicListLoad() {
+  try { _topic.channels = await api('GET', '/api/channels') || []; }
+  catch (_) { _topic.channels = []; }
+  topicListRender();
+}
+
+function topicListRender() {
+  const list = $('topic-list-items'), empty = $('topic-list-empty');
+  if (!list) return;
+  if (!_topic.channels.length) { if (empty) empty.style.display = 'block'; list.innerHTML = ''; return; }
+  if (empty) empty.style.display = 'none';
+  const q = ($('topic-list-search')?.value || '').trim().toLowerCase();
+  const src = _topic.channels.filter(c => !q
+    || c.slug.toLowerCase().includes(q)
+    || (c.description || '').toLowerCase().includes(q)
+    || (c.last_text || '').toLowerCase().includes(q));
+  if (!src.length) { list.innerHTML = _histNoMatch; return; }
+  list.innerHTML = '<div style="display:flex;flex-direction:column;gap:7px;">' + src.map(c => {
+    const id = esc(c.id);
+    const sub = topicSub(c);
+    const count = c.message_count || 0;
+    const badge = count
+      ? '<span style="min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:#F2F0EC;color:#7A7A7A;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + count + '</span>'
+      : '';
+    return '<div class="doc-card" onclick="openTopic(\'' + id + '\')" style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s;">'
+      + '<span style="width:38px;height:38px;border-radius:9px;background:#F2F0EC;color:#9B9B9B;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0;">#</span>'
+      + '<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1A1A1A;">' + esc(c.slug) + '</div>'
+      + '<div style="color:#9B9B9B;font-size:12px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + sub + '</div></div>'
+      + badge
+      + window.btnIco('delete', "event.stopPropagation();topicDelete('" + id + "','" + esc(c.slug) + "')", 'Delete topic')
+      + '</div>';
+  }).join('') + '</div>';
+}
+
+async function topicDelete(id, slug) {
+  if (!(await askDelete('Delete #' + slug + ' and all its messages? This cannot be undone.'))) return;
+  try { await api('DELETE', '/api/channels/' + encodeURIComponent(id)); }
+  catch (e) { toast('Delete failed: ' + e.message); return; }
+  _topic.channels = _topic.channels.filter(c => c.id !== id);
+  topicListRender();
+  toast('Topic deleted', 'success');
+}
+
+// Open one topic's chat (3-pane). Loads topics if not already in memory.
+async function openTopic(id) {
+  showScreen('topic');
+  if (!_topic.channels.length) {
+    try { _topic.channels = await api('GET', '/api/channels') || []; } catch (_) {}
+  }
+  topicSelectChannel(id);
+}
+
+function topicStopPoll() { if (_topic.poll) { clearInterval(_topic.poll); _topic.poll = null; } }
+
+function topicRenderChannels() {
+  const sub = $('topic-channels-sub');
+  if (sub) sub.textContent = _topic.channels.length + ' topic' + (_topic.channels.length === 1 ? '' : 's');
+  const html = _topic.channels.map(c => {
+    const active = c.id === _topic.channelId;
+    const sub2 = topicSub(c);
+    return '<button onclick="topicSelectChannel(\'' + c.id + '\')" style="display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:11px;text-align:left;width:100%;' + (active ? 'background:#FBF1F1;border:1px solid rgba(204,0,0,0.18);' : '') + '">'
+      + '<span style="width:34px;height:34px;border-radius:9px;background:' + (active ? '#CC0000' : '#F2F0EC') + ';color:' + (active ? '#fff' : '#9B9B9B') + ';display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">#</span>'
+      + '<span style="flex:1;min-width:0;"><span style="display:block;font-size:13.5px;font-weight:700;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(c.slug) + '</span>'
+      + '<span style="display:block;font-size:11.5px;color:' + (active ? '#CC0000' : '#9A9A9A') + ';' + (active ? 'font-weight:600;' : '') + 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + sub2 + '</span></span>'
+      + '</button>';
+  }).join('');
+  const el = $('topic-channels'); if (el) el.innerHTML = html;
+}
+
+function topicSelectChannel(id) {
+  _topic.channelId = id;
+  _topic.lastAt = null;
+  const ch = _topic.channels.find(c => c.id === id);
+  const slug = ch ? ch.slug : '';
+  if ($('topic-title')) $('topic-title').textContent = slug;
+  if ($('topic-title-mb')) $('topic-title-mb').textContent = slug;
+  $('topic-messages').innerHTML = '';
+  topicRenderChannels();
+  topicStopPoll();
+  topicLoadMessages(true);
+  _topic.poll = setInterval(() => topicLoadMessages(false), 4000);
+}
+
+function topicTime(iso) {
+  if (!iso) return '';
+  const d = new Date(/[Z+]/.test(iso) ? iso : iso + 'Z');
+  return isNaN(d) ? '' : d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+function topicBubble(m) {
+  const img = m.has_image
+    ? '<div style="margin-top:10px;border-radius:10px;overflow:hidden;border:1px solid rgba(0,0,0,0.08);max-width:300px;"><img src="/api/messages/' + m.id + '/image" style="display:block;width:100%;" alt=""></div>'
+    : '';
+  const txt = m.text
+    ? '<p style="font-size:14px;color:#2C2C2C;line-height:1.5;white-space:pre-wrap;word-break:break-word;">' + esc(m.text) + '</p>'
+    : '';
+  return '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:5px;">'
+    + '<div style="max-width:560px;background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:4px 15px 15px 15px;padding:13px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">' + txt + img + '</div>'
+    + '<span style="font-size:10.5px;color:#A8A8A8;font-family:\'JetBrains Mono\',monospace;padding-left:6px;">' + topicTime(m.created_at) + '</span>'
+    + '</div>';
+}
+
+function topicEmpty() {
+  return '<div data-topic-empty style="margin:auto;text-align:center;color:#A8A29A;padding:40px 20px;">'
+    + '<div style="font-size:30px;opacity:0.25;margin-bottom:10px;">&#128172;</div>'
+    + '<div style="font-size:14px;font-weight:600;color:#8A8A8A;">No messages yet</div>'
+    + '<div style="font-size:12.5px;margin-top:4px;">Be the first to post to this topic.</div></div>';
+}
+
+function topicDivider() {
+  return '<div data-topic-divider style="display:flex;align-items:center;gap:14px;"><div style="flex:1;height:1px;background:rgba(0,0,0,0.08);"></div><span style="font-size:11px;font-weight:700;color:#A8A8A8;letter-spacing:0.5px;">TODAY</span><div style="flex:1;height:1px;background:rgba(0,0,0,0.08);"></div></div>';
+}
+
+async function topicLoadMessages(reset) {
+  if (!_topic.channelId) return;
+  const cid = _topic.channelId;
+  let path = '/api/channels/' + cid + '/messages';
+  if (!reset && _topic.lastAt) path += '?after=' + encodeURIComponent(_topic.lastAt);
+  let msgs;
+  try { msgs = await api('GET', path) || []; } catch (_) { return; }
+  if (cid !== _topic.channelId) return;  // channel switched mid-fetch
+  const box = $('topic-messages');
+  if (reset) {
+    box.innerHTML = '';
+    if (!msgs.length) { box.insertAdjacentHTML('beforeend', topicEmpty()); return; }
+    box.insertAdjacentHTML('beforeend', topicDivider());
+  }
+  if (!msgs.length) return;
+  // First messages arriving into an empty channel (via send/poll): drop the placeholder.
+  if (!box.querySelector('[data-topic-divider]')) {
+    box.innerHTML = '';
+    box.insertAdjacentHTML('beforeend', topicDivider());
+  }
+  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+  msgs.forEach(m => box.insertAdjacentHTML('beforeend', topicBubble(m)));
+  _topic.lastAt = msgs[msgs.length - 1].created_at;
+  if (reset || atBottom) box.scrollTop = box.scrollHeight;
+}
+
+async function topicSend() {
+  const inp = $('topic-input');
+  const text = (inp.value || '').trim();
+  if ((!text && !_topic.image) || !_topic.channelId) return;
+  const body = { text };
+  if (_topic.image) body.image = _topic.image;
+  const keepText = text, keepImg = _topic.image;
+  inp.value = ''; topicClearAttach();
+  try { await api('POST', '/api/channels/' + _topic.channelId + '/messages', body); }
+  catch (e) { toast('Send failed: ' + e.message); inp.value = keepText; _topic.image = keepImg; return; }
+  topicLoadMessages(false);
+}
+
+function topicAttach(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => compressDataUrl(reader.result, 1400, 0.82, c => {
+    _topic.image = c;
+    $('topic-chip-img').src = c;
+    $('topic-chip').style.display = 'block';
+  });
+  reader.readAsDataURL(file);
+}
+
+function topicClearAttach() {
+  _topic.image = null;
+  $('topic-file').value = '';
+  $('topic-chip').style.display = 'none';
+}
+
+function topicOpenModal() {
+  $('topic-modal-name').value = '';
+  $('topic-modal').style.display = 'flex';
+  setTimeout(() => $('topic-modal-name').focus(), 50);
+}
+function topicModalClose() { $('topic-modal').style.display = 'none'; }
+
+async function topicCreate() {
+  const slug = ($('topic-modal-name').value || '').trim().toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '');
+  if (!slug) { toast('Invalid topic name'); return; }
+  try {
+    const ch = await api('POST', '/api/channels', { slug });
+    try { _topic.channels = await api('GET', '/api/channels') || []; } catch (_) {}
+    topicModalClose();
+    openTopic(ch.id);
+  } catch (e) {
+    toast(e.status === 409 ? 'Topic "' + slug + '" already exists' : 'Create failed: ' + e.message);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Landing
   $('landing-sop-card').addEventListener('click', enterSop);
@@ -2695,8 +2846,8 @@ document.addEventListener('DOMContentLoaded', () => {
   $('tool-undo').addEventListener('click', undoAnnotation);
   $('tool-clear').addEventListener('click', clearAnnotations);
 
-  // Editor
-  $('sidebar-logo').addEventListener('click', goHome);
+  // Editor  (rail logo is now rendered by railHtml → goLanding; this id may be absent)
+  $('sidebar-logo')?.addEventListener('click', goHome);
   $('editor-home-btn').addEventListener('click', goHome);
   $('sidebar-new-btn')?.addEventListener('click', openModal);
   $('sidebar-search')?.addEventListener('input', () => { state.editorSearch = $('sidebar-search').value; renderSidebarList(); });
@@ -2720,8 +2871,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!file || _editorImgIdx == null) return;
     const reader = new FileReader();
     reader.onload = () => {
-      state.currentSop.steps[_editorImgIdx].image = reader.result;
-      renderEditorSteps(); queueSave();
+      compressDataUrl(reader.result, 1400, 0.82, compressed => {
+        state.currentSop.steps[_editorImgIdx].image = compressed;
+        renderEditorSteps(); queueSave();
+      });
     };
     reader.readAsDataURL(file);
   });
@@ -2730,8 +2883,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.screen === 'capture' && _photoImg) { sizeCanvas(); redrawCanvas(); }
   });
 
-  showScreen('landing');
-  loadSops();
+  // Gate on the PIN session: show the app if already authed, else the login screen.
+  api('GET', '/api/session')
+    .then(s => { if (s && s.authed) enterApp(); else showLogin(); })
+    .catch(showLogin);
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('/static/sw.js').catch(() => {}));
@@ -3087,6 +3242,7 @@ function lbDownloadLabel(id) {
 }
 
 async function lbDeleteLabel(id) {
+  if (!(await window.askDelete('Delete this label? This cannot be undone.'))) return;
   try { await api('DELETE', '/api/labels/' + encodeURIComponent(id)); }
   catch (e) { if (window.toast) window.toast('Delete failed: ' + e.message); return; }
   await _lbRefresh();
@@ -3127,8 +3283,8 @@ function _lbListRender() {
               <div style="color:#9B9B9B;font-size:12px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(sub)}</div>
             </div>
           </div>
-          <button onclick="lbDownloadLabel('${id}')" style="color:#9B9B9B;font-size:15px;padding:4px 6px;border-radius:6px;flex-shrink:0;transition:color 0.1s;" title="Download JPG" onmouseenter="this.style.color='#1A1A1A'" onmouseleave="this.style.color='#9B9B9B'">&#8681;</button>
-          <button onclick="lbDeleteLabel('${id}')" style="color:#C8C8C8;font-size:14px;padding:4px 6px;border-radius:6px;flex-shrink:0;transition:color 0.1s;" title="Delete" onmouseenter="this.style.color='#CC0000'" onmouseleave="this.style.color='#C8C8C8'">&#128465;</button>
+          ${window.btnIco('download', `lbDownloadLabel('${id}')`, 'Download JPG')}
+          ${window.btnIco('delete', `lbDeleteLabel('${id}')`, 'Delete')}
         </div>`;
       }).join('')}
     </div>`).join('');
@@ -3886,14 +4042,15 @@ function _iclListRender(){
               <div style="color:#9B9B9B;font-size:12px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(sub)}</div>
             </div>
           </div>
-          <button class="dt-only" onclick="iclDownloadIcl('${id}')" style="color:#9B9B9B;font-size:15px;padding:4px 6px;border-radius:6px;flex-shrink:0;" title="Download .xlsx">&#8681;</button>
-          <button onclick="iclDeleteIcl('${id}')" style="color:#C8C8C8;font-size:14px;padding:4px 6px;border-radius:6px;flex-shrink:0;" title="Delete">&#128465;</button>
+          ${window.btnIco('download', `iclDownloadIcl('${id}')`, 'Download .xlsx')}
+          ${window.btnIco('delete', `iclDeleteIcl('${id}')`, 'Delete')}
         </div>`;
       }).join('')}
     </div>`).join('');
 }
 function iclDownloadIcl(id){ window.location.href='/api/icls/'+encodeURIComponent(id)+'/export'; }
 async function iclDeleteIcl(id){
+  if (!(await window.askDelete('Delete this inspection checklist? This cannot be undone.'))) return;
   try{ await api('DELETE','/api/icls/'+encodeURIComponent(id)); }
   catch(e){ if(window.toast)window.toast('Delete failed: '+e.message); return; }
   await _iclRefresh();
