@@ -129,12 +129,18 @@
       <span style="font-size:18px;font-weight:700;color:#1A1A1A;">Studio</span>
     </div>
     <p style="font-size:13px;color:#6B6B6B;margin-bottom:20px;">Enter PIN to continue</p>
-    <input id="login-pin" type="hidden">
-    <div id="pin-dots" style="display:flex;justify-content:center;gap:16px;margin-bottom:6px;height:18px;">
+    <!-- The dots double as the tap target: tapping focuses the (invisible) real
+         input, which summons the device's native number keypad. -->
+    <label for="login-pin" id="pin-dots" style="position:relative;display:flex;justify-content:center;gap:16px;margin-bottom:6px;height:18px;cursor:text;">
       <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
-    </div>
+      <input id="login-pin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="4"
+             autocomplete="off" autocorrect="off" spellcheck="false" autofocus
+             oninput="onPinInput()"
+             style="position:absolute;inset:-14px 0;width:100%;height:46px;opacity:0;border:none;background:transparent;color:transparent;caret-color:transparent;font-size:16px;text-align:center;-webkit-text-fill-color:transparent;">
+    </label>
     <div id="login-error" style="display:none;color:#CC0000;font-size:12.5px;margin-top:8px;">Wrong PIN — try again.</div>
-    <div id="pin-pad" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px;">
+    <!-- On-screen pad: desktop only. On phones the native numeric keyboard is used. -->
+    <div id="pin-pad" class="dt-only" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px;">
       <button class="pin-key" onclick="pinDigit('1')">1</button>
       <button class="pin-key" onclick="pinDigit('2')">2</button>
       <button class="pin-key" onclick="pinDigit('3')">3</button>
@@ -1225,7 +1231,7 @@ async function api(method, path, body) {
     const err = new Error(d || `${method} ${path} (${res.status})`);
     err.status = res.status; err.body = j;
     // Session expired/lost mid-use → drop back to the PIN screen (not on login itself).
-    if (res.status === 401 && path !== '/api/login' && state.screen !== 'login') showLogin();
+    if (res.status === 401 && path !== '/api/login' && state.screen !== 'login') { forgetAuth(); showLogin(); }
     if (res.status === 409) err.stale = true;
     else if (res.status >= 500) err.transient = true;
     else err.permanent = true;
@@ -1490,14 +1496,34 @@ function pinDel() {
   clearLoginError();
   renderPinDots();
 }
+// Native numeric keyboard path (mobile): sanitise to digits, cap at 4, submit
+// once full. Shares all state with the on-screen pad via #login-pin.
+function onPinInput() {
+  if (_loggingIn) return;
+  const el = $('login-pin');
+  const cleaned = (el.value || '').replace(/\D/g, '').slice(0, 4);
+  if (el.value !== cleaned) el.value = cleaned;
+  clearLoginError();
+  renderPinDots();
+  if (cleaned.length === 4) submitLogin();
+}
+function focusPin() {
+  const el = $('login-pin');
+  if (el) { try { el.focus({ preventScroll: true }); } catch (_) { el.focus(); } }
+}
 function showLogin() {
   $('login-pin').value = '';
   clearLoginError();
   renderPinDots();
   showScreen('login');
+  // Pop the device's native number keypad straight away.
+  setTimeout(focusPin, 120);
 }
 document.addEventListener('keydown', (e) => {
   if (state.screen !== 'login') return;
+  // When the real input is focused, let its own oninput drive the value so we
+  // don't count each keystroke twice.
+  if (e.target && e.target.id === 'login-pin') return;
   if (e.key >= '0' && e.key <= '9') { pinDigit(e.key); e.preventDefault(); }
   else if (e.key === 'Backspace') { pinDel(); e.preventDefault(); }
 });
@@ -1525,6 +1551,7 @@ async function submitLogin() {
   renderPinDots();
   try {
     await api('POST', '/api/login', { pin });
+    rememberAuth();
     enterApp();
   } catch (e) {
     $('login-error').style.display = 'block';
@@ -1535,7 +1562,21 @@ async function submitLogin() {
   }
 }
 
+// Mirror the server's 8h session lifetime locally. This is a UX hint only — the
+// server still enforces the real PIN gate on every /api request — but it lets the
+// app boot straight in after the OS camera kills & reloads the PWA mid-capture,
+// instead of flashing the PIN screen while /api/session round-trips (or fails on
+// a transient network blip during the reload).
+const _AUTH_KEY = 'bixl_authed_until';
+function rememberAuth() { try { localStorage.setItem(_AUTH_KEY, String(Date.now() + 8 * 60 * 60 * 1000)); } catch (e) {} }
+function forgetAuth() { try { localStorage.removeItem(_AUTH_KEY); } catch (e) {} }
+function locallyAuthed() {
+  let until = 0; try { until = parseInt(localStorage.getItem(_AUTH_KEY) || '0', 10); } catch (e) {}
+  return until > Date.now();
+}
+
 function logout() {
+  forgetAuth();
   api('POST', '/api/logout').catch(() => {});
   showLogin();
 }
@@ -3073,10 +3114,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.screen === 'capture' && _photoImg) { sizeCanvas(); redrawCanvas(); }
   });
 
-  // Gate on the PIN session: show the app if already authed, else the login screen.
+  // Gate on the PIN session. If we were authed recently (within the 8h window),
+  // enter the app immediately so a camera-triggered reload doesn't flash the PIN
+  // screen, then confirm with the server in the background.
+  const _optimistic = locallyAuthed();
+  if (_optimistic) enterApp();
   api('GET', '/api/session')
-    .then(s => { if (s && s.authed) enterApp(); else showLogin(); })
-    .catch(showLogin);
+    .then(s => {
+      if (s && s.authed) { rememberAuth(); if (!_optimistic) enterApp(); }
+      else { forgetAuth(); showLogin(); }
+    })
+    .catch(() => { if (!_optimistic) showLogin(); });  // transient/offline: keep the optimistic app
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('/static/sw.js').catch(() => {}));
