@@ -362,7 +362,10 @@ with app.app_context():
                 _conn.execute(text(_stmt))
                 _conn.commit()
             except Exception:
-                pass
+                # A failed statement (e.g. column already exists) aborts the
+                # current transaction on Postgres — roll back so the next
+                # statement in the loop isn't skipped with "transaction aborted".
+                _conn.rollback()
 
     # Seed Look Up master data (IXL Search DB) from lookup_seed.json on an empty table.
     if Mapping.query.count() == 0:
