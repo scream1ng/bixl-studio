@@ -275,14 +275,32 @@ class Message(db.Model):
     channel_id = db.Column(db.String(36), db.ForeignKey("channels.id"), nullable=False)
     text = db.Column(db.Text, nullable=False, default="")
     image_hash = db.Column(db.String(64), db.ForeignKey("image_blobs.hash"), nullable=True)
+    image_hashes = db.Column(db.Text, nullable=True)  # JSON list of blob hashes (multi-photo)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    edited_at = db.Column(db.DateTime, nullable=True)
+
+    def hashes(self) -> list:
+        """Ordered list of image blob hashes, folding the legacy single column in."""
+        if self.image_hashes:
+            try:
+                vals = json.loads(self.image_hashes)
+                if isinstance(vals, list):
+                    return [h for h in vals if h]
+            except (ValueError, TypeError):
+                pass
+        return [self.image_hash] if self.image_hash else []
 
     def to_dict(self) -> dict:
+        hs = self.hashes()
         return {
             "id": self.id,
             "channel_id": self.channel_id,
             "text": self.text or "",
-            "has_image": bool(self.image_hash),
+            "has_image": bool(hs),
+            "image_count": len(hs),
+            "images": [f"/api/messages/{self.id}/image/{i}" for i in range(len(hs))],
+            "edited": self.edited_at is not None,
+            "edited_at": self.edited_at.isoformat() if self.edited_at else None,
             "created_at": self.created_at.isoformat(),
         }
 
@@ -337,6 +355,8 @@ with app.app_context():
             "ALTER TABLE sops ADD COLUMN format_key TEXT NOT NULL DEFAULT 'a3-landscape'",
             "ALTER TABLE sops ADD COLUMN steps_per_page INTEGER NOT NULL DEFAULT 8",
             "CREATE UNIQUE INDEX IF NOT EXISTS ix_mappings_wip ON mappings (wip_number)",
+            "ALTER TABLE messages ADD COLUMN image_hashes TEXT",
+            "ALTER TABLE messages ADD COLUMN edited_at TIMESTAMP",
         ):
             try:
                 _conn.execute(text(_stmt))
@@ -707,11 +727,13 @@ def _gc_blobs(hashes) -> None:
         return
     # ICL keeps screenshot hashes in a JSON text column — scan it once, not per hash.
     icl_hashes = {s.get("hash") for icl in ICL.query.all() for s in icl._shots()}
+    # Messages may keep several hashes in a JSON column — scan them once too.
+    msg_hashes = {h for m in Message.query.all() for h in m.hashes()}
     for h in cands:
-        if h in icl_hashes:
+        if h in icl_hashes or h in msg_hashes:
             continue
         if any(db.session.query(m.id).filter_by(image_hash=h).first()
-               for m in (Step, Label, PFC, Message)):
+               for m in (Step, Label, PFC)):
             continue
         b = db.session.get(ImageBlob, h)
         if b:
@@ -1191,7 +1213,7 @@ def create_channel():
 def delete_channel(channel_id):
     ch = db.session.get(Channel, channel_id)
     if ch:
-        hashes = {m.image_hash for m in ch.messages if m.image_hash}
+        hashes = {h for m in ch.messages for h in m.hashes()}
         db.session.delete(ch)  # cascades to its messages
         db.session.flush()
         _gc_blobs(hashes)
@@ -1217,26 +1239,67 @@ def create_message(channel_id):
         return jsonify({"error": "not found"}), 404
     d = request.get_json(silent=True) or {}
     text_val = (d.get("text") or "").strip()
-    image = d.get("image")  # optional photo as a data URL
-    if not text_val and not image:
+    # Accept a list of photos (data URLs); still accept the legacy single `image`.
+    images = d.get("images")
+    if not isinstance(images, list):
+        images = [d.get("image")] if d.get("image") else []
+    images = [im for im in images if im]
+    if not text_val and not images:
         return jsonify({"error": "empty message"}), 400
-    img_hash = None
-    if image:
-        img_hash = _sha256(image)
-        if not db.session.get(ImageBlob, img_hash):
-            db.session.add(ImageBlob(hash=img_hash, data=image))
-    msg = Message(channel_id=channel_id, text=text_val, image_hash=img_hash)
+    hashes = []
+    for im in images:
+        h = _sha256(im)
+        if not db.session.get(ImageBlob, h):
+            db.session.add(ImageBlob(hash=h, data=im))
+        hashes.append(h)
+    msg = Message(
+        channel_id=channel_id,
+        text=text_val,
+        image_hash=hashes[0] if hashes else None,  # keep legacy column populated
+        image_hashes=json.dumps(hashes) if hashes else None,
+    )
     db.session.add(msg)
     db.session.commit()
     return jsonify(msg.to_dict()), 201
 
 
-@app.route("/api/messages/<message_id>/image", methods=["GET"])
-def message_image(message_id):
+@app.route("/api/messages/<message_id>", methods=["PATCH"])
+def edit_message(message_id):
     msg = db.session.get(Message, message_id)
-    if not msg or not msg.image_hash:
+    if not msg:
         return jsonify({"error": "not found"}), 404
-    blob = db.session.get(ImageBlob, msg.image_hash)
+    d = request.get_json(silent=True) or {}
+    text_val = (d.get("text") or "").strip()
+    if not text_val and not msg.hashes():
+        return jsonify({"error": "empty message"}), 400
+    msg.text = text_val
+    msg.edited_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify(msg.to_dict())
+
+
+@app.route("/api/messages/<message_id>", methods=["DELETE"])
+def delete_message(message_id):
+    msg = db.session.get(Message, message_id)
+    if msg:
+        hashes = set(msg.hashes())
+        db.session.delete(msg)
+        db.session.flush()
+        _gc_blobs(hashes)
+        db.session.commit()
+    return "", 204
+
+
+@app.route("/api/messages/<message_id>/image", methods=["GET"])
+@app.route("/api/messages/<message_id>/image/<int:idx>", methods=["GET"])
+def message_image(message_id, idx=0):
+    msg = db.session.get(Message, message_id)
+    if not msg:
+        return jsonify({"error": "not found"}), 404
+    hashes = msg.hashes()
+    if idx < 0 or idx >= len(hashes):
+        return jsonify({"error": "not found"}), 404
+    blob = db.session.get(ImageBlob, hashes[idx])
     if not blob:
         return jsonify({"error": "not found"}), 404
     return _send_jpeg_blob(blob)
