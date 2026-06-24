@@ -1584,6 +1584,11 @@ function isMobile() { return window.matchMedia('(max-width: 767px)').matches; }
   const stamp = () => { try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} };
   const maybeReset = () => {
     if (!isMobile()) return;
+    // Don't lock while a photo capture is in flight: the camera backgrounds (and may
+    // evict + reload) the PWA, and returning from it must not drop us to the PIN screen.
+    if (window._captureInFlight) return;
+    let capAt = 0; try { capAt = parseInt(localStorage.getItem('bixl_capture_at') || '0', 10); } catch (e) {}
+    if (capAt && Date.now() - capAt < 60000) return;
     let last = 0; try { last = parseInt(localStorage.getItem(KEY) || '0', 10); } catch (e) {}
     if (last && Date.now() - last > IDLE_MS) logout();
   };
@@ -2612,6 +2617,7 @@ function compressDataUrl(dataUrl, maxPx, quality, cb) {
 }
 
 function onPhotoSelected(file) {
+  window._captureInFlight = false;
   if (!file) return;
   const reader = new FileReader();
   reader.onload = () => {
@@ -3048,6 +3054,15 @@ document.addEventListener('DOMContentLoaded', () => {
   $('cap-move-fwd').addEventListener('click', moveStepForward);
 
   $('cap-add-dot').addEventListener('click', captureAddStep);
+  // Opening the OS camera/file picker backgrounds (and may evict + reload) the PWA.
+  // Flag the capture as in-flight so the idle lock doesn't drop us to PIN on return.
+  // _captureInFlight covers background-without-reload; bixl_capture_at survives a reload.
+  ['cap-camera-input', 'cap-camera-input-bar', 'cap-upload-input'].forEach(id => {
+    $(id).addEventListener('click', () => {
+      window._captureInFlight = true;
+      try { localStorage.setItem('bixl_capture_at', String(Date.now())); } catch (e) {}
+    });
+  });
   $('cap-camera-input').addEventListener('change', e => onPhotoSelected(e.target.files[0]));
   $('cap-camera-input-bar').addEventListener('change', e => onPhotoSelected(e.target.files[0]));
   $('cap-upload-input').addEventListener('change', e => onPhotoSelected(e.target.files[0]));

@@ -32,6 +32,13 @@ APP_PIN = os.environ.get("APP_PIN", "1858")
 # Mobile additionally locks after 15 min idle (client-side, see index.html).
 app.permanent_session_lifetime = timedelta(hours=8)
 app.config["SESSION_REFRESH_EACH_REQUEST"] = False  # expire from login, not sliding
+# Cookie hardening. SECURE needs HTTPS, so only enforce it off localhost: local dev
+# runs over plain HTTP and falls back to the insecure default SECRET_KEY — keying off
+# that keeps local login working while production (Railway, real SECRET_KEY) stays Secure.
+_is_local_http = os.environ.get("SECRET_KEY") is None
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_HTTPONLY"] = True   # already Flask's default; explicit for clarity
+app.config["SESSION_COOKIE_SECURE"] = not _is_local_http
 
 # ── Database ─────────────────────────────────────────────────────────────────
 _db_url = os.environ.get("DATABASE_URL", "sqlite:///bixl.db")
