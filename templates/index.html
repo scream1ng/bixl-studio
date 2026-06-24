@@ -115,6 +115,7 @@
 <style>
   .pin-dot { width:14px;height:14px;border-radius:50%;border:1.5px solid #C8C8C8;background:transparent;transition:background .12s,border-color .12s; }
   .pin-dot.filled { background:#1A1A1A;border-color:#1A1A1A; }
+  #pin-dots:focus-within { border-color:#CC0000; }
   .pin-btn { width:100%;margin-top:18px;background:#CC0000;color:#fff;border:none;border-radius:12px;min-height:50px;font-size:16px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .1s; }
   .pin-btn:active { background:#B00000; }
   .pin-btn:disabled { opacity:.55;cursor:default; }
@@ -130,12 +131,12 @@
     <p style="font-size:13px;color:#6B6B6B;margin-bottom:20px;">Enter PIN to continue</p>
     <!-- The dots double as the tap target: tapping focuses the (invisible) real
          input, which summons the device's native number keypad. -->
-    <label for="login-pin" id="pin-dots" style="position:relative;display:flex;justify-content:center;gap:16px;margin-bottom:6px;height:18px;cursor:text;">
+    <label for="login-pin" id="pin-dots" style="position:relative;display:inline-flex;justify-content:center;gap:16px;margin-bottom:6px;padding:14px 22px;border:1.5px solid #C8C8C8;border-radius:12px;background:#FAFAF8;cursor:text;">
       <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
       <input id="login-pin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="4"
              autocomplete="off" autocorrect="off" spellcheck="false" autofocus
              oninput="onPinInput()"
-             style="position:absolute;inset:-14px 0;width:100%;height:46px;opacity:0;border:none;background:transparent;color:transparent;caret-color:transparent;font-size:16px;text-align:center;-webkit-text-fill-color:transparent;">
+             style="position:absolute;inset:0;width:100%;height:100%;opacity:0;border:none;background:transparent;color:transparent;caret-color:transparent;font-size:16px;text-align:center;-webkit-text-fill-color:transparent;">
     </label>
     <div id="login-error" style="display:none;color:#CC0000;font-size:12.5px;margin-top:8px;">Wrong PIN — try again.</div>
     <button id="login-btn" class="btn-red pin-btn" onclick="submitLogin()">Log in</button>
