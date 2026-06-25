@@ -1,8 +1,22 @@
 # BIXL Studio
 
-Manufacturing documentation platform for IXL Group. First and only module for now: an **SOP generator**. The job is to turn shop-floor photos and short notes into a formatted Word document built from IXL's existing `.docx` template — without the photo and the note ever getting separated.
+Manufacturing documentation platform for IXL Group — a single hosted Flask app (Railway) with several shop-floor modules, gated by a shared PIN. The **SOP generator** was the first module and most of the doc detail below is about it; the app has since grown several more (see table). Responsive: desktop for building, phone for capture/viewing.
 
-The core problem this solves: today, photos are taken on a phone and notes are written separately, so back at the PC nobody can tell which note belongs to which photo. BIXL Studio keeps photo + annotation + note together as one "step" from capture to final document.
+The core problem the SOP module solves: today, photos are taken on a phone and notes are written separately, so back at the PC nobody can tell which note belongs to which photo. BIXL Studio keeps photo + annotation + note together as one "step" from capture to final document.
+
+### Modules (current)
+
+| Module | What it does | Status |
+|---|---|---|
+| **Topics** | Team discussion channels — text/photo posts per thread. | live |
+| **Look Up** | FG ↔ WIP part-number finder (`Mapping` model). | live |
+| **SOP** | Photos + notes → formatted IXL Word `.docx` (1–8 steps/page, multi-page). | live |
+| **Label** | Three.js STEP viewer → wireframe label JPG at exact angle; history list. | live |
+| **ICL** (Inspection Checklist) | Balloon dimensions off a STEP model → real IXL inspection `.xlsx`; history. | live |
+| **PFC** (Process Flow Chart) | BOM transaction export → process flow chart (SVG); history. | live |
+| MLB | Material label batch. | soon |
+
+ICL/Label/PFC geometry runs in a **separate `cad-service/`** (FastAPI + OpenCASCADE `ocp`, own Docker deploy). The web app proxies it via `CAD_API_URL`. See README.md for per-module detail and the cad-service OCC gotcha below.
 
 ---
 
@@ -230,6 +244,12 @@ The CAD service (`cad-service/`) runs OpenCASCADE via the `ocp` conda package in
 - [x] Label three-column editor UI — preview panel + settings panel + recent labels sidebar
 - [x] Label history page (`screen-label-list`) — grouped list (Today/This week/Earlier), thumbnail, delete, same format as SOP home
 - [x] Label mobile layout — 44vh preview cap, settings panel full-width below, Browse file + greyed Take Photo buttons, mobile header with hamburger
+- [x] Auth — shared PIN gate, 8h session cap, deny-by-default `/api/*`, hardened session cookies
+- [x] Topics module — channels + text/photo messages (edit/delete, multi-photo, lightbox)
+- [x] Look Up module — FG ↔ WIP part-number mapping + lookup
+- [x] ICL module — STEP balloon dimensioning, smart dimension type, `.xlsx` export, history (cad-service backed)
+- [x] PFC module — BOM transaction parse → SVG flow chart, `.xlsx` export, history
+- [x] cad-service — FastAPI + OpenCASCADE STEP mesh/measure, separate Docker deploy, binding-agnostic OCC
 - [ ] Empty-cell heading removal (blank "STEP N" for unused steps, ≤8)
 - [ ] Multi-page support (>8 steps → duplicate table on new page, STEP 9+)
 - [ ] Label: Take Photo mode (mobile capture → label, currently greyed out)
@@ -239,7 +259,7 @@ The CAD service (`cad-service/`) runs OpenCASCADE via the `ocp` conda package in
 ## Open questions (decide before or during the relevant phase)
 
 1. **Annotations**: bake arrows/circles into the photo on capture (simple, not editable in Word) vs. store as data and render native Word shapes on generate (editable, more complex). Default: baked-in.
-2. **Auth**: single user to start, possibly 1–2 more later. Add minimal auth only when a second user actually needs it.
+2. **Auth**: done — shared **PIN gate** (`POST /api/login`, `APP_PIN` env var) with an 8h hard session cap; `_require_pin` deny-by-default `before_request` on all `/api/*` except `/api/login` + `/api/session`. Mobile re-locks after 15 min idle (client-side). Per-user auth not yet needed.
 3. **"Note-only" SOPs**: some SOPs are one photo + lots of text, no 8-cell grid. May need a second template/layout later — out of scope for phase 1.
 
 ---

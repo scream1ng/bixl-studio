@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import hmac
 import io
 import json
 import os
 import re
+import time
 import uuid
 from datetime import datetime, timedelta
 
@@ -39,6 +41,12 @@ _is_local_http = os.environ.get("SECRET_KEY") is None
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_HTTPONLY"] = True   # already Flask's default; explicit for clarity
 app.config["SESSION_COOKIE_SECURE"] = not _is_local_http
+
+# Loud warning if running on insecure defaults (don't silently ship them to prod).
+if app.secret_key == "dev-insecure-change-me":
+    app.logger.warning("SECRET_KEY not set — using insecure dev default. Set SECRET_KEY in production.")
+if APP_PIN == "1858":
+    app.logger.warning("APP_PIN not set — using default PIN. Set APP_PIN in production.")
 
 # ── Database ─────────────────────────────────────────────────────────────────
 _db_url = os.environ.get("DATABASE_URL", "sqlite:///bixl.db")
@@ -428,13 +436,56 @@ def session_status():
     return jsonify({"authed": bool(session.get("authed"))})
 
 
+# Login brute-force throttle. In-memory, per client IP. Safe because gunicorn runs
+# a single worker (see Procfile); revisit if --workers is ever raised.
+_LOGIN_MAX_FAILS = 5      # failed attempts allowed within the window before lockout
+_LOGIN_WINDOW = 300       # seconds: rolling window for counting failures
+_LOGIN_LOCKOUT = 300      # seconds: how long a tripped IP stays locked out
+_login_fails: dict[str, list[float]] = {}   # ip -> recent failure timestamps
+_login_locked: dict[str, float] = {}        # ip -> monotonic unlock time
+
+
+def _client_ip() -> str:
+    # Railway terminates TLS at a proxy, so remote_addr is the proxy. Trust the
+    # first hop in X-Forwarded-For for per-client throttling.
+    fwd = request.headers.get("X-Forwarded-For", "")
+    return fwd.split(",")[0].strip() or (request.remote_addr or "?")
+
+
+def _login_lock_remaining(ip: str) -> float:
+    """Seconds left on this IP's lockout, or 0 if not locked."""
+    remaining = _login_locked.get(ip, 0.0) - time.monotonic()
+    return remaining if remaining > 0 else 0.0
+
+
+def _record_login_fail(ip: str) -> None:
+    now = time.monotonic()
+    fails = [t for t in _login_fails.get(ip, []) if now - t < _LOGIN_WINDOW]
+    fails.append(now)
+    _login_fails[ip] = fails
+    if len(fails) >= _LOGIN_MAX_FAILS:
+        _login_locked[ip] = now + _LOGIN_LOCKOUT
+        _login_fails.pop(ip, None)
+
+
 @app.route("/api/login", methods=["POST"])
 def login():
+    ip = _client_ip()
+    locked = _login_lock_remaining(ip)
+    if locked:
+        retry = int(locked) + 1
+        resp = jsonify({"error": "too many attempts", "retry_after": retry})
+        resp.headers["Retry-After"] = str(retry)
+        return resp, 429
     pin = (request.get_json(silent=True) or {}).get("pin", "")
-    if str(pin) == APP_PIN:
+    # Constant-time compare so response timing can't leak PIN digits.
+    if hmac.compare_digest(str(pin), APP_PIN):
+        _login_fails.pop(ip, None)
+        _login_locked.pop(ip, None)
         session.permanent = True   # apply the 8h lifetime
         session["authed"] = True
         return jsonify({"ok": True})
+    _record_login_fail(ip)
     return jsonify({"error": "invalid pin"}), 401
 
 
