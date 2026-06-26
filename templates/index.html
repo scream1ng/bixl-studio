@@ -2638,7 +2638,7 @@ function onPhotoSelected(file) {
 }
 
 // ── Topics (team discussion threads) ─────────────────────────────────────────
-const _topic = { channelId: null, channels: [], lastAt: null, poll: null, images: [], msgs: {} };
+const _topic = { channelId: null, channels: [], lastAt: null, lastDay: null, poll: null, images: [], msgs: {} };
 
 // Composer draft persistence. Mobile (esp. iOS standalone PWA) often evicts and
 // reloads the page when the OS camera takes over, which would otherwise wipe the
@@ -2761,6 +2761,7 @@ function topicSelectChannel(id) {
   if ($('topic-title-mb')) $('topic-title-mb').textContent = slug;
   $('topic-messages').innerHTML = '';
   _topic.msgs = {};
+  _topic.lastDay = null;
   topicRenderChannels();
   topicStopPoll();
   topicLoadMessages(true);
@@ -2771,6 +2772,24 @@ function topicTime(iso) {
   if (!iso) return '';
   const d = new Date(/[Z+]/.test(iso) ? iso : iso + 'Z');
   return isNaN(d) ? '' : d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+// Parse a (naive-UTC) ISO timestamp into a stable local-day key, e.g. "2026-06-24".
+function topicDayKey(iso) {
+  if (!iso) return '';
+  const d = new Date(/[Z+]/.test(iso) ? iso : iso + 'Z');
+  if (isNaN(d)) return '';
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+// Divider label for a message's local day: "TODAY" for today, else a date like "TUE 24 JUN 2026".
+function topicDayLabel(iso) {
+  const key = topicDayKey(iso);
+  if (!key) return 'TODAY';
+  if (key === topicDayKey(new Date().toISOString())) return 'TODAY';
+  const d = new Date(/[Z+]/.test(iso) ? iso : iso + 'Z');
+  return d.toLocaleDateString([], { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })
+    .replace(/,/g, '').toUpperCase();
 }
 
 // Photo gallery grid inside a message bubble.
@@ -2834,8 +2853,9 @@ function topicEmpty() {
     + '<div style="font-size:12.5px;margin-top:4px;">Be the first to post to this topic.</div></div>';
 }
 
-function topicDivider() {
-  return '<div data-topic-divider style="display:flex;align-items:center;gap:14px;"><div style="flex:1;height:1px;background:rgba(0,0,0,0.08);"></div><span style="font-size:11px;font-weight:700;color:#A8A8A8;letter-spacing:0.5px;">TODAY</span><div style="flex:1;height:1px;background:rgba(0,0,0,0.08);"></div></div>';
+function topicDivider(label) {
+  label = label || 'TODAY';
+  return '<div data-topic-divider style="display:flex;align-items:center;gap:14px;"><div style="flex:1;height:1px;background:rgba(0,0,0,0.08);"></div><span style="font-size:11px;font-weight:700;color:#A8A8A8;letter-spacing:0.5px;">' + esc(label) + '</span><div style="flex:1;height:1px;background:rgba(0,0,0,0.08);"></div></div>';
 }
 
 async function topicLoadMessages(reset) {
@@ -2849,17 +2869,24 @@ async function topicLoadMessages(reset) {
   const box = $('topic-messages');
   if (reset) {
     box.innerHTML = '';
+    _topic.lastDay = null;
     if (!msgs.length) { box.insertAdjacentHTML('beforeend', topicEmpty()); return; }
-    box.insertAdjacentHTML('beforeend', topicDivider());
   }
   if (!msgs.length) return;
   // First messages arriving into an empty channel (via send/poll): drop the placeholder.
-  if (!box.querySelector('[data-topic-divider]')) {
+  if (box.querySelector('[data-topic-empty]')) {
     box.innerHTML = '';
-    box.insertAdjacentHTML('beforeend', topicDivider());
+    _topic.lastDay = null;
   }
   const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
-  msgs.forEach(m => box.insertAdjacentHTML('beforeend', topicBubble(m)));
+  msgs.forEach(m => {
+    const day = topicDayKey(m.created_at);
+    if (day !== _topic.lastDay) {
+      box.insertAdjacentHTML('beforeend', topicDivider(topicDayLabel(m.created_at)));
+      _topic.lastDay = day;
+    }
+    box.insertAdjacentHTML('beforeend', topicBubble(m));
+  });
   _topic.lastAt = msgs[msgs.length - 1].created_at;
   if (reset || atBottom) box.scrollTop = box.scrollHeight;
 }
