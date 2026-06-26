@@ -64,6 +64,10 @@
       #lb-preview-panel.lb-empty #label-dropzone { position: static !important; padding: 24px 20px; }
       #lb-settings-panel { width: 100% !important; flex: 1 0 auto !important; border-radius: 0; overflow-y: auto; min-height: 0; }
       #lb-settings-panel #lb-settings-drop { display: none !important; }
+      /* EXP report on phone: tighter gutters, full-width search, no desktop spacer */
+      #exp-report-pad { padding: 14px 14px 48px !important; }
+      #exp-report-pad .exp-spacer { display: none !important; }
+      #exp-report-pad .exp-srch { width: 100% !important; min-width: 0 !important; }
     }
     @media (min-width: 768px) {
       .mb-only { display: none !important; }
@@ -914,6 +918,88 @@
   </aside>
 </div>
 
+<!-- ═══════════════════ EXP LIST (BOM expiry reports — module landing) ═══════════════════ -->
+<div id="screen-exp-list" class="screen">
+
+  <aside class="shell-rail"></aside>
+
+  <main class="shell-panel">
+    <header class="mb-only" style="height:58px;display:flex;align-items:center;padding:0 18px;flex-shrink:0;">
+      <button onclick="openDrawer()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex-shrink:0;">
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+      </button>
+      <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Expiry</span>
+      <button onclick="expNew()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;color:#CC0000;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
+    </header>
+    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
+      <div style="max-width:820px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+        <div>
+          <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">BOM expiry reports</h1>
+          <p style="font-size:13px;color:#6B6B6B;margin-top:3px;">Saved runway snapshots — open one to review, or start a new analysis from a Product Detail Report.</p>
+        </div>
+        <button onclick="expNew()" style="flex-shrink:0;background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;">+ New EXP</button>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
+      <div style="max-width:820px;margin:0 auto;">
+        <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
+          <input id="exp-search" oninput="expListRender()" placeholder="Search saved reports…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
+        </div>
+        <div id="exp-list-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
+          <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No reports yet</div>
+          <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New EXP</strong> to turn a Product Detail Report into an expiry timeline.</p>
+        </div>
+        <div id="exp-list-items"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════ EXP (BOM expiry timeline report) ═══════════════════ -->
+<div id="screen-exp" class="screen">
+
+  <aside class="shell-rail"></aside>
+
+  <main id="exp-main" class="shell-panel" style="overflow-y:auto;position:relative;">
+    <!-- drag highlight -->
+    <div id="exp-drag" style="display:none;position:fixed;inset:0;z-index:50;background:rgba(204,0,0,0.06);border:3px dashed #CC0000;align-items:center;justify-content:center;pointer-events:none;">
+      <div style="background:#fff;padding:18px 28px;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,0.2);font-size:17px;font-weight:700;color:#CC0000;">Drop to load Product Detail Report</div>
+    </div>
+
+    <!-- mobile header (matches Look Up / Topics sub-page pattern) -->
+    <header class="mb-only" style="height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);background:#fff;">
+      <button onclick="expBack()" style="color:#1A1A1A;font-size:15px;font-weight:600;padding:8px 2px;">&#8249; Reports</button>
+      <span style="font-weight:700;font-size:14px;color:#1A1A1A;">Expiry</span>
+      <span style="width:64px;"></span>
+    </header>
+
+    <div id="exp-report-pad" style="padding:30px 38px 60px;max-width:1280px;margin:0 auto;width:100%;">
+      <!-- back -->
+      <div class="dt-only editor-home-lnk" onclick="expBack()" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#6B6B6B;cursor:pointer;margin-bottom:14px;">&#8592; All reports</div>
+
+      <!-- header (desktop only — phone uses the compact banner above) -->
+      <div class="dt-only" style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;">
+        <div>
+          <div style="display:flex;align-items:center;gap:11px;">
+            <h1 style="font-size:27px;font-weight:800;letter-spacing:-0.5px;">EXP</h1>
+            <span style="font-size:10.5px;font-weight:700;color:#2E9E4F;background:#E7F4EB;padding:4px 10px;border-radius:20px;">&#9679; LIVE</span>
+          </div>
+          <p style="color:#6B6B6B;font-size:14px;margin-top:5px;max-width:600px;">Drop a Product Detail Report to see a runway timeline of every BOM that has expired, expires within 3 months, or expires within a year.</p>
+        </div>
+        <button id="exp-save-btn" onclick="expSave()" style="display:none;flex-shrink:0;background:#1A1A1A;color:#fff;padding:9px 16px;border-radius:8px;font-size:13.5px;font-weight:600;border:none;cursor:pointer;">Save to history</button>
+      </div>
+
+      <!-- dynamic body: dropzone / parsing / dashboard -->
+      <div id="exp-report-body"></div>
+    </div>
+  </main>
+
+  <input id="exp-file" type="file" accept=".xlsx" style="display:none;">
+</div>
+
 <!-- ═══════════════════ TOPICS LIST (module landing) ═══════════════════ -->
 <div id="screen-topic-list" class="screen">
   <aside class="shell-rail"></aside>
@@ -1235,6 +1321,7 @@ const RAIL_PRODUCTS = [
   { key: 'label',  abbr: 'LB',  label: 'Label',                sub: 'Part labels',           fn: 'enterLabel' },
   { key: 'icl',    abbr: 'ICL', label: 'Inspection Checklist', sub: 'Quality checks',        fn: 'enterIcl' },
   { key: 'pfc',    abbr: 'PFC', label: 'Process Flow Chart',   sub: 'BOM &#8594; flow',       fn: 'enterPfc' },
+  { key: 'exp',    abbr: 'EXP', label: 'Expiry',               sub: 'BOM runway',            fn: 'enterExp' },
 ];
 
 function railKeyFor(s) {
@@ -1242,6 +1329,7 @@ function railKeyFor(s) {
   if (['label', 'label-list'].includes(s)) return 'label';
   if (['icl', 'icl-list'].includes(s)) return 'icl';
   if (['pfc', 'pfc-list'].includes(s)) return 'pfc';
+  if (['exp', 'exp-list'].includes(s)) return 'exp';
   if (['topic', 'topic-list'].includes(s)) return 'topic';
   if (['home', 'editor', 'capture'].includes(s)) return 'sop';
   return '';
@@ -1310,7 +1398,7 @@ function drawerHtml() {
 }
 
 function setDrawerActive(key) {
-  ['sop', 'label', 'lookup', 'icl', 'pfc', 'topic'].forEach(k => {
+  ['sop', 'label', 'lookup', 'icl', 'pfc', 'exp', 'topic'].forEach(k => {
     const btn = $('drawer-' + k);
     if (!btn) return;
     const active = k === key;
@@ -1835,6 +1923,425 @@ document.addEventListener('DOMContentLoaded', () => {
       const ext = file.name.split('.').pop().toLowerCase();
       if (!['xlsx', 'xlsm'].includes(ext)) { toast('Only .xlsx / .xlsm BOM exports accepted'); return; }
       pfcOnFile(file);
+    });
+  }
+});
+
+// ── EXP (BOM expiry timeline) ─────────────────────────────────────────────────
+// Fully client-side: parses a Product Detail Report .xlsx in-browser (zip + sheet,
+// no libs) into a BOM runway Gantt. History persists in localStorage.
+const EXP_HKEY = 'exp_history_v1';
+const EXP_EXPIRY_MONTHS = 3, EXP_HORIZON_MONTHS = 12, EXP_ACTIVE_ONLY = true, EXP_CAP = 90;
+const EXP_MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+let _expRows = [];        // parsed product rows (allRows)
+let _expHistory = [];
+let _expS = { loaded:false, parsing:false, error:null, fileName:'—', group:'All', site:'All', q:'' };
+
+function expDefaultState() { return { loaded:false, parsing:false, error:null, fileName:'—', group:'All', site:'All', q:'' }; }
+
+// ---- navigation ----
+function enterExp() { expLoadHistory(); showScreen('exp-list'); expListRender(); }
+function expNew() { _expRows = []; _expS = expDefaultState(); showScreen('exp'); expRenderReport(); }
+function expBack() { showScreen('exp-list'); expListRender(); }
+
+// ---- history (localStorage) ----
+function expLoadHistory() { let h = []; try { h = JSON.parse(localStorage.getItem(EXP_HKEY) || 'null'); } catch (e) {} _expHistory = Array.isArray(h) ? h : []; }
+function expSaveHistory(h) { try { localStorage.setItem(EXP_HKEY, JSON.stringify(h)); } catch (e) {} }
+
+// ---- date helpers ----
+function expSerialToDate(s) { if (s == null || s === '') return null; const n = +s; if (!isFinite(n) || n <= 0) return null; return new Date(Date.UTC(1899, 11, 30) + Math.round(n) * 86400000); }
+function expAddMonths(d, n) { return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + n, d.getUTCDate())); }
+function expFmtDate(d) { return d.getUTCDate() + ' ' + EXP_MON[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); }
+function expFmtShort(d) { return EXP_MON[d.getUTCMonth()] + " '" + String(d.getUTCFullYear()).slice(2); }
+function expFmtRel(ts) { const d = new Date(ts); return d.getUTCDate() + ' ' + EXP_MON[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); }
+function expSiteList() { const set = new Set(); _expRows.forEach(r => { if (r.site) set.add(r.site); }); return [...set].sort(); }
+
+// ---- file handling ----
+async function expHandleFile(f) {
+  if (!f) return;
+  _expS.parsing = true; _expS.error = null; expRenderReport();
+  try { const buf = await f.arrayBuffer(); await expParseBuf(buf, f.name); }
+  catch (err) { _expS.parsing = false; _expS.loaded = _expRows.length > 0; _expS.error = String(err.message || err); expRenderReport(); }
+}
+async function expParseBuf(buf, name) {
+  const rows = await expParseXlsx(buf);
+  if (!rows.length) throw new Error('No product rows found — is this a Product Detail Report?');
+  // Merge by site: a dropped file replaces only the sites it contains, keeping others loaded.
+  const incomingSites = new Set(rows.map(r => r.site).filter(Boolean));
+  const kept = (_expS.loaded ? _expRows : []).filter(r => !incomingSites.has(r.site));
+  _expRows = kept.concat(rows);
+  _expS.loaded = true; _expS.parsing = false; _expS.error = null; _expS.fileName = name;
+  _expS.site = incomingSites.size === 1 ? [...incomingSites][0] : 'All'; _expS.group = 'All'; _expS.q = '';
+  expRenderReport();
+}
+
+// ---- xlsx parsing (zip + sheet, no libs) ----
+function expDec(s) {
+  if (s == null) return '';
+  return String(s).replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+    .replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#39;/g,"'")
+    .replace(/&#x([0-9a-fA-F]+);/g,(m,h)=>String.fromCodePoint(parseInt(h,16)))
+    .replace(/&#(\d+);/g,(m,d)=>String.fromCodePoint(+d));
+}
+async function expParseXlsx(buf) {
+  const bytes = new Uint8Array(buf), dv = new DataView(buf);
+  let eocd = -1;
+  for (let i = bytes.length - 22; i >= 0; i--) { if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; } }
+  if (eocd < 0) throw new Error('not a valid .xlsx (zip) file');
+  const cdOffset = dv.getUint32(eocd + 16, true), cdCount = dv.getUint16(eocd + 10, true);
+  let p = cdOffset; const entries = [];
+  for (let i = 0; i < cdCount; i++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true), compSize = dv.getUint32(p + 20, true);
+    const nameLen = dv.getUint16(p + 28, true), extraLen = dv.getUint16(p + 30, true), commentLen = dv.getUint16(p + 32, true);
+    const localOffset = dv.getUint32(p + 42, true);
+    const name = new TextDecoder().decode(bytes.subarray(p + 46, p + 46 + nameLen));
+    entries.push({ name, method, compSize, localOffset });
+    p += 46 + nameLen + extraLen + commentLen;
+  }
+  const inflate = async (u8) => { const ds = new DecompressionStream('deflate-raw'); const s = new Response(u8).body.pipeThrough(ds); return new Uint8Array(await new Response(s).arrayBuffer()); };
+  const read = async (nm) => {
+    const e = entries.find(x => x.name === nm); if (!e) return null;
+    const lh = e.localOffset, nl = dv.getUint16(lh + 26, true), el = dv.getUint16(lh + 28, true);
+    const start = lh + 30 + nl + el, comp = bytes.subarray(start, start + e.compSize);
+    return e.method === 0 ? comp : await inflate(comp);
+  };
+  let shared = [];
+  if (entries.find(e => /sharedStrings\.xml$/.test(e.name))) {
+    const sx = new TextDecoder().decode(await read('xl/sharedStrings.xml'));
+    shared = (sx.match(/<si>[\s\S]*?<\/si>/g) || []).map(si => {
+      const ts = [...si.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(x => x[1]);
+      return expDec(ts.join(''));
+    });
+  }
+  let sheetEntry = entries.find(e => /xl\/worksheets\/sheet1\.xml$/.test(e.name)) || entries.find(e => /xl\/worksheets\/.*\.xml$/.test(e.name));
+  const xml = new TextDecoder().decode(await read(sheetEntry.name));
+  const rows = [];
+  const rowRe = /<row\b([^>]*)>([\s\S]*?)<\/row>/g; let rm;
+  while ((rm = rowRe.exec(xml))) {
+    const rnumM = /r="(\d+)"/.exec(rm[1]); const rnum = rnumM ? +rnumM[1] : 0;
+    if (rnum < 7) continue;
+    const cells = expParseCells(rm[2], shared);
+    if (!cells.B) continue;
+    rows.push({
+      num: cells.B, name: cells.C || '', group: cells.D || '', pool: cells.F || '', vendor: cells.G || '',
+      activeBom: cells.L || '', bom: cells.M || '', bomEndSerial: cells.N, activeRoute: cells.P || '',
+      routeEndSerial: cells.Q, onHand: cells.R, site: cells.S || '', moq: cells.V
+    });
+  }
+  return rows;
+}
+function expParseCells(inner, shared) {
+  const out = {};
+  const re = /<c\b([^>]*?)(\/>|>([\s\S]*?)<\/c>)/g; let m;
+  while ((m = re.exec(inner))) {
+    const attrs = m[1], body = m[3] || '';
+    const rM = /r="([A-Z]+)\d+"/.exec(attrs); if (!rM) continue;
+    const col = rM[1];
+    const tM = /t="([^"]+)"/.exec(attrs); const t = tM ? tM[1] : '';
+    let val = '';
+    if (t === 'inlineStr') { const im = /<t[^>]*>([\s\S]*?)<\/t>/.exec(body); val = im ? expDec(im[1]) : ''; }
+    else if (t === 's') { const vm = /<v>([\s\S]*?)<\/v>/.exec(body); val = vm ? (shared[+vm[1]] || '') : ''; }
+    else { const vm = /<v>([\s\S]*?)<\/v>/.exec(body); val = vm ? expDec(vm[1]) : ''; }
+    if (val !== '') out[col] = val;
+  }
+  return out;
+}
+
+// ---- compute (filtered Gantt model) ----
+function expComputeView() {
+  const expiryMonths = EXP_EXPIRY_MONTHS, horizonMonths = EXP_HORIZON_MONTHS, activeOnly = EXP_ACTIVE_ONLY;
+  const PERPETUAL_YEAR = 2050;
+  const today = new Date(); const T = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+  const expiryEnd = expAddMonths(T, expiryMonths);
+  const winStart = expAddMonths(T, -3);
+  const winEnd = expAddMonths(T, horizonMonths);
+  const span = winEnd - winStart;
+  const pct = (d) => Math.max(0, Math.min(100, ((d - winStart) / span) * 100));
+  const q = (_expS.q || '').trim().toLowerCase();
+  const grp = _expS.group, site = _expS.site || 'All';
+  const colorFor = (days) => { if (days < 0) return '#7A0000'; if (days <= expiryMonths * 30 + 2) return '#CC0000'; if (days <= 365) return '#D9982A'; return '#2E9E4F'; };
+  let rows = _expRows.map(r => {
+    const end = expSerialToDate(r.bomEndSerial);
+    const perpetual = !end || end.getUTCFullYear() >= PERPETUAL_YEAR;
+    const days = end ? Math.round((end - T) / 86400000) : null;
+    return { ...r, end, perpetual, days };
+  });
+  const matchS = (r) => site === 'All' || (r.site || '') === site;
+  const matchG = (r) => grp === 'All' || r.group === grp;
+  const matchQ = (r) => !q || (r.num && r.num.toLowerCase().includes(q)) || (r.name && r.name.toLowerCase().includes(q)) || (r.bom && r.bom.toLowerCase().includes(q)) || (r.pool && r.pool.toLowerCase().includes(q));
+  const filtered = rows.filter(r => matchS(r) && matchG(r) && matchQ(r));
+  const isActive = (r) => !activeOnly || r.activeBom === 'Yes';
+  const expiring = filtered.filter(r => isActive(r) && !r.perpetual && r.days >= 0 && r.end <= expiryEnd);
+  const kpiExpiring = expiring.length;
+  const kpiExpired = filtered.filter(r => isActive(r) && !r.perpetual && r.days < 0).length;
+  const within1yCount = filtered.filter(r => isActive(r) && !r.perpetual && r.days > expiryMonths * 30 + 2 && r.days <= 365).length;
+  const sparkHeights = [
+    filtered.filter(r => isActive(r) && !r.perpetual && r.days < 0).length,
+    Math.max(kpiExpiring, 1),
+    within1yCount
+  ];
+  const ganttAll = filtered.filter(r => isActive(r) && !r.perpetual && r.end >= winStart && r.end <= winEnd).sort((a, b) => a.end - b.end);
+  const ganttRows = ganttAll.slice(0, EXP_CAP).map(r => {
+    const color = colorFor(r.days);
+    const s = Math.min(T, r.end), e = Math.max(T, r.end);
+    const left = pct(s), width = Math.max(0.6, pct(e) - pct(s));
+    return {
+      num: r.num, name: r.name, color, endShort: expFmtShort(r.end), pool: r.pool || '—',
+      poolStyle: 'width:96px;flex-shrink:0;font-size:11px;font-weight:600;color:#5A5A5A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;' + (r.pool ? 'background:#EFEDE7;padding:3px 8px;border-radius:6px;' : 'color:#C0C0C0;'),
+      barStyle: 'position:absolute;top:6px;height:20px;border-radius:5px;left:' + left + '%;width:' + width + '%;min-width:4px;background:' + color + ';'
+    };
+  });
+  const months = [];
+  let cur = new Date(Date.UTC(winStart.getUTCFullYear(), winStart.getUTCMonth() + 1, 1));
+  while (cur <= winEnd) {
+    const jan = cur.getUTCMonth() === 0;
+    months.push({ left: pct(cur) + '%', label: jan ? "Jan '" + String(cur.getUTCFullYear()).slice(2) : EXP_MON[cur.getUTCMonth()], color: jan ? '#1A1A1A' : '#B4B0A8' });
+    cur = new Date(Date.UTC(cur.getUTCFullYear(), cur.getUTCMonth() + 3, 1));
+  }
+  return {
+    windowLabel: expiryMonths + ' month' + (expiryMonths > 1 ? 's' : ''),
+    kpiExpiring, kpiExpired, within1yCount, sparkHeights, ganttRows, months,
+    todayLeft: pct(T) + '%', windowLeft: pct(expiryEnd) + '%',
+    ganttCaption: 'Expired, ≤ 3 months, and < 1 year — bars run from today to each BOM end date, soonest first.',
+    ganttTruncated: ganttAll.length > EXP_CAP, hasGantt: ganttRows.length > 0,
+    emptyScope: site === 'All' ? 'any site' : 'Site ' + site,
+    ganttShown: Math.min(EXP_CAP, ganttAll.length), ganttTotal: ganttAll.length
+  };
+}
+// Unfiltered export rows (all sites/groups) — used for CSV download.
+function expBuildExport(rows) {
+  const today = new Date(); const T = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+  const enr = rows.map(r => {
+    const end = expSerialToDate(r.bomEndSerial);
+    const perpetual = !end || end.getUTCFullYear() >= 2050;
+    const days = end ? Math.round((end - T) / 86400000) : null;
+    return { ...r, end, perpetual, days };
+  });
+  const isActive = (r) => !EXP_ACTIVE_ONLY || r.activeBom === 'Yes';
+  const src = enr.filter(r => isActive(r) && !r.perpetual && r.days <= 365).sort((a, b) => a.end - b.end);
+  const statusOf = (r) => r.days < 0 ? 'Expired' : (r.days <= EXP_EXPIRY_MONTHS * 30 + 2 ? 'Expiring ≤ ' + EXP_EXPIRY_MONTHS + 'm' : 'Within 1 year');
+  return src.map(r => ({ num: r.num, name: r.name, pool: r.pool || '', bom: r.bom || '', group: r.group || '', site: r.site || '', endLabel: expFmtDate(r.end), status: statusOf(r) }));
+}
+
+// ---- report render ----
+function expSetGroup(g) { _expS.group = g; expRenderDash(); }
+function expSetSite(s) { _expS.site = s; expRenderDash(); }
+function expSearch(v) { _expS.q = v; expRenderGantt(); }   // gantt only → search input keeps focus
+
+function expRenderReport() {
+  const body = $('exp-report-body'), save = $('exp-save-btn');
+  if (!body) return;
+  if (save) save.style.display = _expS.loaded ? 'inline-flex' : 'none';
+  if (_expS.parsing) {
+    body.innerHTML = '<div style="margin-top:60px;display:flex;flex-direction:column;align-items:center;gap:16px;color:#6B6B6B;">'
+      + '<div style="width:42px;height:42px;border:4px solid #D8D5CE;border-top-color:#CC0000;border-radius:50%;animation:spin 0.8s linear infinite;"></div>'
+      + '<div style="font-size:14px;font-weight:600;">Reading the spreadsheet…</div></div>';
+    return;
+  }
+  if (!_expS.loaded) { body.innerHTML = expDropzoneHtml(); return; }
+  body.innerHTML = '<div id="exp-dash"></div>';
+  expRenderDash();
+}
+function expDropzoneHtml() {
+  const err = _expS.error
+    ? '<div style="margin-top:14px;background:#FBE3E3;color:#7A0000;padding:12px 16px;border-radius:10px;font-size:13px;">Couldn\'t read that file: ' + esc(_expS.error) + '</div>'
+    : '';
+  return '<div onclick="$(\'exp-file\').click()" style="display:block;margin-top:34px;cursor:pointer;">'
+    + '<div style="border:2px dashed #C4C0B8;border-radius:18px;background:#F1EFEA;padding:64px 30px;text-align:center;">'
+    + '<div style="width:62px;height:62px;margin:0 auto;border-radius:16px;background:#fff;border:1px solid #E0DCD3;display:flex;align-items:center;justify-content:center;font-size:24px;color:#CC0000;">&#10515;</div>'
+    + '<div style="font-size:18px;font-weight:700;margin-top:18px;">Drop your Product Detail Report</div>'
+    + '<div style="font-size:13.5px;color:#8A8A8A;margin-top:6px;">Drag an <span style="font-family:\'JetBrains Mono\',monospace;color:#1A1A1A;">.xlsx</span> file anywhere on this page, or click to browse.</div>'
+    + '<div style="display:inline-block;margin-top:18px;background:#CC0000;color:#fff;padding:10px 20px;border-radius:9px;font-size:14px;font-weight:600;">Choose file</div>'
+    + '</div></div>' + err;
+}
+function expRenderDash() {
+  const host = $('exp-dash'); if (!host) return;
+  const siteHtml = ['All'].concat(expSiteList()).map(s => {
+    const active = _expS.site === s, label = s === 'All' ? 'All sites' : 'Site ' + s;
+    return '<div onclick="expSetSite(\'' + esc(s) + '\')" style="padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;' + (active ? 'background:#CC0000;color:#fff;' : 'color:#7A7A7A;') + '">' + esc(label) + '</div>';
+  }).join('');
+  const groupHtml = ['All','WIP','FGoods'].map(g => {
+    const active = _expS.group === g;
+    return '<div onclick="expSetGroup(\'' + g + '\')" style="padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;' + (active ? 'background:#1A1A1A;color:#fff;' : 'color:#7A7A7A;') + '">' + g + '</div>';
+  }).join('');
+  host.innerHTML =
+    '<div style="display:flex;align-items:center;gap:12px;margin-top:22px;flex-wrap:wrap;">'
+    + '<div style="display:flex;gap:4px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:11px;padding:4px;">' + siteHtml + '</div>'
+    + '<div style="width:1px;height:26px;background:rgba(0,0,0,0.1);"></div>'
+    + '<div style="display:flex;gap:4px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:11px;padding:4px;">' + groupHtml + '</div>'
+    + '<div class="exp-spacer" style="flex:1;"></div>'
+    + '<div class="exp-srch" style="height:40px;min-width:280px;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:11px;display:flex;align-items:center;padding:0 13px;gap:9px;">'
+    + '<span style="color:#BBB;font-size:14px;">&#8981;</span>'
+    + '<input value="' + esc(_expS.q) + '" oninput="expSearch(this.value)" placeholder="Search product or BOM number…" style="flex:1;border:none;outline:none;font-size:13.5px;color:#1A1A1A;background:transparent;">'
+    + '</div></div>'
+    + '<div id="exp-gantt"></div>';
+  expRenderGantt();
+}
+function expLegend(color, label) {
+  return '<div style="display:flex;align-items:center;gap:6px;"><span style="width:11px;height:11px;border-radius:3px;background:' + color + ';"></span><span style="font-size:11.5px;color:#6B6B6B;">' + label + '</span></div>';
+}
+// Phone-friendly runway: stacked rows, urgency colour bar + end date, no horizontal scroll.
+function expGanttMobileList(v) {
+  const rows = v.ganttRows.map(r =>
+    '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F1EFEA;">'
+    + '<span style="width:6px;height:30px;border-radius:3px;flex-shrink:0;background:' + r.color + ';"></span>'
+    + '<div style="flex:1;min-width:0;">'
+    +   '<div style="display:flex;align-items:center;gap:7px;">'
+    +     '<span style="font-family:\'JetBrains Mono\',monospace;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(r.num) + '</span>'
+    +     (r.pool && r.pool !== '—' ? '<span style="font-size:10px;font-weight:600;color:#5A5A5A;background:#EFEDE7;padding:2px 6px;border-radius:5px;flex-shrink:0;">' + esc(r.pool) + '</span>' : '')
+    +   '</div>'
+    +   '<div style="font-size:12px;color:#8A8A8A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;">' + esc(r.name) + '</div>'
+    + '</div>'
+    + '<span style="font-size:12.5px;font-weight:700;color:' + r.color + ';flex-shrink:0;">' + esc(r.endShort) + '</span>'
+    + '</div>').join('');
+  return '<div style="margin-top:12px;">' + rows + '</div>';
+}
+function expRenderGantt(v) {
+  const host = $('exp-gantt'); if (!host) return;
+  v = v || expComputeView();
+  let chart;
+  if (v.hasGantt && isMobile()) {
+    // Phone: the 430px Gantt grid overflows — show a compact soonest-first list instead.
+    chart = expGanttMobileList(v);
+  } else if (v.hasGantt) {
+    const labelRows = v.ganttRows.map(r =>
+      '<div style="height:32px;display:flex;align-items:center;gap:10px;padding-right:14px;">'
+      + '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12.5px;font-weight:600;width:122px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;">' + esc(r.num) + '</span>'
+      + '<span style="font-size:12.5px;color:#6B6B6B;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(r.name) + '</span>'
+      + '<span style="' + r.poolStyle + '">' + esc(r.pool) + '</span>'
+      + '<span style="font-size:11.5px;font-weight:600;color:' + r.color + ';flex-shrink:0;">' + esc(r.endShort) + '</span>'
+      + '</div>').join('');
+    const monthTicks = v.months.map(mo =>
+      '<div style="position:absolute;top:0;bottom:0;width:1px;background:#F0EEE9;left:' + mo.left + ';"></div>'
+      + '<div style="position:absolute;top:6px;left:' + mo.left + ';transform:translateX(4px);font-size:10.5px;font-weight:600;color:' + mo.color + ';white-space:nowrap;">' + esc(mo.label) + '</div>').join('');
+    const barRows = v.ganttRows.map(r => '<div style="height:32px;position:relative;"><div style="' + r.barStyle + '"></div></div>').join('');
+    chart = '<div style="display:flex;margin-top:18px;overflow-x:auto;">'
+      + '<div style="width:430px;flex-shrink:0;">'
+      +   '<div style="height:30px;display:flex;align-items:center;gap:10px;padding-right:14px;font-size:10px;font-weight:700;color:#A8A8A8;text-transform:uppercase;letter-spacing:0.9px;">'
+      +     '<span style="width:122px;flex-shrink:0;">PART#</span><span style="flex:1;">DESCRIPTION</span><span style="width:96px;flex-shrink:0;">Pool</span><span style="flex-shrink:0;">Ends</span>'
+      +   '</div>' + labelRows + '</div>'
+      + '<div style="flex:1;min-width:420px;position:relative;border-left:1px solid #ECEAE5;">'
+      +   monthTicks
+      +   '<div style="position:absolute;top:0;bottom:0;width:2px;background:#1A1A1A;left:' + v.todayLeft + ';"></div>'
+      +   '<div style="position:absolute;top:6px;left:' + v.todayLeft + ';transform:translateX(-50%);background:#1A1A1A;color:#fff;font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:5px;white-space:nowrap;">TODAY</div>'
+      +   '<div style="position:absolute;top:0;bottom:0;width:0;border-left:1.5px dashed #CC0000;left:' + v.windowLeft + ';"></div>'
+      +   '<div style="position:relative;"><div style="height:30px;"></div>' + barRows + '</div>'
+      + '</div></div>';
+  } else {
+    chart = '<div style="margin-top:18px;display:flex;align-items:center;gap:13px;background:#E7F4EB;border-radius:14px;padding:20px 22px;">'
+      + '<div style="width:34px;height:34px;flex-shrink:0;border-radius:50%;background:#2E9E4F;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;">&#10003;</div>'
+      + '<div><div style="font-size:14px;font-weight:700;color:#1F5B33;">Nothing expiring for ' + esc(v.emptyScope) + '</div>'
+      + '<div style="font-size:12.5px;color:#3C6B4C;margin-top:2px;">No active BOM here has expired or ends within a year — every dated BOM runs past the horizon or has no end date.</div></div></div>';
+  }
+  const trunc = v.ganttTruncated
+    ? '<div style="margin-top:14px;font-size:12px;color:#9B9B9B;text-align:center;">Showing the ' + v.ganttShown + ' soonest of ' + v.ganttTotal + ' dated BOMs in this window — search or filter to narrow further.</div>'
+    : '';
+  host.innerHTML = '<div style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:18px;padding:22px 24px 26px;margin-top:16px;">'
+    + '<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;">'
+    +   '<div><h2 style="font-size:17px;font-weight:700;">BOM runway timeline</h2><p style="font-size:12.5px;color:#8A8A8A;margin-top:3px;">' + esc(v.ganttCaption) + '</p></div>'
+    +   '<div style="display:flex;gap:16px;align-items:center;">' + expLegend('#7A0000', 'Expired') + expLegend('#CC0000', '&#8804; ' + esc(v.windowLabel)) + expLegend('#D9982A', '&lt; 1 year') + '</div>'
+    + '</div>' + chart + trunc + '</div>';
+}
+
+// ---- save / history list ----
+function expSave() {
+  if (!_expS.loaded) return;
+  const v = expComputeView();
+  const rec = {
+    id: 'r' + Date.now(), created_at: Date.now(), sites: expSiteList(), fileName: _expS.fileName,
+    counts: { expiring: v.kpiExpiring, within1y: v.within1yCount, expired: v.kpiExpired, total: _expRows.length },
+    spark: v.sparkHeights, rows: _expRows
+  };
+  _expHistory = [rec, ..._expHistory].slice(0, 20);
+  expSaveHistory(_expHistory);
+  const b = $('exp-save-btn');
+  if (b) { b.textContent = 'Saved ✓'; setTimeout(() => { b.textContent = 'Save to history'; }, 1800); }
+}
+function expFindRec(id) { return _expHistory.find(r => r.id === id); }
+function expOpenRec(id) {
+  const r = expFindRec(id); if (!r) return;
+  _expRows = r.rows || [];
+  _expS = expDefaultState(); _expS.loaded = _expRows.length > 0; _expS.fileName = r.fileName || '—';
+  showScreen('exp'); expRenderReport();
+}
+function expDeleteRec(id) {
+  askDelete('Delete this saved report? This cannot be undone.').then(ok => {
+    if (!ok) return;
+    _expHistory = _expHistory.filter(r => r.id !== id);
+    expSaveHistory(_expHistory); expListRender();
+  });
+}
+function expDownloadRec(id) {
+  const r = expFindRec(id); if (!r) return;
+  const out = expBuildExport(r.rows || []);
+  const head = ['Part #','Description','Pool','BOM number','Group','Site','Ends','Status'];
+  const escc = (s) => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
+  const csvBody = out.map(x => [x.num, x.name, x.pool, x.bom, x.group, x.site, x.endLabel, x.status].map(escc).join(',')).join('\n');
+  const csv = head.map(escc).join(',') + '\n' + csvBody;
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'EXP - ' + ((r.sites || []).join(',')) + ' - expiring.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function expHistCard(r) {
+  const sp = (r.spark && r.spark.length) ? r.spark : [1];
+  const mx = Math.max(1, ...sp);
+  const spark = (r.spark || []).map(h => '<div style="flex:1;min-width:2px;border-radius:1px;background:#CC0000;opacity:0.85;height:' + Math.round((h / mx) * 100) + '%;"></div>').join('');
+  const c = r.counts || {};
+  const id = esc(r.id);
+  const title = 'Site ' + ((r.sites || []).join(' + ') || '—');
+  const sub = expFmtRel(r.created_at) + ' · ' + ((c.total || 0).toLocaleString()) + ' products · ' + ((r.fileName || '').split(' + ').length) + ' file(s)';
+  return '<div style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:11px 14px;display:flex;align-items:center;gap:12px;">'
+    + '<div onclick="expOpenRec(\'' + id + '\')" title="Open" style="display:flex;align-items:center;gap:13px;flex:1;min-width:0;cursor:pointer;">'
+    +   '<div style="width:46px;height:38px;border-radius:8px;flex-shrink:0;background:#FBF7F2;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:flex-end;gap:2px;padding:6px 5px;overflow:hidden;">' + spark + '</div>'
+    +   '<div style="flex:1;min-width:0;">'
+    +     '<div style="font-weight:600;font-size:13.5px;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(title) + '</div>'
+    +     '<div style="color:#9B9B9B;font-size:12px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(sub) + '</div>'
+    +   '</div>'
+    +   '<div style="display:flex;gap:6px;flex-shrink:0;">'
+    +     '<span style="font-size:11px;font-weight:700;color:#CC0000;background:#FCE9E9;padding:3px 9px;border-radius:20px;">' + (c.expiring || 0) + ' &#8804; 3m</span>'
+    +     '<span style="font-size:11px;font-weight:700;color:#7A0000;background:#F4E4E4;padding:3px 9px;border-radius:20px;">' + (c.expired || 0) + ' expired</span>'
+    +   '</div>'
+    + '</div>'
+    + window.btnIco('download', "expDownloadRec('" + id + "')", 'Download CSV')
+    + window.btnIco('delete', "expDeleteRec('" + id + "')", 'Delete')
+    + '</div>';
+}
+function expListRender() {
+  const list = $('exp-list-items'), empty = $('exp-list-empty');
+  if (!list) return;
+  if (!_expHistory.length) { if (empty) empty.style.display = 'block'; list.innerHTML = ''; return; }
+  if (empty) empty.style.display = 'none';
+  const q = ($('exp-search')?.value || '').trim().toLowerCase();
+  let src = _expHistory;
+  if (q) src = src.filter(r => (r.sites || []).join(' ').toLowerCase().includes(q) || (r.fileName || '').toLowerCase().includes(q));
+  if (!src.length) { list.innerHTML = window._histNoMatch; return; }
+  const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+  const groups = [{ label: 'Today', items: [] }, { label: 'This week', items: [] }, { label: 'Earlier', items: [] }];
+  for (const r of src) { const d = new Date(r.created_at || 0); groups[d >= today ? 0 : d >= weekAgo ? 1 : 2].items.push(r); }
+  list.innerHTML = groups.filter(g => g.items.length).map(g =>
+    '<div style="font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.1px;margin:20px 0 8px;">' + esc(g.label) + '</div>'
+    + '<div style="display:flex;flex-direction:column;gap:7px;">' + g.items.map(r => expHistCard(r)).join('') + '</div>'
+  ).join('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const f = $('exp-file');
+  if (f) f.addEventListener('change', e => { const file = e.target.files[0]; if (file) expHandleFile(file); e.target.value = ''; });
+  const main = $('exp-main');
+  if (main) {
+    main.addEventListener('dragover', e => { e.preventDefault(); const dr = $('exp-drag'); if (dr) dr.style.display = 'flex'; });
+    main.addEventListener('dragleave', e => { if (e.relatedTarget === null) { const dr = $('exp-drag'); if (dr) dr.style.display = 'none'; } });
+    main.addEventListener('drop', e => {
+      e.preventDefault();
+      const dr = $('exp-drag'); if (dr) dr.style.display = 'none';
+      const file = e.dataTransfer.files && e.dataTransfer.files[0]; if (!file) return;
+      if (file.name.split('.').pop().toLowerCase() !== 'xlsx') { toast('Only .xlsx Product Detail Reports accepted'); return; }
+      expHandleFile(file);
     });
   }
 });
