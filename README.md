@@ -11,11 +11,13 @@ Manufacturing documentation platform for IXL Group — a single hosted web app (
 | Module | What it does | Status |
 |--------|--------------|--------|
 | **Topics** | Team discussion channels — text/photo posts per thread. | ✅ |
+| **Tasks** | Kanban board fed from Topics — send messages onto To do / In progress / Done cards, drag to move, tags + filter, comments, archive history. | ✅ |
 | **Look Up** | FG ↔ WIP part-number finder. | ✅ |
 | **SOP** | Turn shop-floor photos + notes into a formatted IXL Word `.docx` (1–8 steps/page, multi-page). | ✅ |
 | **Label** | Three.js STEP viewer → wireframe label JPG at exact angle; history list. | ✅ |
 | **ICL** (Inspection Checklist) | Balloon dimensions off a STEP model → export the real IXL inspection `.xlsx`; saved history. | ✅ |
 | **PFC** (Process Flow Chart) | BOM transaction export → process flow chart (SVG renderer); saved history. | ✅ |
+| **EXP** (Expiry) | BOM Product Detail Report → expiry runway timeline; saved history. | ✅ |
 | MLB | Material label batch. | Soon |
 
 Access is gated by a shared **PIN** (`POST /api/login`) with an 8-hour hard session cap; mobile re-locks after 15 min idle.
@@ -103,6 +105,10 @@ GET/POST/DELETE /api/labels ...               Label history
 POST /api/pfc/parse                           BOM transaction export → flow chart
 GET/POST/DELETE /api/pfcs ... /thumb /export  PFC history + re-export
 GET/POST/DELETE /api/channels ...             Topics channels + messages
+GET/POST/PATCH/DELETE /api/tasks ...          Tasks board (status/priority/due/tags/add-messages/archive)
+POST /api/tasks/:id/comments                  task comments (+ PATCH/DELETE /api/comments/:id)
+GET/POST/PATCH/DELETE /api/tags ...           tags/labels (delete scrubs from tasks)
+GET/POST/PUT/DELETE /api/mappings ...         Look Up FG↔WIP mappings + /api/lookup
 GET  /healthz                                 Railway health check
 ```
 
