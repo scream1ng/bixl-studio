@@ -9,6 +9,7 @@ The core problem the SOP module solves: today, photos are taken on a phone and n
 | Module | What it does | Status |
 |---|---|---|
 | **Topics** | Team discussion channels — text/photo posts per thread. | live |
+| **Tasks** | Kanban board fed from Topics — send messages onto To do / In progress / Done cards, drag to move, archive history. | live |
 | **Look Up** | FG ↔ WIP part-number finder (`Mapping` model). | live |
 | **SOP** | Photos + notes → formatted IXL Word `.docx` (1–8 steps/page, multi-page). | live |
 | **Label** | Three.js STEP viewer → wireframe label JPG at exact angle; history list. | live |
@@ -247,6 +248,8 @@ The CAD service (`cad-service/`) runs OpenCASCADE via the `ocp` conda package in
 - [x] Auth — shared PIN gate, 8h session cap, deny-by-default `/api/*`, hardened session cookies
 - [x] Topics module — channels + text/photo messages (edit/delete, multi-photo, lightbox)
 - [x] Look Up module — FG ↔ WIP part-number mapping + lookup
+- [x] Tasks module — Kanban board fed from Topics (live message refs), drag between columns, card detail (editable priority/due, status switch), send-from-topic modal, archive/restore/delete
+- [x] Tags — GitHub-style labels on tasks (`Tag` model + `tasks.tag_ids` JSON refs), seeded preset (Quality/Safety/Improvement/Document), editable manager (create/rename/recolor/delete), board tag-filter
 - [x] ICL module — STEP balloon dimensioning, smart dimension type, `.xlsx` export, history (cad-service backed)
 - [x] PFC module — BOM transaction parse → SVG flow chart, `.xlsx` export, history
 - [x] cad-service — FastAPI + OpenCASCADE STEP mesh/measure, separate Docker deploy, binding-agnostic OCC

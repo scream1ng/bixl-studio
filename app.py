@@ -320,6 +320,129 @@ class Message(db.Model):
         }
 
 
+class Task(db.Model):
+    """A Kanban card pulled from Topics messages onto the Tasks board.
+
+    Messages are stored as live references (a JSON list of Message ids) so the
+    card reflects edits and can link back to its topic; dropped messages simply
+    fall out on resolve. Priority/due are task-level fields the user sets.
+    """
+    __tablename__ = "tasks"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    title = db.Column(db.Text, nullable=False, default="")
+    channel_id = db.Column(db.String(36), db.ForeignKey("channels.id"), nullable=True)
+    channel_slug = db.Column(db.String(64), nullable=False, default="")  # snapshot for display
+    message_ids = db.Column(db.Text, nullable=False, default="[]")        # JSON list of Message ids
+    tag_ids = db.Column(db.Text, nullable=False, default="[]")            # JSON list of Tag ids
+    priority = db.Column(db.String(8), nullable=False, default="")        # '', 'Low', 'Medium', 'High'
+    due = db.Column(db.String(10), nullable=False, default="")            # ISO date 'YYYY-MM-DD' or ''
+    status = db.Column(db.String(8), nullable=False, default="todo")      # 'todo' | 'doing' | 'done'
+    position = db.Column(db.Float, nullable=False, default=0.0)           # order within a column (asc)
+    archived_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    comments = db.relationship(
+        "TaskComment", backref="task", lazy=True,
+        order_by="TaskComment.created_at", cascade="all, delete-orphan",
+    )
+
+    def msg_id_list(self) -> list:
+        try:
+            vals = json.loads(self.message_ids or "[]")
+            return [m for m in vals if m] if isinstance(vals, list) else []
+        except (ValueError, TypeError):
+            return []
+
+    def tag_id_list(self) -> list:
+        try:
+            vals = json.loads(self.tag_ids or "[]")
+            return [t for t in vals if t] if isinstance(vals, list) else []
+        except (ValueError, TypeError):
+            return []
+
+    def _live_messages(self) -> list:
+        """Resolve referenced messages, preserving order; dropped ones fall out."""
+        out = []
+        for mid in self.msg_id_list():
+            m = db.session.get(Message, mid)
+            if m:
+                out.append(m)
+        return out
+
+    def to_dict(self, include_messages: bool = False) -> dict:
+        msgs = self._live_messages()
+        photo_url = ""
+        for m in msgs:
+            if m.hashes():
+                photo_url = f"/api/messages/{m.id}/image/0"
+                break
+        # Resolve tags live; dropped ones fall out, order preserved.
+        tags = resolve_tags(self.tag_id_list())
+        d = {
+            "id": self.id,
+            "title": self.title,
+            "channel_id": self.channel_id,
+            "channel_slug": self.channel_slug,
+            "priority": self.priority,
+            "due": self.due,
+            "status": self.status,
+            "position": self.position,
+            "archived": self.archived_at is not None,
+            "archived_at": self.archived_at.isoformat() if self.archived_at else None,
+            "created_at": self.created_at.isoformat(),
+            "msg_count": len(msgs),
+            "photo_url": photo_url,
+            "tag_ids": [tg["id"] for tg in tags],
+            "tags": tags,
+            "comment_count": len(self.comments),
+        }
+        if include_messages:
+            d["messages"] = [m.to_dict() for m in msgs]
+            d["comments"] = [c.to_dict() for c in self.comments]
+        return d
+
+
+class TaskComment(db.Model):
+    """A free-text note added to a task (task detail beyond the brief messages)."""
+    __tablename__ = "task_comments"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    task_id = db.Column(db.String(36), db.ForeignKey("tasks.id"), nullable=False)
+    text = db.Column(db.Text, nullable=False, default="")
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    edited_at = db.Column(db.DateTime, nullable=True)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "text": self.text or "",
+            "edited": self.edited_at is not None,
+            "created_at": self.created_at.isoformat(),
+        }
+
+
+class Tag(db.Model):
+    """A GitHub-style label applied to tasks (Quality, Safety, Improvement, …).
+
+    Topics are the 'project'; tags are cross-cutting categories on the task cards.
+    """
+    __tablename__ = "tags"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = db.Column(db.String(40), nullable=False)
+    color = db.Column(db.String(9), nullable=False, default="#6B6B6B")  # hex
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def to_dict(self) -> dict:
+        return {"id": self.id, "name": self.name, "color": self.color}
+
+
+def resolve_tags(tag_ids) -> list:
+    """Resolve a list of tag ids to tag dicts, dropping any that no longer exist."""
+    return [tg.to_dict() for tg in (db.session.get(Tag, ti) for ti in tag_ids) if tg]
+
+
 def _migrate():
     """Migrate steps.image → image_blobs + steps.image_hash if needed."""
     is_sqlite = db.engine.dialect.name == "sqlite"
@@ -372,6 +495,7 @@ with app.app_context():
             "CREATE UNIQUE INDEX IF NOT EXISTS ix_mappings_wip ON mappings (wip_number)",
             "ALTER TABLE messages ADD COLUMN image_hashes TEXT",
             "ALTER TABLE messages ADD COLUMN edited_at TIMESTAMP",
+            "ALTER TABLE tasks ADD COLUMN tag_ids TEXT NOT NULL DEFAULT '[]'",
         ):
             try:
                 _conn.execute(text(_stmt))
@@ -405,6 +529,36 @@ with app.app_context():
             ("line-2-coater", "Watching the edge sensor closely"),
         ):
             db.session.add(Channel(slug=_slug, description=_desc))
+        db.session.commit()
+
+    # Seed a manufacturing-oriented tag preset on an empty table (editable later).
+    if Tag.query.count() == 0:
+        for _n, _c in (
+            ("Quality", "#CC0000"),
+            ("Safety", "#E8590C"),
+            ("Improvement", "#2E9E4F"),
+            ("Document", "#7048E8"),
+        ):
+            db.session.add(Tag(name=_n, color=_c))
+        db.session.commit()
+
+    # One-time cleanup: drop the de-scoped default tags from DBs seeded with the
+    # original 8 — but only when still untouched (default name+colour) and unused,
+    # so renamed / recoloured / applied tags are left alone.
+    _dropped = (("Maintenance", "#1C7ED6"), ("Tooling", "#0CA678"),
+                ("Material", "#D9982A"), ("Rework", "#C2255C"))
+    _all_tasks = None  # loaded lazily only if a dropped tag is actually present
+    _changed = False
+    for _n, _c in _dropped:
+        tg = Tag.query.filter(db.func.lower(Tag.name) == _n.lower(), Tag.color == _c).first()
+        if not tg:
+            continue
+        if _all_tasks is None:
+            _all_tasks = Task.query.all()
+        if not any(tg.id in t.tag_id_list() for t in _all_tasks):
+            db.session.delete(tg)
+            _changed = True
+    if _changed:
         db.session.commit()
 
 
@@ -1291,7 +1445,28 @@ def list_messages(channel_id):
     if after:
         q = q.filter(Message.created_at > datetime.fromisoformat(after))
     rows = q.order_by(Message.created_at).all()
-    return jsonify([m.to_dict() for m in rows])
+    if not rows:  # common case on a quiet 4s poll — skip the task scan
+        return jsonify([])
+    # Map each message → the (non-archived) task it sits on, so the chat can
+    # colour picked messages by task status and show the task's tags.
+    labels = {"todo": "To do", "doing": "In progress", "done": "Done"}
+    tag_map = {tg.id: tg.to_dict() for tg in Tag.query.all()}
+    task_by_msg = {}
+    for t in Task.query.filter(Task.archived_at.is_(None)).all():
+        info = {
+            "status": t.status,
+            "status_label": labels.get(t.status, t.status),
+            "tags": [tag_map[ti] for ti in t.tag_id_list() if ti in tag_map],
+        }
+        for mid in t.msg_id_list():
+            task_by_msg.setdefault(mid, info)
+    out = []
+    for m in rows:
+        d = m.to_dict()
+        if m.id in task_by_msg:
+            d["task"] = task_by_msg[m.id]
+        out.append(d)
+    return jsonify(out)
 
 
 @app.route("/api/channels/<channel_id>/messages", methods=["POST"])
@@ -1364,6 +1539,202 @@ def message_image(message_id, idx=0):
     if not blob:
         return jsonify({"error": "not found"}), 404
     return _send_jpeg_blob(blob)
+
+
+# ── Tasks (Kanban board fed from Topics) ───────────────────────────────────────
+
+_TASK_PRIORITIES = {"", "Low", "Medium", "High"}
+_TASK_STATUSES = {"todo", "doing", "done"}
+
+
+def _task_pos_top() -> float:
+    lo = db.session.query(db.func.min(Task.position)).scalar()
+    return (lo - 1.0) if lo is not None else 0.0
+
+
+def _task_pos_bottom() -> float:
+    hi = db.session.query(db.func.max(Task.position)).scalar()
+    return (hi + 1.0) if hi is not None else 0.0
+
+
+@app.route("/api/tasks", methods=["GET"])
+def list_tasks():
+    rows = Task.query.order_by(Task.position).all()
+    return jsonify([t.to_dict() for t in rows])
+
+
+@app.route("/api/tasks", methods=["POST"])
+def create_task():
+    d = request.get_json(silent=True) or {}
+    channel_id = d.get("channel_id")
+    msg_ids = d.get("message_ids")
+    if not isinstance(msg_ids, list) or not msg_ids:
+        return jsonify({"error": "no messages"}), 400
+    ch = db.session.get(Channel, channel_id) if channel_id else None
+    msgs = [m for m in (db.session.get(Message, mid) for mid in msg_ids) if m]
+    if not msgs:
+        return jsonify({"error": "messages not found"}), 404
+    first_text = (msgs[0].text or "").strip() or "Photo"
+    title = first_text if len(first_text) <= 64 else first_text[:61] + "…"
+    t = Task(
+        title=title,
+        channel_id=ch.id if ch else None,
+        channel_slug=("# " + ch.slug) if ch else (d.get("channel_slug") or ""),
+        message_ids=json.dumps([m.id for m in msgs]),
+        status="todo",
+        position=_task_pos_top(),  # new cards land at the top of To do
+    )
+    db.session.add(t)
+    db.session.commit()
+    return jsonify(t.to_dict(include_messages=True)), 201
+
+
+@app.route("/api/tasks/<task_id>", methods=["GET"])
+def get_task(task_id):
+    t = db.session.get(Task, task_id)
+    if not t:
+        return jsonify({"error": "not found"}), 404
+    return jsonify(t.to_dict(include_messages=True))
+
+
+@app.route("/api/tasks/<task_id>", methods=["PATCH"])
+def update_task(task_id):
+    t = db.session.get(Task, task_id)
+    if not t:
+        return jsonify({"error": "not found"}), 404
+    d = request.get_json(silent=True) or {}
+    if "tag_ids" in d and isinstance(d.get("tag_ids"), list):
+        t.tag_ids = json.dumps([i for i in d["tag_ids"] if db.session.get(Tag, i)])
+    if "add_message_ids" in d and isinstance(d.get("add_message_ids"), list):
+        cur = t.msg_id_list()
+        for mid in d["add_message_ids"]:
+            if mid not in cur and db.session.get(Message, mid):
+                cur.append(mid)
+        t.message_ids = json.dumps(cur)
+    if "title" in d:
+        t.title = (d.get("title") or "").strip() or t.title
+    if "priority" in d and (d.get("priority") or "") in _TASK_PRIORITIES:
+        t.priority = d.get("priority") or ""
+    if "due" in d:
+        t.due = (d.get("due") or "").strip()
+    if "status" in d and d.get("status") in _TASK_STATUSES:
+        if d["status"] != t.status:
+            t.position = _task_pos_bottom()  # dropped at the bottom of the target column
+        t.status = d["status"]
+    if "archived" in d:
+        if d.get("archived"):
+            t.archived_at = datetime.utcnow()
+        else:
+            t.archived_at = None
+            t.position = _task_pos_bottom()  # restored cards land at the bottom of their column
+    db.session.commit()
+    return jsonify(t.to_dict(include_messages=True))
+
+
+@app.route("/api/tasks/<task_id>", methods=["DELETE"])
+def delete_task(task_id):
+    t = db.session.get(Task, task_id)
+    if t:
+        db.session.delete(t)
+        db.session.commit()
+    return "", 204
+
+
+@app.route("/api/tasks/<task_id>/comments", methods=["POST"])
+def create_comment(task_id):
+    t = db.session.get(Task, task_id)
+    if not t:
+        return jsonify({"error": "not found"}), 404
+    text_val = ((request.get_json(silent=True) or {}).get("text") or "").strip()
+    if not text_val:
+        return jsonify({"error": "empty comment"}), 400
+    c = TaskComment(task_id=task_id, text=text_val)
+    db.session.add(c)
+    db.session.commit()
+    return jsonify(c.to_dict()), 201
+
+
+@app.route("/api/comments/<comment_id>", methods=["PATCH"])
+def update_comment(comment_id):
+    c = db.session.get(TaskComment, comment_id)
+    if not c:
+        return jsonify({"error": "not found"}), 404
+    text_val = ((request.get_json(silent=True) or {}).get("text") or "").strip()
+    if not text_val:
+        return jsonify({"error": "empty comment"}), 400
+    c.text = text_val
+    c.edited_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify(c.to_dict())
+
+
+@app.route("/api/comments/<comment_id>", methods=["DELETE"])
+def delete_comment(comment_id):
+    c = db.session.get(TaskComment, comment_id)
+    if c:
+        db.session.delete(c)
+        db.session.commit()
+    return "", 204
+
+
+# ── Tags (GitHub-style labels on tasks) ────────────────────────────────────────
+
+_TAG_COLOR_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
+
+
+@app.route("/api/tags", methods=["GET"])
+def list_tags():
+    return jsonify([t.to_dict() for t in Tag.query.order_by(Tag.created_at).all()])
+
+
+@app.route("/api/tags", methods=["POST"])
+def create_tag():
+    d = request.get_json(silent=True) or {}
+    name = (d.get("name") or "").strip()
+    if not name:
+        return jsonify({"error": "name required"}), 400
+    color = (d.get("color") or "").strip()
+    if not _TAG_COLOR_RE.match(color):
+        color = "#6B6B6B"
+    if Tag.query.filter(db.func.lower(Tag.name) == name.lower()).first():
+        return jsonify({"error": "tag exists"}), 409
+    tg = Tag(name=name[:40], color=color)
+    db.session.add(tg)
+    db.session.commit()
+    return jsonify(tg.to_dict()), 201
+
+
+@app.route("/api/tags/<tag_id>", methods=["PATCH"])
+def update_tag(tag_id):
+    tg = db.session.get(Tag, tag_id)
+    if not tg:
+        return jsonify({"error": "not found"}), 404
+    d = request.get_json(silent=True) or {}
+    if "name" in d:
+        name = (d.get("name") or "").strip()
+        if name:
+            dup = Tag.query.filter(db.func.lower(Tag.name) == name.lower(), Tag.id != tag_id).first()
+            if dup:
+                return jsonify({"error": "tag exists"}), 409
+            tg.name = name[:40]
+    if "color" in d and _TAG_COLOR_RE.match((d.get("color") or "").strip()):
+        tg.color = d["color"].strip()
+    db.session.commit()
+    return jsonify(tg.to_dict())
+
+
+@app.route("/api/tags/<tag_id>", methods=["DELETE"])
+def delete_tag(tag_id):
+    tg = db.session.get(Tag, tag_id)
+    if tg:
+        db.session.delete(tg)
+        # Scrub the tag id from every task that references it.
+        for t in Task.query.all():
+            ids = t.tag_id_list()
+            if tag_id in ids:
+                t.tag_ids = json.dumps([i for i in ids if i != tag_id])
+        db.session.commit()
+    return "", 204
 
 
 if __name__ == "__main__":

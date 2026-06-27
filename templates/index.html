@@ -92,6 +92,52 @@
     .ico-btn.ico-del:hover { color: #CC0000; border-color: rgba(204,0,0,0.4); background: #FFF6F6; }
     .step-photo:hover { opacity: 0.85; }
     .module-card:hover { border-color: rgba(0,0,0,0.16) !important; box-shadow: 0 4px 14px rgba(0,0,0,0.07) !important; }
+
+    /* ── Design system: tokens + components ──────────────────────────── */
+    :root {
+      --r-sm: 8px; --r-md: 12px; --r-lg: 18px;
+      --red: #CC0000; --red-dark: #b00000; --ink: #1A1A1A; --ink-2: #2C2C2C;
+      --muted: #6B6B6B; --line: rgba(0,0,0,0.07);
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 9px 16px; border-radius: 9px; font-size: 14px; font-weight: 600;
+      border: 1px solid transparent; cursor: pointer; line-height: 1; white-space: nowrap;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+    .btn-primary { background: var(--red); color: #fff; }
+    .btn-primary:hover { background: var(--red-dark); }
+    .btn-dark { background: var(--ink); color: #fff; }
+    .btn-dark:hover { background: var(--ink-2); }
+    .btn-ghost { background: #fff; color: var(--ink-2); border-color: rgba(0,0,0,0.12); }
+    .btn-ghost:hover { background: #F5F4F1; }
+    .btn-sm { padding: 7px 13px; font-size: 13px; border-radius: 8px; }
+    .btn-block { width: 100%; }
+    .btn:disabled, .btn[disabled] { opacity: 0.5; cursor: default; }
+    /* surfaces */
+    .card { background: #fff; border: 1px solid rgba(0,0,0,0.06); border-radius: var(--r-md); }
+    .section-label { font-size: 10.5px; font-weight: 700; color: #9B9B9B; letter-spacing: 1px; text-transform: uppercase; }
+    .empty-state { text-align: center; padding: 64px 20px; background: #fff; border: 1px dashed rgba(0,0,0,0.1); border-radius: var(--r-md); }
+    /* Tasks board */
+    .task-cols { display: flex; gap: 18px; align-items: stretch; max-width: 1100px; margin: 0 auto; height: 100%; }
+    .task-col { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
+    .task-dropzone { display: flex; flex-direction: column; gap: 11px; flex: 1 1 0; min-height: 60px; overflow-y: auto; padding: 10px; border-radius: 15px; background: rgba(0,0,0,0.025); transition: background 0.12s, box-shadow 0.12s; }
+    .task-title-row { border-radius: 8px; padding: 4px 7px; margin: 8px 0 -4px -7px; transition: background 0.1s; }
+    .task-title-row:hover { background: rgba(0,0,0,0.04); }
+    .task-title-row:hover svg { stroke: #CC0000; }
+    /* Tasks header — base styles live here so the mobile rules below override without !important */
+    .tasks-header { padding: 24px 30px 18px; }
+    .tasks-head-text { display: flex; align-items: center; gap: 11px; }
+    .tasks-actions { display: flex; gap: 9px; flex-shrink: 0; align-items: center; margin-left: auto; }
+    @media (max-width: 767px) {
+      .task-board-wrap { overflow-y: auto !important; padding: 16px 14px 24px !important; }
+      .task-cols { flex-direction: column; height: auto; max-width: none; }
+      .task-dropzone { overflow: visible; flex: none; }
+      .tasks-header { padding: 12px 14px; }
+      .tasks-head-text { display: none; }       /* top bar already shows "Tasks" */
+      .tasks-actions { margin-left: 0; width: 100%; }
+      .tasks-actions .btn { flex: 1; }          /* Archive + Manage fill the row evenly */
+    }
     input:focus, textarea:focus { border-color: #CC0000 !important; outline: none; }
     textarea:focus { background: #FFFCF5 !important; }
     .editor-home-lnk:hover { color: #CC0000 !important; }
@@ -159,7 +205,7 @@
       <div style="width:2px;height:16px;background:#CC0000;border-radius:1px;"></div>
       <span style="font-size:17px;font-weight:700;color:#1A1A1A;">Studio</span>
     </div>
-    <div style="max-width:780px;margin:0 auto;width:100%;">
+    <div style="max-width:1100px;margin:0 auto;width:100%;">
 
       <h1 style="font-size:26px;font-weight:800;letter-spacing:-0.4px;color:#1A1A1A;line-height:1.22;text-align:center;">One workspace for the factory floor.</h1>
       <p style="color:#6B6B6B;font-size:14px;margin-top:8px;text-align:center;">Choose a tool from the menu to get started.</p>
@@ -187,13 +233,13 @@
     </header>
     <!-- desktop panel header -->
     <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
-      <div style="max-width:780px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
         <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Standard operating procedures</h1>
-        <button class="btn-red" onclick="openModal()" style="background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;transition:background 0.1s;">+ New SOP</button>
+        <button class="btn btn-primary" onclick="openModal()">+ New SOP</button>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
-      <div style="max-width:780px;margin:0 auto;">
+      <div style="max-width:1100px;margin:0 auto;">
       <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
         <input id="home-search" oninput="renderHomeList()" placeholder="Search SOPs…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
@@ -227,13 +273,13 @@
     </header>
     <!-- desktop header -->
     <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
-      <div style="max-width:780px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
         <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Part labels</h1>
-        <button onclick="enterLabelNew()" style="background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;transition:background 0.1s;">+ New Label</button>
+        <button class="btn btn-primary" onclick="enterLabelNew()">+ New Label</button>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
-      <div style="max-width:780px;margin:0 auto;">
+      <div style="max-width:1100px;margin:0 auto;">
         <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
           <input id="lb-search" oninput="_lbListRender()" placeholder="Search labels…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
@@ -264,7 +310,7 @@
           <button id="status-draft-btn" style="padding:5px 13px;border-radius:20px;font-size:11.5px;font-weight:700;background:#6B6B6B;color:#fff;border:none;transition:all 0.1s;">Draft</button>
           <button id="status-done-btn" style="padding:5px 13px;border-radius:20px;font-size:11.5px;font-weight:700;background:transparent;color:#9B9B9B;border:1px solid rgba(0,0,0,0.14);transition:all 0.1s;">Complete</button>
         </div>
-        <button id="download-btn" class="btn-red" style="background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;transition:background 0.1s;">&#8595; Download .docx</button>
+        <button id="download-btn" class="btn btn-primary">&#8595; Download .docx</button>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:20px 28px 28px;min-height:0;">
@@ -420,13 +466,13 @@
     </header>
     <!-- desktop header -->
     <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
-      <div style="max-width:780px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
         <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Inspection checklists</h1>
-        <button onclick="enterIclNew()" style="background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;transition:background 0.1s;">+ New ICL</button>
+        <button class="btn btn-primary" onclick="enterIclNew()">+ New ICL</button>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
-      <div style="max-width:780px;margin:0 auto;">
+      <div style="max-width:1100px;margin:0 auto;">
         <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
           <input id="icl-search" oninput="_iclListRender()" placeholder="Search checklists…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
@@ -613,16 +659,16 @@
     </header>
     <!-- desktop header -->
     <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
-      <div style="max-width:880px;margin:0 auto;width:100%;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;">
         <div style="min-width:0;">
           <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">WIP &#8594; Finish Good mappings</h1>
           <p id="lu-count-sub" style="color:#6B6B6B;font-size:13.5px;margin-top:5px;"></p>
         </div>
-        <button class="btn-red" onclick="lookupNew()" style="background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;white-space:nowrap;flex-shrink:0;transition:background 0.1s;">+ New Look Up</button>
+        <button class="btn btn-primary" style="flex-shrink:0;" onclick="lookupNew()">+ New Look Up</button>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
-      <div style="max-width:880px;margin:0 auto;">
+      <div style="max-width:1100px;margin:0 auto;">
         <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
           <input id="lu-search" oninput="lookupFilter()" placeholder="Search by WIP or Finish Good number…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
@@ -642,58 +688,10 @@
 </div>
 
 <!-- ═══════════════════ LOOK UP — NEW / EDIT MAPPING (web) ═══════════════════ -->
-<div id="screen-lookup-new" class="screen">
-
-  <aside class="shell-rail"></aside>
-
-  <main class="shell-panel">
-    <!-- mobile header -->
-    <header class="mb-only" style="height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);background:#fff;">
-      <button onclick="lookupBack()" style="color:#1A1A1A;font-size:15px;font-weight:600;padding:8px 2px;">&#8249; Look Up</button>
-      <span id="lu-form-mtitle" style="font-weight:700;font-size:14px;color:#1A1A1A;">New Look Up</span>
-      <span style="width:64px;"></span>
-    </header>
-    <div style="flex:1;overflow-y:auto;padding:20px;min-height:0;">
-      <div style="max-width:600px;margin:0 auto;">
-        <div class="dt-only" onclick="lookupBack()" style="font-size:12.5px;color:#9B9B9B;margin-bottom:5px;cursor:pointer;">&#8249; Look Up</div>
-        <h1 id="lu-form-title" style="font-size:23px;font-weight:800;letter-spacing:-0.4px;color:#1A1A1A;">New Look Up</h1>
-        <p style="color:#6B6B6B;font-size:13.5px;margin-top:5px;">Link a WIP part to the finished good(s) it rolls up into. A WIP can belong to more than one.</p>
-
-        <!-- WIP (child) group -->
-        <div style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:20px;margin-top:20px;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:15px;">
-            <span style="width:30px;height:30px;border-radius:8px;background:#F6EFD9;color:#8A6E2E;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">WIP</span>
-            <div><div style="font-size:14px;font-weight:700;color:#1A1A1A;">WIP &#8212; child part</div><div style="font-size:11.5px;color:#9B9B9B;">The part the operator is holding on the floor</div></div>
-          </div>
-          <div style="display:grid;grid-template-columns:210px 1fr;gap:13px;">
-            <div>
-              <div style="font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">WIP number</div>
-              <input id="lu-f-wip" placeholder="2xxxxx" style="width:100%;padding:11px 13px;background:#fff;border:1px solid rgba(0,0,0,0.12);border-radius:10px;font-size:14px;font-family:'JetBrains Mono',monospace;color:#1A1A1A;box-sizing:border-box;">
-            </div>
-            <div>
-              <div style="font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">WIP description</div>
-              <input id="lu-f-wipdesc" placeholder="e.g. Ribbon Cable Harness &#183; 120mm" style="width:100%;padding:11px 13px;background:#fff;border:1px solid rgba(0,0,0,0.12);border-radius:10px;font-size:14px;color:#1A1A1A;box-sizing:border-box;">
-            </div>
-          </div>
-        </div>
-
-        <!-- FG (parent) group -->
-        <div style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:20px;margin-top:14px;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:15px;">
-            <span style="width:30px;height:30px;border-radius:8px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">FG</span>
-            <div><div style="font-size:14px;font-weight:700;color:#1A1A1A;">Finish Good &#8212; parent(s)</div><div style="font-size:11.5px;color:#9B9B9B;">Every finished good this WIP rolls up into</div></div>
-          </div>
-          <div id="lu-fg-rows"></div>
-          <div onclick="lookupAddFg()" style="display:inline-flex;align-items:center;gap:7px;margin-top:13px;padding:9px 14px;border:1px dashed #C8C4BC;border-radius:10px;color:#8A6A52;font-size:13px;font-weight:600;cursor:pointer;"><span style="font-size:15px;color:#CC0000;">+</span> Add another finished good</div>
-        </div>
-
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
-          <button onclick="lookupBack()" style="background:#fff;color:#2C2C2C;border:1px solid rgba(0,0,0,0.12);padding:11px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
-          <button class="btn-red" onclick="lookupSave()" style="background:#CC0000;color:#fff;padding:11px 22px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.1s;">Save Look Up</button>
-        </div>
-      </div>
-    </div>
-  </main>
+<!-- LOOK UP — create / edit drawer (rendered by lookupRenderForm) -->
+<div id="lookup-drawer-overlay" style="display:none;position:fixed;inset:0;z-index:700;">
+  <div onclick="lookupCloseForm()" style="position:absolute;inset:0;background:rgba(20,18,16,0.34);animation:fadeIn 0.14s ease;"></div>
+  <aside id="lookup-drawer-body" style="position:absolute;top:0;right:0;bottom:0;width:520px;max-width:96vw;background:#F5F4F1;box-shadow:-12px 0 44px rgba(0,0,0,0.22);display:flex;flex-direction:column;"></aside>
 </div>
 
 <!-- ═══════════════════ LOOK UP — MOBILE OPERATOR ═══════════════════ -->
@@ -821,13 +819,13 @@
       <button disabled title="Create on desktop" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;cursor:not-allowed;">+</button>
     </header>
     <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
-      <div style="max-width:780px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
         <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Process flow charts</h1>
-        <button onclick="enterPfcNew()" style="background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;transition:background 0.1s;">+ New PFC</button>
+        <button class="btn btn-primary" onclick="enterPfcNew()">+ New PFC</button>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
-      <div style="max-width:780px;margin:0 auto;">
+      <div style="max-width:1100px;margin:0 auto;">
         <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
           <input id="pfc-search" oninput="pfcListRender()" placeholder="Search flow charts…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
@@ -934,16 +932,16 @@
       <button onclick="expNew()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;color:#CC0000;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
     </header>
     <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
-      <div style="max-width:820px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;">
         <div>
           <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">BOM expiry reports</h1>
           <p style="font-size:13px;color:#6B6B6B;margin-top:3px;">Saved runway snapshots — open one to review, or start a new analysis from a Product Detail Report.</p>
         </div>
-        <button onclick="expNew()" style="flex-shrink:0;background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;">+ New EXP</button>
+        <button class="btn btn-primary" style="flex-shrink:0;" onclick="expNew()">+ New EXP</button>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
-      <div style="max-width:820px;margin:0 auto;">
+      <div style="max-width:1100px;margin:0 auto;">
         <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
           <input id="exp-search" oninput="expListRender()" placeholder="Search saved reports…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
@@ -976,7 +974,7 @@
       <span style="width:64px;"></span>
     </header>
 
-    <div id="exp-report-pad" style="padding:30px 38px 60px;max-width:1280px;margin:0 auto;width:100%;">
+    <div id="exp-report-pad" style="padding:30px 38px 60px;max-width:1100px;margin:0 auto;width:100%;">
       <!-- back -->
       <div class="dt-only editor-home-lnk" onclick="expBack()" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#6B6B6B;cursor:pointer;margin-bottom:14px;">&#8592; All reports</div>
 
@@ -1015,13 +1013,13 @@
       <button onclick="topicOpenModal()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;color:#CC0000;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
     </header>
     <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
-      <div style="max-width:780px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
         <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Topics</h1>
-        <button onclick="topicOpenModal()" style="background:#CC0000;color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;transition:background 0.1s;">+ New topic</button>
+        <button class="btn btn-primary" onclick="topicOpenModal()">+ New topic</button>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
-      <div style="max-width:780px;margin:0 auto;">
+      <div style="max-width:1100px;margin:0 auto;">
         <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
           <input id="topic-list-search" oninput="topicListRender()" placeholder="Search topics&hellip;" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
@@ -1049,17 +1047,17 @@
 
     <!-- desktop header -->
     <div class="dt-only" style="padding:14px 26px 16px;border-bottom:1px solid rgba(0,0,0,0.07);flex-shrink:0;">
-      <div style="max-width:720px;margin:0 auto;width:100%;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;">
         <button onclick="enterTopics()" style="color:#9B9B9B;font-size:12.5px;font-weight:600;margin-bottom:8px;display:inline-flex;align-items:center;gap:4px;">&#8249; All topics</button>
         <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:19px;font-weight:800;color:#BCBCBC;">#</span><h1 id="topic-title" style="font-size:19px;font-weight:800;letter-spacing:-0.3px;">general</h1></div>
         <p style="color:#8A8A8A;font-size:12.5px;margin-top:2px;">Post updates, photos, and replies for the team.</p>
       </div>
     </div>
 
-    <div id="topic-messages" style="flex:1;min-height:0;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:16px;max-width:720px;width:100%;margin:0 auto;"></div>
+    <div id="topic-messages" style="flex:1;min-height:0;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:16px;max-width:1100px;width:100%;margin:0 auto;"></div>
 
     <!-- composer -->
-    <div style="padding:0 18px 16px;flex-shrink:0;max-width:720px;width:100%;margin:0 auto;">
+    <div style="padding:0 18px 16px;flex-shrink:0;max-width:1100px;width:100%;margin:0 auto;">
       <input id="topic-file" type="file" accept="image/*" multiple style="display:none;" onchange="topicAttach(this.files)">
       <input id="topic-camera" type="file" accept="image/*" capture="environment" style="display:none;" onchange="topicAttach(this.files)">
       <div id="topic-tray" style="display:none;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
@@ -1080,6 +1078,42 @@
     </div>
     <div id="topic-channels" style="flex:1;min-height:0;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:3px;"></div>
   </aside>
+</div>
+
+<!-- ═══════════════════ TASKS (Kanban board from Topics) ═══════════════════ -->
+<div id="screen-tasks" class="screen">
+  <aside class="shell-rail"></aside>
+
+  <main class="shell-panel">
+    <!-- mobile header -->
+    <header class="mb-only" style="height:58px;display:flex;align-items:center;padding:0 18px;flex-shrink:0;">
+      <button onclick="openDrawer()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex-shrink:0;">
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+      </button>
+      <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Tasks</span>
+      <button onclick="tasksOpenSend()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;color:#CC0000;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
+    </header>
+    <!-- desktop header + board/archive (rendered by JS) -->
+    <div id="tasks-content" style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;"></div>
+  </main>
+</div>
+
+<!-- TASKS card detail drawer -->
+<div id="task-detail-overlay" style="display:none;position:fixed;inset:0;z-index:700;">
+  <div onclick="tasksCloseDetail()" style="position:absolute;inset:0;background:rgba(20,18,16,0.34);animation:fadeIn 0.14s ease;"></div>
+  <aside id="task-detail-body" style="position:absolute;top:0;right:0;bottom:0;width:480px;max-width:94vw;background:#F5F4F1;box-shadow:-12px 0 44px rgba(0,0,0,0.22);display:flex;flex-direction:column;"></aside>
+</div>
+
+<!-- TASKS send-from-topic modal -->
+<div id="task-send-overlay" onclick="if(event.target===this)tasksCloseSend()" style="display:none;position:fixed;inset:0;z-index:720;background:rgba(20,18,16,0.42);align-items:center;justify-content:center;padding:24px;animation:fadeIn 0.14s ease;">
+  <div id="task-send-body" style="width:560px;max-width:100%;max-height:88vh;background:#fff;border-radius:18px;box-shadow:0 30px 70px rgba(0,0,0,0.3);display:flex;flex-direction:column;overflow:hidden;"></div>
+</div>
+
+<!-- TASKS tag manager modal -->
+<div id="tag-mgr-overlay" onclick="if(event.target===this)tasksCloseTagMgr()" style="display:none;position:fixed;inset:0;z-index:820;background:rgba(20,18,16,0.42);align-items:center;justify-content:center;padding:24px;animation:fadeIn 0.14s ease;">
+  <div id="tag-mgr-body" style="width:460px;max-width:100%;max-height:86vh;background:#fff;border-radius:18px;box-shadow:0 30px 70px rgba(0,0,0,0.3);display:flex;flex-direction:column;overflow:hidden;"></div>
 </div>
 
 <!-- ═══════════════════ TOPICS photo lightbox ═══════════════════ -->
@@ -1151,8 +1185,8 @@
       </div>
     </div>
     <div style="display:flex;gap:10px;">
-      <button id="modal-cancel" style="flex:1;background:#fff;color:#2C2C2C;border:1px solid rgba(0,0,0,0.12);padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;transition:background 0.1s;">Cancel</button>
-      <button id="modal-create" class="btn-red" style="flex:1;background:#CC0000;color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;transition:background 0.1s;">Create</button>
+      <button id="modal-cancel" class="btn btn-ghost" style="flex:1;">Cancel</button>
+      <button id="modal-create" class="btn btn-primary" style="flex:1;">Create</button>
     </div>
   </div>
 </div>
@@ -1167,20 +1201,20 @@
       <div style="font-size:11.5px;color:#9B9B9B;">Lowercase letters, numbers and dashes. Shown as #name.</div>
     </div>
     <div style="display:flex;gap:10px;">
-      <button onclick="topicModalClose()" style="flex:1;background:#fff;color:#2C2C2C;border:1px solid rgba(0,0,0,0.12);padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;transition:background 0.1s;">Cancel</button>
-      <button onclick="topicCreate()" class="btn-red" style="flex:1;background:#CC0000;color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;transition:background 0.1s;">Create</button>
+      <button onclick="topicModalClose()" class="btn btn-ghost" style="flex:1;">Cancel</button>
+      <button onclick="topicCreate()" class="btn btn-primary" style="flex:1;">Create</button>
     </div>
   </div>
 </div>
 
 <!-- Shared delete-confirm modal (every delete routes through askDelete) -->
-<div id="confirm-modal" onclick="if(event.target===this)confirmResolve(false)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:600;padding:20px;animation:fadeIn 0.15s ease;">
+<div id="confirm-modal" onclick="if(event.target===this)confirmResolve(false)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:1200;padding:20px;animation:fadeIn 0.15s ease;">
   <div style="background:#fff;border-radius:20px;width:100%;max-width:380px;padding:26px 24px;box-shadow:0 24px 60px rgba(0,0,0,0.22);">
     <h3 style="font-size:17px;font-weight:800;color:#1A1A1A;margin-bottom:8px;">Delete?</h3>
     <p id="confirm-msg" style="font-size:13.5px;color:#6B6B6B;line-height:1.5;margin-bottom:22px;">This cannot be undone.</p>
     <div style="display:flex;gap:10px;">
-      <button onclick="confirmResolve(false)" style="flex:1;background:#fff;color:#2C2C2C;border:1px solid rgba(0,0,0,0.12);padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;transition:background 0.1s;">Cancel</button>
-      <button onclick="confirmResolve(true)" class="btn-red" style="flex:1;background:#CC0000;color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;font-weight:700;transition:background 0.1s;">Delete</button>
+      <button onclick="confirmResolve(false)" class="btn btn-ghost" style="flex:1;">Cancel</button>
+      <button onclick="confirmResolve(true)" class="btn btn-primary" style="flex:1;">Delete</button>
     </div>
   </div>
 </div>
@@ -1316,6 +1350,7 @@ async function api(method, path, body) {
 // each screen's .shell-rail on show, so all 13 rails stay identical.
 const RAIL_PRODUCTS = [
   { key: 'topic',  abbr: 'TP',  label: 'Topics',               sub: 'Team discussion',       fn: 'enterTopics' },
+  { key: 'task',   abbr: 'TSK', label: 'Tasks',                sub: 'From topics',           fn: 'enterTasks' },
   { key: 'lookup', abbr: 'LU',  label: 'Look Up',              sub: 'FG &#8596; WIP finder',  fn: 'enterLookup' },
   { key: 'sop',    abbr: 'SOP', label: 'SOP',                  sub: 'Operating procedures',  fn: 'enterSop' },
   { key: 'label',  abbr: 'LB',  label: 'Label',                sub: 'Part labels',           fn: 'enterLabel' },
@@ -1325,12 +1360,13 @@ const RAIL_PRODUCTS = [
 ];
 
 function railKeyFor(s) {
-  if (['lookup', 'lookup-mobile', 'lookup-new'].includes(s)) return 'lookup';
+  if (['lookup', 'lookup-mobile'].includes(s)) return 'lookup';
   if (['label', 'label-list'].includes(s)) return 'label';
   if (['icl', 'icl-list'].includes(s)) return 'icl';
   if (['pfc', 'pfc-list'].includes(s)) return 'pfc';
   if (['exp', 'exp-list'].includes(s)) return 'exp';
   if (['topic', 'topic-list'].includes(s)) return 'topic';
+  if (s === 'tasks') return 'task';
   if (['home', 'editor', 'capture'].includes(s)) return 'sop';
   return '';
 }
@@ -1358,8 +1394,16 @@ function railHtml(active) {
     + '<span style="font-size:13px;font-weight:600;color:#C8C8C8;">Lock</span></button>';
 }
 
+// Overlays owned by a screen — hidden when navigating to any other screen.
+const SCREEN_OVERLAYS = {
+  tasks: ['task-detail-overlay', 'task-send-overlay', 'tag-mgr-overlay'],
+  lookup: ['lookup-drawer-overlay'],
+};
 function showScreen(name) {
   if (state.screen === 'topic' && name !== 'topic') topicStopPoll();
+  Object.entries(SCREEN_OVERLAYS).forEach(([owner, ids]) => {
+    if (name !== owner) ids.forEach(i => { const o = $(i); if (o) o.style.display = 'none'; });
+  });
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
   const el = $('screen-' + name);
   if (el) el.classList.add('active');
@@ -1398,7 +1442,7 @@ function drawerHtml() {
 }
 
 function setDrawerActive(key) {
-  ['sop', 'label', 'lookup', 'icl', 'pfc', 'exp', 'topic'].forEach(k => {
+  ['sop', 'label', 'lookup', 'icl', 'pfc', 'exp', 'topic', 'task'].forEach(k => {
     const btn = $('drawer-' + k);
     if (!btn) return;
     const active = k === key;
@@ -2350,6 +2394,7 @@ document.addEventListener('DOMContentLoaded', () => {
 let _luMappings = [];     // library cache
 let _luEditingId = null;  // null = new mapping
 let _luFgRows = [];       // form FG rows: [{fg_number, fg_description}]
+let _luForm = {};         // drawer form header values {wip, wipdesc}
 
 function enterLookup() {
   if (isMobile()) {
@@ -2420,12 +2465,8 @@ function lookupNew() {
   }
   _luEditingId = null;
   _luFgRows = [{ fg_number: '', fg_description: '' }];
-  $('lu-form-title').textContent = 'New Look Up';
-  $('lu-form-mtitle').textContent = 'New Look Up';
-  $('lu-f-wip').value = '';
-  $('lu-f-wipdesc').value = '';
-  renderLookupFgRows();
-  showScreen('lookup-new');
+  _luForm = { wip: '', wipdesc: '' };
+  lookupOpenForm();
   setTimeout(() => $('lu-f-wip')?.focus(), 60);
 }
 
@@ -2435,17 +2476,41 @@ function lookupEdit(id) {
   _luEditingId = id;
   _luFgRows = (m.finish_goods || []).map(f => ({ fg_number: f.fg_number || '', fg_description: f.fg_description || '' }));
   if (!_luFgRows.length) _luFgRows = [{ fg_number: '', fg_description: '' }];
-  $('lu-form-title').textContent = 'Edit Look Up';
-  $('lu-form-mtitle').textContent = 'Edit Look Up';
-  $('lu-f-wip').value = m.wip_number || '';
-  $('lu-f-wipdesc').value = m.wip_description || '';
-  renderLookupFgRows();
-  showScreen('lookup-new');
+  _luForm = { wip: m.wip_number || '', wipdesc: m.wip_description || '' };
+  lookupOpenForm();
 }
 
-function lookupBack() {
-  loadMappings();
-  showScreen('lookup');
+function lookupOpenForm() { $('lookup-drawer-overlay').style.display = 'block'; lookupRenderForm(); }
+function lookupCloseForm() { const o = $('lookup-drawer-overlay'); if (o) o.style.display = 'none'; }
+function lookupBack() { lookupCloseForm(); loadMappings(); }  // stays on the list screen
+
+function lookupRenderForm() {
+  const body = $('lookup-drawer-body'); if (!body) return;
+  const title = _luEditingId ? 'Edit Look Up' : 'New Look Up';
+  const inp = 'width:100%;padding:11px 13px;background:#fff;border:1px solid rgba(0,0,0,0.12);border-radius:10px;font-size:14px;color:#1A1A1A;box-sizing:border-box;';
+  body.innerHTML =
+    '<div style="padding:18px 22px 16px;background:#fff;border-bottom:1px solid var(--line);flex-shrink:0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">'
+    + '<div><div style="font-size:18px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">' + title + '</div>'
+    + '<div style="font-size:12.5px;color:#8A8A8A;margin-top:2px;max-width:380px;">Link a WIP part to the finished good(s) it rolls up into. A WIP can belong to more than one.</div></div>'
+    + '<button onclick="lookupCloseForm()" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,0,0,0.08);background:#fff;color:#6B6B6B;font-size:17px;line-height:1;flex-shrink:0;cursor:pointer;">✕</button></div>'
+    + '<div style="flex:1;min-height:0;overflow-y:auto;padding:18px 22px;">'
+    + '<div class="card" style="padding:18px;">'
+    + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><span style="width:30px;height:30px;border-radius:8px;background:#F6EFD9;color:#8A6E2E;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">WIP</span>'
+    + '<div><div style="font-size:14px;font-weight:700;color:#1A1A1A;">WIP — child part</div><div style="font-size:11.5px;color:#9B9B9B;">The part the operator is holding on the floor</div></div></div>'
+    + '<div style="margin-bottom:12px;"><div class="section-label" style="margin-bottom:6px;">WIP number</div><input id="lu-f-wip" placeholder="2xxxxx" style="' + inp + "font-family:'JetBrains Mono',monospace;\"></div>"
+    + '<div><div class="section-label" style="margin-bottom:6px;">WIP description</div><input id="lu-f-wipdesc" placeholder="e.g. Ribbon Cable Harness · 120mm" style="' + inp + '"></div></div>'
+    + '<div class="card" style="padding:18px;margin-top:14px;">'
+    + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><span style="width:30px;height:30px;border-radius:8px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">FG</span>'
+    + '<div><div style="font-size:14px;font-weight:700;color:#1A1A1A;">Finish Good — parent(s)</div><div style="font-size:11.5px;color:#9B9B9B;">Every finished good this WIP rolls up into</div></div></div>'
+    + '<div id="lu-fg-rows"></div>'
+    + '<button onclick="lookupAddFg()" style="display:inline-flex;align-items:center;gap:7px;margin-top:6px;padding:9px 14px;border:1px dashed #C8C4BC;border-radius:10px;color:#8A6A52;font-size:13px;font-weight:600;cursor:pointer;background:transparent;"><span style="font-size:15px;color:#CC0000;">+</span> Add another finished good</button></div>'
+    + '</div>'
+    + '<div style="flex-shrink:0;padding:14px 22px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;">'
+    + '<button class="btn btn-ghost" onclick="lookupCloseForm()">Cancel</button>'
+    + '<button class="btn btn-primary" onclick="lookupSave()">Save Look Up</button></div>';
+  $('lu-f-wip').value = _luForm.wip || '';
+  $('lu-f-wipdesc').value = _luForm.wipdesc || '';
+  renderLookupFgRows();
 }
 
 function syncFgRowsFromDom() {
@@ -2466,7 +2531,7 @@ function renderLookupFgRows() {
     const labelsD = i === 0
       ? `<div style="font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">FG description</div>`
       : '';
-    return `<div class="lu-fg-row" style="display:grid;grid-template-columns:210px 1fr 34px;gap:13px;align-items:end;margin-bottom:11px;">
+    return `<div class="lu-fg-row" style="display:grid;grid-template-columns:130px 1fr 34px;gap:10px;align-items:end;margin-bottom:11px;">
       <div>${labels}<input class="lu-fg-num" value="${esc(f.fg_number)}" placeholder="8xxxxx" style="${inp}font-family:'JetBrains Mono',monospace;"></div>
       <div>${labelsD}<input class="lu-fg-desc" value="${esc(f.fg_description)}" placeholder="Finished good name" style="${inp}"></div>
       <div onclick="lookupRemoveFg(${i})" title="Remove" style="width:34px;height:42px;border-radius:9px;border:1px solid rgba(0,0,0,0.1);background:#fff;display:flex;align-items:center;justify-content:center;color:#BBB;font-size:16px;cursor:pointer;">&times;</div>
@@ -3327,8 +3392,20 @@ function topicBubble(m) {
   const txt = m.text
     ? '<p style="font-size:14px;color:#2C2C2C;line-height:1.5;white-space:pre-wrap;word-break:break-word;">' + esc(m.text) + '</p>'
     : '';
+  // On-board styling: tint the bubble by task status + show status / tag name(s).
+  let bodyBg = '#fff', bodyBorder = 'rgba(0,0,0,0.07)', tkBadge = '';
+  if (m.task) {
+    const col = _TASK_DOT[m.task.status] || '#6B6B6B';
+    bodyBg = hexA(col, 0.07); bodyBorder = hexA(col, 0.34);
+    const tagChips = (m.task.tags || []).map(g =>
+      '<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;background:' + hexA(g.color, 0.16) + ';color:' + g.color + ';">' + esc(g.name) + '</span>').join('');
+    tkBadge = '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:9px;">'
+      + '<span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:0.3px;color:' + col + ';">'
+      + '<span style="width:7px;height:7px;border-radius:50%;background:' + col + ';"></span>ON BOARD · ' + esc(m.task.status_label) + '</span>' + tagChips + '</div>';
+  }
   const edited = m.edited ? ' <span style="color:#B8B2AA;">(edited)</span>' : '';
   const ico = {
+    task: '<span style="font-size:9px;font-weight:800;letter-spacing:0.3px;line-height:1;">TSK</span>',
     copy: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h8"></path></svg>',
     edit: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>',
     del: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>'
@@ -3339,6 +3416,7 @@ function topicBubble(m) {
     + ' onmouseout="this.style.background=\'transparent\';this.style.color=\'#6B6B6B\';"'
     + ' style="width:28px;height:28px;border-radius:7px;border:none;background:transparent;color:#6B6B6B;display:flex;align-items:center;justify-content:center;cursor:pointer;">' + svg + '</button>';
   const actions = '<div class="topic-actions" style="position:absolute;top:-15px;right:10px;z-index:5;display:flex;gap:2px;opacity:0;transition:opacity 0.12s;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:9px;padding:2px;box-shadow:0 2px 8px rgba(0,0,0,0.10);">'
+    + (m.task ? '' : actBtn("tasksSendFromMessage('" + _topic.channelId + "','" + m.id + "')", 'Send to task', ico.task, false))
     + actBtn("topicCopy('" + m.id + "')", 'Copy', ico.copy, false)
     + actBtn("topicEditStart('" + m.id + "')", 'Edit', ico.edit, false)
     + actBtn("topicDeleteMsg('" + m.id + "')", 'Delete', ico.del, true)
@@ -3347,7 +3425,7 @@ function topicBubble(m) {
     + ' onmouseover="var a=this.querySelector(\'.topic-actions\');if(a)a.style.opacity=1;"'
     + ' onmouseout="var a=this.querySelector(\'.topic-actions\');if(a)a.style.opacity=0;">'
     + '<div style="position:relative;">'
-    + '<div class="topic-body" style="width:100%;background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:14px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">' + txt + gal + '</div>'
+    + '<div class="topic-body" style="width:100%;background:' + bodyBg + ';border:1px solid ' + bodyBorder + ';border-radius:14px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">' + tkBadge + txt + gal + '</div>'
     + actions + '</div>'
     + '<span class="topic-stamp" style="font-size:10.5px;color:#A8A8A8;font-family:\'JetBrains Mono\',monospace;padding-left:6px;">' + topicTime(m.created_at) + edited + '</span>'
     + '</div>';
@@ -3559,6 +3637,689 @@ async function topicCreate() {
   } catch (e) {
     toast(e.status === 409 ? 'Topic "' + slug + '" already exists' : 'Create failed: ' + e.message);
   }
+}
+
+// ═══════════════════ TASKS (Kanban board fed from Topics) ═══════════════════
+const _task = {
+  all: [],            // every task (board + archived); split at render time
+  tags: [],           // all tags (labels)
+  filter: [],         // active tag-id filter on the board
+  view: 'board',      // 'board' | 'archive'
+  detailId: null, detail: null, editTitle: false,
+  editCommentId: null, commentDraft: '',
+  dragId: null,
+  send: { channelId: null, channels: [], msgs: [], sel: {} },
+  tagMgr: { colorPickFor: null, newColor: '#CC0000' },
+};
+const _TAG_PALETTE = ['#CC0000', '#E8590C', '#D9982A', '#2E9E4F', '#0CA678', '#1C7ED6', '#7048E8', '#C2255C', '#5A5A5A', '#7A766E'];
+function hexA(hex, a) {
+  const h = String(hex || '#6B6B6B').replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+}
+const _TASK_COLS = [
+  { key: 'todo',  label: 'To do',       dot: '#6B6B6B' },
+  { key: 'doing', label: 'In progress', dot: '#D9982A' },
+  { key: 'done',  label: 'Done',        dot: '#2E9E4F' },
+];
+// Derived from _TASK_COLS so status labels/colours live in one place.
+const _TASK_LABELS = Object.fromEntries(_TASK_COLS.map(c => [c.key, c.label]));
+const _TASK_DOT = Object.fromEntries(_TASK_COLS.map(c => [c.key, c.dot]));
+
+function taskPrioStyle(p) {
+  const m = { High: ['#FCE9E9', '#B0202E'], Medium: ['#F6EFD9', '#9B7B2E'], Low: ['#ECEAE4', '#7A766E'] };
+  const c = m[p]; if (!c) return '';
+  return 'font-size:10px;font-weight:700;letter-spacing:0.3px;padding:3px 8px;border-radius:6px;background:' + c[0] + ';color:' + c[1] + ';';
+}
+function taskDueStyle(warn) {
+  return warn
+    ? 'font-size:11px;font-weight:700;color:#B0202E;background:#FCE9E9;padding:2px 8px;border-radius:6px;'
+    : 'font-size:11px;font-weight:600;color:#7A766E;background:#ECEAE4;padding:2px 8px;border-radius:6px;';
+}
+function taskDueInfo(due) {
+  if (!due) return null;
+  const d = new Date(due + 'T00:00:00');
+  if (isNaN(d)) return { label: due, warn: false };
+  const now = new Date();
+  const t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const days = Math.round((d - t0) / 86400000);
+  let label;
+  if (days === 0) label = 'Today';
+  else if (days === 1) label = 'Tomorrow';
+  else if (days === -1) label = 'Yesterday';
+  else if (days < 0) label = 'Overdue';
+  else label = d.toLocaleDateString([], { day: 'numeric', month: 'short' });
+  return { label, warn: days <= 1 };
+}
+function taskMsgTime(iso) {
+  if (!iso) return '';
+  const d = new Date(/[Z+]/.test(iso) ? iso : iso + 'Z');
+  return isNaN(d) ? '' : d.toLocaleString([], { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+}
+function _taskMaxPos() { return _task.all.reduce((m, t) => Math.max(m, t.position || 0), 0); }
+function _taskPatchLocal(id, f) { const t = _task.all.find(x => x.id === id); if (t) Object.assign(t, f); }
+
+function enterTasks() { _task.view = 'board'; showScreen('tasks'); tasksLoad(); }
+async function tasksLoad() {
+  try {
+    const [tasks, tags] = await Promise.all([api('GET', '/api/tasks'), api('GET', '/api/tags')]);
+    _task.all = tasks || []; _task.tags = tags || [];
+  } catch (e) { _task.all = _task.all || []; }
+  tasksRender();
+}
+function tasksToggleArchive() { _task.view = _task.view === 'archive' ? 'board' : 'archive'; tasksRender(); }
+function tasksRender() {
+  const c = $('tasks-content'); if (!c) return;
+  c.innerHTML = _task.view === 'archive' ? tasksArchiveHtml() : tasksBoardHtml();
+}
+
+function tasksHeaderHtml(isBoard) {
+  const archivedCount = _task.all.filter(t => t.archived).length;
+  const archiveCls = isBoard ? 'btn btn-ghost btn-sm' : 'btn btn-dark btn-sm';
+  const archiveBtnLabel = isBoard ? ('Archive · ' + archivedCount) : '‹ Board';
+  const sendBtn = isBoard
+    ? '<button onclick="tasksOpenSend()" class="btn btn-primary dt-only"><span style="font-size:15px;line-height:1;">＋</span> Send from a topic</button>'
+    : '';
+  const manageBtn = isBoard ? '<button onclick="tasksOpenTagMgr()" class="btn btn-ghost btn-sm">Manage tags</button>' : '';
+  return '<div class="tasks-header" style="flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;max-width:1100px;margin:0 auto;width:100%;flex-wrap:wrap;">'
+    + '<div class="tasks-head-text"><h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Tasks</h1></div>'
+    + '<div class="tasks-actions">'
+    + '<button onclick="tasksToggleArchive()" class="' + archiveCls + '">' + archiveBtnLabel + '</button>' + manageBtn + sendBtn + '</div></div></div>';
+}
+
+function tasksBoardHtml() {
+  const active = _task.filter;
+  const match = t => !active.length || (t.tag_ids || []).some(id => active.includes(id));
+  const board = _task.all.filter(t => !t.archived && match(t));
+  const cols = _TASK_COLS.map(d => {
+    const cards = board.filter(t => t.status === d.key).sort((a, b) => (a.position || 0) - (b.position || 0));
+    const archiveAll = (d.key === 'done' && cards.length)
+      ? '<button onclick="tasksArchiveAllDone()" title="Archive all done" style="margin-left:auto;font-size:11px;font-weight:600;color:#8A8A8A;background:transparent;display:inline-flex;align-items:center;gap:4px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"></rect><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"></path><path d="M10 12h4"></path></svg> Archive</button>'
+      : '';
+    let body = cards.map(tasksCardHtml).join('');
+    if (d.key === 'todo') body += '<button onclick="tasksOpenSend()" style="width:100%;border:1.5px dashed rgba(0,0,0,0.12);background:transparent;border-radius:12px;padding:11px;font-size:12.5px;font-weight:600;color:#8A8A8A;cursor:pointer;">＋ Send from a topic</button>';
+    else if (!cards.length) body = '<div style="border:1.5px dashed rgba(0,0,0,0.12);border-radius:12px;padding:22px 14px;text-align:center;font-size:12.5px;color:#A8A39A;">Drop a card here</div>';
+    return '<section class="task-col"><div style="display:flex;align-items:center;gap:9px;padding:2px 4px 12px;">'
+      + '<span style="width:9px;height:9px;border-radius:50%;background:' + d.dot + ';"></span>'
+      + '<span style="font-size:13.5px;font-weight:700;color:#1A1A1A;">' + d.label + '</span>'
+      + '<span style="font-size:11.5px;font-weight:700;color:#9B9B9B;background:#fff;border:1px solid rgba(0,0,0,0.06);min-width:22px;text-align:center;padding:1px 7px;border-radius:20px;">' + cards.length + '</span>'
+      + archiveAll + '</div>'
+      + '<div class="task-dropzone" ondragover="taskDragOver(event)" ondragleave="taskDragLeave(event)" ondrop="taskDrop(event,\'' + d.key + '\')">' + body + '</div></section>';
+  }).join('');
+  return tasksHeaderHtml(true)
+    + '<div class="task-board-wrap" style="flex:1;min-height:0;overflow:hidden;padding:22px 30px 26px;display:flex;flex-direction:column;">'
+    + tasksFilterBar()
+    + '<div style="flex:1;min-height:0;"><div class="task-cols">' + cols + '</div></div></div>';
+}
+
+function tasksTagChips(t) {
+  const tags = t.tags || [];
+  if (!tags.length) return '';
+  return '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;">'
+    + tags.map(g => '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:' + hexA(g.color, 0.14) + ';color:' + g.color + ';">' + esc(g.name) + '</span>').join('')
+    + '</div>';
+}
+
+function tasksFilterBar() {
+  if (!_task.tags.length) return '';
+  const chips = _task.tags.map(g => {
+    const on = _task.filter.includes(g.id);
+    return '<button onclick="tasksToggleFilter(\'' + g.id + '\')" style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:20px;cursor:pointer;border:1px solid '
+      + (on ? g.color : 'rgba(0,0,0,0.12)') + ';background:' + (on ? g.color : '#fff') + ';color:' + (on ? '#fff' : '#6B6B6B') + ';">'
+      + '<span style="width:8px;height:8px;border-radius:50%;background:' + (on ? '#fff' : g.color) + ';"></span>' + esc(g.name) + '</button>';
+  }).join('');
+  const clear = _task.filter.length ? '<button onclick="tasksClearFilter()" style="font-size:11.5px;font-weight:600;color:#8A8A8A;background:transparent;padding:4px 6px;">Clear</button>' : '';
+  return '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;max-width:1100px;margin:0 auto 14px;width:100%;">'
+    + '<span style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;">FILTER</span>' + chips + clear + '</div>';
+}
+function tasksToggleFilter(id) {
+  const i = _task.filter.indexOf(id);
+  if (i >= 0) _task.filter.splice(i, 1); else _task.filter.push(id);
+  tasksRender();
+}
+function tasksClearFilter() { _task.filter = []; tasksRender(); }
+
+function tasksCardHtml(t) {
+  const prio = t.priority ? '<span style="' + taskPrioStyle(t.priority) + '">' + t.priority + '</span>' : '';
+  const due = taskDueInfo(t.due);
+  const dueBadge = due ? '<span style="' + taskDueStyle(due.warn) + '">' + esc(due.label) + '</span>' : '';
+  const photo = t.photo_url ? '<div style="margin-top:11px;height:96px;border-radius:9px;overflow:hidden;border:1px solid rgba(0,0,0,0.05);"><img src="' + t.photo_url + '" style="width:100%;height:100%;object-fit:cover;display:block;" alt=""></div>' : '';
+  return '<div draggable="true" ondragstart="taskDragStart(event,\'' + t.id + '\')" ondragend="taskDragEnd(event)" onclick="tasksOpenDetail(\'' + t.id + '\')" style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:12px 14px;cursor:pointer;">'
+    + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">' + prio
+    + '<span style="margin-left:auto;font-size:11px;font-weight:600;color:#7A7A7A;background:#F2F0EC;padding:2px 8px;border-radius:6px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(t.channel_slug) + '</span></div>'
+    + '<div style="font-size:14px;font-weight:600;color:#1A1A1A;line-height:1.35;">' + esc(t.title) + '</div>' + tasksTagChips(t) + photo
+    + '<div style="display:flex;align-items:center;gap:12px;margin-top:12px;">'
+    + '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;color:#8A8A8A;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>' + t.msg_count + (t.msg_count === 1 ? ' message' : ' messages') + '</span>'
+    + (t.comment_count ? '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:500;color:#8A8A8A;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h10M7 12h6"></path><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>' + t.comment_count + '</span>' : '')
+    + dueBadge + '</div></div>';
+}
+
+// ---- drag/drop (no full re-render during a drag; highlight is direct DOM) ----
+function taskZoneHot(z) { z.style.background = 'rgba(204,0,0,0.05)'; z.style.boxShadow = 'inset 0 0 0 2px rgba(204,0,0,0.35)'; }
+function taskZonePlain(z) { z.style.background = 'rgba(0,0,0,0.025)'; z.style.boxShadow = 'none'; }
+function taskDragStart(ev, id) {
+  _task.dragId = id;
+  try { ev.dataTransfer.effectAllowed = 'move'; ev.dataTransfer.setData('text/plain', id); } catch (e) {}
+  const el = ev.currentTarget; setTimeout(() => { if (el) el.style.opacity = '0.35'; }, 0);
+}
+function taskDragEnd(ev) { _task.dragId = null; if (ev.currentTarget) ev.currentTarget.style.opacity = '1'; document.querySelectorAll('.task-dropzone').forEach(taskZonePlain); }
+function taskDragOver(ev) { ev.preventDefault(); try { ev.dataTransfer.dropEffect = 'move'; } catch (e) {} taskZoneHot(ev.currentTarget); }
+function taskDragLeave(ev) { if (ev.currentTarget.contains(ev.relatedTarget)) return; taskZonePlain(ev.currentTarget); }
+function taskDrop(ev, col) {
+  ev.preventDefault(); taskZonePlain(ev.currentTarget);
+  const id = _task.dragId || (ev.dataTransfer && ev.dataTransfer.getData('text/plain'));
+  _task.dragId = null;
+  if (id) taskMove(id, col);
+}
+async function taskMove(id, col) {
+  const t = _task.all.find(x => x.id === id);
+  if (!t || t.archived || t.status === col) return;
+  t.status = col; t.position = _taskMaxPos() + 1;
+  tasksRender();
+  toast('Moved to ' + _TASK_LABELS[col], 'success');
+  try { await api('PATCH', '/api/tasks/' + id, { status: col }); }
+  catch (e) { toast('Move failed'); tasksLoad(); }
+}
+
+// ---- detail drawer ----
+async function tasksOpenDetail(id) {
+  _task.detailId = id;
+  let t;
+  try { t = await api('GET', '/api/tasks/' + id); }
+  catch (e) { toast('Load failed'); return; }
+  if (_task.detailId !== id) return;
+  _task.detail = t;
+  _task.editTitle = false;
+  _task.editCommentId = null;
+  _task.commentDraft = '';
+  $('task-detail-overlay').style.display = 'block';
+  tasksRenderDetail();
+}
+function tasksCloseDetail() {
+  _task.detailId = null; _task.detail = null;
+  const o = $('task-detail-overlay'); if (o) o.style.display = 'none';
+}
+function tasksRenderDetail() {
+  const t = _task.detail, body = $('task-detail-body');
+  if (!t || !body) return;
+  const prio = t.priority ? '<span style="' + taskPrioStyle(t.priority) + '">' + t.priority + '</span>' : '';
+  const due = taskDueInfo(t.due);
+  const dueBadge = due ? '<span style="' + taskDueStyle(due.warn) + '">' + esc(due.label) + '</span>' : '';
+  const statusTabs = _TASK_COLS.map(d => {
+    const on = t.status === d.key;
+    return '<button onclick="tasksDetailSetStatus(\'' + d.key + '\')" style="flex:1;padding:8px 6px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;'
+      + (on ? 'background:#fff;color:#1A1A1A;box-shadow:0 1px 3px rgba(0,0,0,0.1);' : 'background:transparent;color:#8A8A8A;') + '">' + d.label + '</button>';
+  }).join('');
+  const prioPills = ['', 'Low', 'Medium', 'High'].map(p => {
+    const on = (t.priority || '') === p;
+    return '<button onclick="tasksSetPriority(\'' + p + '\')" style="padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid '
+      + (on ? '#CC0000' : 'rgba(0,0,0,0.12)') + ';background:' + (on ? '#FCE9E9' : '#fff') + ';color:' + (on ? '#B0202E' : '#6B6B6B') + ';">' + (p || 'None') + '</button>';
+  }).join('');
+  const msgs = t.messages || [];
+  const msgList = msgs.length ? msgs.map(tasksDetailMsgHtml).join('')
+    : '<div style="font-size:13px;color:#9B9B9B;padding:8px 0;">These messages are no longer in the topic.</div>';
+  const next = t.status === 'todo' ? 'In progress' : t.status === 'doing' ? 'Done' : null;
+  const advanceLabel = next ? ('Move to ' + next) : 'Archive task';
+  const topicArg = t.channel_id ? ('\'' + t.channel_id + '\'') : 'null';
+  const titleBlock = _task.editTitle
+    ? '<input id="task-title-input" value="' + esc(t.title) + '" onkeydown="if(event.key===\'Enter\'){this.blur();}else if(event.key===\'Escape\'){tasksTitleCancel();}" onblur="tasksTitleSave(this.value)" style="width:100%;margin-top:12px;font-size:19px;font-weight:800;letter-spacing:-0.3px;line-height:1.3;color:#1A1A1A;border:1px solid #CC0000;border-radius:8px;padding:6px 9px;margin-left:-9px;background:#fff;">'
+    : '<div onclick="tasksTitleEdit()" title="Click to rename" class="task-title-row" style="display:flex;align-items:center;gap:8px;margin-top:12px;cursor:text;">'
+      + '<h2 style="font-size:19px;font-weight:800;letter-spacing:-0.3px;line-height:1.3;color:#1A1A1A;">' + esc(t.title) + '</h2>'
+      + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg></div>';
+  body.innerHTML =
+    '<div style="padding:18px 22px 16px;background:#fff;border-bottom:1px solid rgba(0,0,0,0.07);flex-shrink:0;">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">'
+    + '<span style="font-size:11px;font-weight:600;color:#7A7A7A;background:#F2F0EC;padding:3px 10px;border-radius:7px;max-width:80%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(t.channel_slug) + '</span>'
+    + '<button onclick="tasksCloseDetail()" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,0,0,0.08);background:#fff;color:#6B6B6B;font-size:17px;line-height:1;flex-shrink:0;">✕</button></div>'
+    + titleBlock
+    + '<div style="display:flex;align-items:center;gap:9px;margin-top:12px;flex-wrap:wrap;">' + prio + dueBadge + '</div></div>'
+    + '<div style="flex:1;min-height:0;overflow-y:auto;">'
+    + '<div style="padding:16px 22px 4px;"><div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Status</div>'
+    + '<div style="display:flex;gap:6px;background:#EAE7E2;border-radius:11px;padding:4px;">' + statusTabs + '</div></div>'
+    + '<div style="padding:16px 22px 4px;"><div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Priority</div>'
+    + '<div style="display:flex;gap:6px;flex-wrap:wrap;">' + prioPills + '</div></div>'
+    + '<div style="padding:16px 22px 4px;"><div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Due date</div>'
+    + '<div style="display:flex;gap:8px;align-items:center;"><input type="date" value="' + esc(t.due || '') + '" onchange="tasksSetDue(this.value)" style="padding:8px 10px;border:1px solid rgba(0,0,0,0.12);border-radius:8px;font-size:13px;color:#1A1A1A;">'
+    + (t.due ? '<button onclick="tasksSetDue(\'\')" style="font-size:12px;font-weight:600;color:#8A8A8A;background:transparent;">Clear</button>' : '') + '</div></div>'
+    + tasksDetailTags(t)
+    + '<div style="padding:18px 22px 22px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">'
+    + '<div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;">Picked from topic</div>'
+    + '<span style="font-size:11px;font-weight:600;color:#9B9B9B;background:#EAE7E2;padding:1px 8px;border-radius:20px;">' + msgs.length + (msgs.length === 1 ? ' message' : ' messages') + '</span>'
+    + '<button onclick="tasksAddMessages()" style="margin-left:auto;font-size:11.5px;font-weight:600;color:#CC0000;background:transparent;display:inline-flex;align-items:center;gap:4px;cursor:pointer;">＋ Add messages</button></div>'
+    + '<div style="display:flex;flex-direction:column;gap:12px;">' + msgList + '</div></div>'
+    + tasksDetailComments(t) + '</div>'
+    + '<div style="flex-shrink:0;padding:14px 22px;background:#fff;border-top:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;gap:12px;">'
+    + '<button onclick="tasksOpenTopic(' + topicArg + ')" style="font-size:13px;font-weight:600;color:#6B6B6B;background:transparent;display:inline-flex;align-items:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Open full topic</button>'
+    + '<button onclick="tasksDetailAdvance()" class="btn btn-dark btn-sm">' + advanceLabel + '</button></div>';
+}
+function tasksDetailMsgHtml(m) {
+  const imgs = (m.images || []).map(u => '<img src="' + u + '" style="width:100%;max-height:220px;object-fit:cover;border-radius:11px;border:1px solid rgba(0,0,0,0.05);margin-top:7px;display:block;" alt="">').join('');
+  return '<div><div style="font-size:11px;color:#A0A0A0;margin-bottom:4px;">' + esc(taskMsgTime(m.created_at)) + (m.edited ? ' · edited' : '') + '</div>'
+    + (m.text ? '<div style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:4px 13px 13px 13px;padding:10px 13px;font-size:13px;color:#33312E;line-height:1.45;white-space:pre-wrap;">' + esc(m.text) + '</div>' : '')
+    + imgs + '</div>';
+}
+
+// ---- comments (free-text notes on a task) ----
+function tasksDetailComments(t) {
+  const cs = t.comments || [];
+  const list = cs.length ? cs.map(tasksCommentHtml).join('')
+    : '<div style="font-size:12.5px;color:#9B9B9B;padding:2px 0 4px;">No notes yet — add task detail below.</div>';
+  return '<div style="padding:6px 22px 24px;border-top:1px solid rgba(0,0,0,0.06);">'
+    + '<div style="display:flex;align-items:center;gap:8px;margin:16px 0 12px;">'
+    + '<div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;">Comments</div>'
+    + (cs.length ? '<span style="font-size:11px;font-weight:600;color:#9B9B9B;background:#EAE7E2;padding:1px 8px;border-radius:20px;">' + cs.length + '</span>' : '') + '</div>'
+    + '<div style="display:flex;flex-direction:column;gap:9px;">' + list + '</div>'
+    + '<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">'
+    + '<textarea id="task-comment-input" oninput="_task.commentDraft=this.value" placeholder="Add task detail, context, next steps…" style="width:100%;min-height:64px;resize:vertical;padding:10px 12px;border:1px solid rgba(0,0,0,0.12);border-radius:10px;font-size:13px;line-height:1.45;color:#1A1A1A;font-family:inherit;">' + esc(_task.commentDraft || '') + '</textarea>'
+    + '<button onclick="tasksAddComment()" class="btn btn-dark btn-sm" style="align-self:flex-end;">Add comment</button></div></div>';
+}
+function tasksCommentHtml(c) {
+  if (_task.editCommentId === c.id) {
+    return '<div style="background:#fff;border:1px solid #CC0000;border-radius:11px;padding:10px 12px;">'
+      + '<textarea id="task-comment-edit" style="width:100%;min-height:54px;resize:vertical;border:none;outline:none;font-size:13px;line-height:1.45;color:#33312E;font-family:inherit;background:transparent;">' + esc(c.text) + '</textarea>'
+      + '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px;">'
+      + '<button onclick="tasksCommentCancel()" style="font-size:12px;font-weight:600;color:#8A8A8A;background:transparent;cursor:pointer;">Cancel</button>'
+      + '<button onclick="tasksCommentSave(\'' + c.id + '\')" style="font-size:12px;font-weight:700;color:#fff;background:#CC0000;padding:6px 12px;border-radius:8px;cursor:pointer;">Save</button></div></div>';
+  }
+  return '<div style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:11px;padding:10px 12px;">'
+    + '<div style="font-size:13px;color:#33312E;line-height:1.45;white-space:pre-wrap;word-break:break-word;">' + esc(c.text) + '</div>'
+    + '<div style="display:flex;align-items:center;gap:10px;margin-top:6px;">'
+    + '<span style="font-size:10.5px;color:#A0A0A0;">' + esc(taskMsgTime(c.created_at)) + (c.edited ? ' · edited' : '') + '</span>'
+    + '<button onclick="tasksCommentEdit(\'' + c.id + '\')" style="margin-left:auto;font-size:11.5px;font-weight:600;color:#8A8A8A;background:transparent;cursor:pointer;">Edit</button>'
+    + '<button onclick="tasksCommentDelete(\'' + c.id + '\')" style="font-size:11.5px;font-weight:600;color:#B0202E;background:transparent;cursor:pointer;">Delete</button></div></div>';
+}
+async function tasksRefreshDetail() {
+  const t = _task.detail; if (!t) return;
+  let fresh; try { fresh = await api('GET', '/api/tasks/' + t.id); } catch (e) { return; }
+  _task.detail = fresh;
+  const card = _task.all.find(x => x.id === fresh.id);  // sync board card in place — no full reload
+  if (card) Object.assign(card, fresh);
+  tasksRenderDetail();
+  tasksRender();
+}
+async function tasksAddComment() {
+  const t = _task.detail; if (!t) return;
+  const el = $('task-comment-input');
+  const text = (el ? el.value : '').trim();
+  if (!text) { toast('Write a comment first'); return; }
+  try { await api('POST', '/api/tasks/' + t.id + '/comments', { text }); }
+  catch (e) { toast('Add failed'); return; }
+  _task.commentDraft = '';
+  tasksRefreshDetail();
+}
+function tasksCommentEdit(id) {
+  _task.editCommentId = id;
+  tasksRenderDetail();
+  const el = $('task-comment-edit'); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+}
+function tasksCommentCancel() { _task.editCommentId = null; tasksRenderDetail(); }
+async function tasksCommentSave(id) {
+  const el = $('task-comment-edit');
+  const text = (el ? el.value : '').trim();
+  if (!text) { toast('Comment cannot be empty'); return; }
+  _task.editCommentId = null;
+  try { await api('PATCH', '/api/comments/' + id, { text }); }
+  catch (e) { toast('Save failed'); }
+  tasksRefreshDetail();
+}
+async function tasksCommentDelete(id) {
+  if (!(await askDelete('Delete this comment?'))) return;
+  try { await api('DELETE', '/api/comments/' + id); }
+  catch (e) { toast('Delete failed'); return; }
+  tasksRefreshDetail();
+}
+async function tasksDetailSetStatus(col) {
+  const t = _task.detail;
+  if (!t || t.status === col) return;
+  t.status = col;
+  _taskPatchLocal(t.id, { status: col, position: _taskMaxPos() + 1 });
+  tasksRenderDetail(); tasksRender();
+  try { await api('PATCH', '/api/tasks/' + t.id, { status: col }); }
+  catch (e) { toast('Save failed'); tasksLoad(); }
+}
+function tasksDetailAdvance() {
+  const t = _task.detail; if (!t) return;
+  const next = t.status === 'todo' ? 'doing' : t.status === 'doing' ? 'done' : null;
+  if (next) tasksDetailSetStatus(next);
+  else tasksArchiveCard(t.id, true);
+}
+async function tasksSetPriority(p) {
+  const t = _task.detail; if (!t) return;
+  t.priority = p; _taskPatchLocal(t.id, { priority: p });
+  tasksRenderDetail(); tasksRender();
+  try { await api('PATCH', '/api/tasks/' + t.id, { priority: p }); }
+  catch (e) { toast('Save failed'); }
+}
+async function tasksSetDue(v) {
+  const t = _task.detail; if (!t) return;
+  t.due = v || ''; _taskPatchLocal(t.id, { due: t.due });
+  tasksRenderDetail(); tasksRender();
+  try { await api('PATCH', '/api/tasks/' + t.id, { due: t.due }); }
+  catch (e) { toast('Save failed'); }
+}
+function tasksOpenTopic(channelId) {
+  if (!channelId) { toast('That topic no longer exists'); return; }
+  tasksCloseDetail();
+  openTopic(channelId);
+}
+function tasksTitleEdit() {
+  _task.editTitle = true;
+  tasksRenderDetail();
+  const el = $('task-title-input'); if (el) { el.focus(); el.select(); }
+}
+function tasksTitleCancel() { _task.editTitle = false; tasksRenderDetail(); }
+async function tasksTitleSave(v) {
+  _task.editTitle = false;
+  v = (v || '').trim();
+  const t = _task.detail; if (!t) return;
+  if (!v || v === t.title) { tasksRenderDetail(); return; }
+  t.title = v; _taskPatchLocal(t.id, { title: v });
+  tasksRenderDetail(); tasksRender();
+  try { await api('PATCH', '/api/tasks/' + t.id, { title: v }); }
+  catch (e) { toast('Save failed'); }
+}
+function tasksAddMessages() {
+  const t = _task.detail; if (!t) return;
+  tasksOpenSend(t.id, t.channel_id);  // open the send modal in add-to-task mode
+}
+
+// ---- tags on a task (detail drawer) ----
+function tasksDetailTags(t) {
+  const sel = t.tag_ids || [];
+  const chips = _task.tags.length
+    ? _task.tags.map(g => {
+        const on = sel.includes(g.id);
+        return '<button onclick="tasksToggleTag(\'' + g.id + '\')" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px;cursor:pointer;border:1px solid '
+          + (on ? g.color : 'rgba(0,0,0,0.12)') + ';background:' + (on ? hexA(g.color, 0.14) : '#fff') + ';color:' + (on ? g.color : '#6B6B6B') + ';">'
+          + '<span style="width:8px;height:8px;border-radius:50%;background:' + g.color + ';"></span>' + esc(g.name) + (on ? ' ✓' : '') + '</button>';
+      }).join('')
+    : '<span style="font-size:12.5px;color:#9B9B9B;">No tags yet.</span>';
+  return '<div style="padding:16px 22px 4px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+    + '<div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;">Tags</div>'
+    + '<button onclick="tasksOpenTagMgr()" style="font-size:11px;font-weight:600;color:#8A8A8A;background:transparent;">Manage</button></div>'
+    + '<div style="display:flex;gap:6px;flex-wrap:wrap;">' + chips + '</div></div>';
+}
+async function tasksToggleTag(id) {
+  const t = _task.detail; if (!t) return;
+  const sel = new Set(t.tag_ids || []);
+  sel.has(id) ? sel.delete(id) : sel.add(id);
+  const ids = _task.tags.map(g => g.id).filter(x => sel.has(x));  // preserve tag order
+  t.tag_ids = ids;
+  t.tags = _task.tags.filter(g => sel.has(g.id));
+  _taskPatchLocal(t.id, { tag_ids: t.tag_ids, tags: t.tags });
+  tasksRenderDetail(); tasksRender();
+  try { await api('PATCH', '/api/tasks/' + t.id, { tag_ids: ids }); }
+  catch (e) { toast('Save failed'); }
+}
+
+// ---- tag manager modal ----
+function tasksOpenTagMgr() {
+  _task.tagMgr = { colorPickFor: null, newColor: _TAG_PALETTE[0] };
+  $('tag-mgr-overlay').style.display = 'flex';
+  tasksRenderTagMgr();
+}
+function tasksCloseTagMgr() { const o = $('tag-mgr-overlay'); if (o) o.style.display = 'none'; }
+async function tasksReloadTags() {
+  try {
+    const [tags, tasks] = await Promise.all([api('GET', '/api/tags'), api('GET', '/api/tasks')]);
+    _task.tags = tags || []; _task.all = tasks || [];
+  } catch (e) {}
+  if ($('tag-mgr-overlay') && $('tag-mgr-overlay').style.display !== 'none') tasksRenderTagMgr();
+  tasksRender();
+  if (_task.detail) {
+    const fresh = _task.all.find(x => x.id === _task.detail.id);
+    if (fresh) { _task.detail.tags = fresh.tags; _task.detail.tag_ids = fresh.tag_ids; }
+    if ($('task-detail-overlay') && $('task-detail-overlay').style.display !== 'none') tasksRenderDetail();
+  }
+}
+function tasksRenderTagMgr() {
+  const body = $('tag-mgr-body'); if (!body) return;
+  const sel = _task.tagMgr.newColor || _TAG_PALETTE[0];
+  const rows = _task.tags.map(g => {
+    const palette = _task.tagMgr.colorPickFor === g.id
+      ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px 30px;">' + _TAG_PALETTE.map(c =>
+          '<button onclick="tasksSetTagColor(\'' + g.id + '\',\'' + c + '\')" style="width:22px;height:22px;border-radius:6px;background:' + c + ';border:2px solid ' + (g.color.toLowerCase() === c.toLowerCase() ? '#1A1A1A' : 'transparent') + ';cursor:pointer;"></button>').join('') + '</div>'
+      : '';
+    return '<div style="padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.06);">'
+      + '<div style="display:flex;align-items:center;gap:10px;">'
+      + '<button onclick="tasksTagPick(\'' + g.id + '\')" title="Change colour" style="width:20px;height:20px;border-radius:50%;background:' + g.color + ';flex-shrink:0;border:1px solid rgba(0,0,0,0.1);cursor:pointer;"></button>'
+      + '<input value="' + esc(g.name) + '" onchange="tasksRenameTag(\'' + g.id + '\',this.value)" style="flex:1;min-width:0;padding:7px 10px;border:1px solid rgba(0,0,0,0.12);border-radius:8px;font-size:13px;color:#1A1A1A;">'
+      + window.btnIco('delete', "tasksDeleteTag('" + g.id + "')", 'Delete tag') + '</div>' + palette + '</div>';
+  }).join('');
+  body.innerHTML =
+    '<div style="padding:18px 22px 15px;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;">'
+    + '<div><div style="font-size:16px;font-weight:800;letter-spacing:-0.2px;">Manage tags</div><div style="font-size:12.5px;color:#8A8A8A;margin-top:2px;">Labels for categorising tasks across topics.</div></div>'
+    + '<button onclick="tasksCloseTagMgr()" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,0,0,0.08);background:#fff;color:#6B6B6B;font-size:17px;line-height:1;flex-shrink:0;">✕</button></div>'
+    + '<div style="flex:1;min-height:0;overflow-y:auto;padding:8px 22px 14px;">' + (rows || '<div style="padding:20px 0;color:#9B9B9B;font-size:13px;text-align:center;">No tags yet — add one below.</div>') + '</div>'
+    + '<div style="flex-shrink:0;padding:14px 22px;border-top:1px solid rgba(0,0,0,0.07);background:#F8F7F5;">'
+    + '<div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">New tag</div>'
+    + '<div style="display:flex;gap:8px;align-items:center;"><input id="tag-new-name" placeholder="e.g. Calibration" onkeydown="if(event.key===\'Enter\')tasksAddTag()" style="flex:1;min-width:0;padding:8px 10px;border:1px solid rgba(0,0,0,0.12);border-radius:8px;font-size:13px;">'
+    + '<button onclick="tasksAddTag()" class="btn btn-primary btn-sm">Add</button></div>'
+    + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">' + _TAG_PALETTE.map(c =>
+        '<button onclick="tasksPickNewColor(\'' + c + '\')" style="width:24px;height:24px;border-radius:6px;background:' + c + ';border:2px solid ' + (sel.toLowerCase() === c.toLowerCase() ? '#1A1A1A' : 'transparent') + ';cursor:pointer;"></button>').join('') + '</div></div>';
+}
+function tasksTagPick(id) { _task.tagMgr.colorPickFor = _task.tagMgr.colorPickFor === id ? null : id; tasksRenderTagMgr(); }
+async function tasksSetTagColor(id, c) {
+  _task.tagMgr.colorPickFor = null;
+  try { await api('PATCH', '/api/tags/' + id, { color: c }); }
+  catch (e) { toast('Save failed'); return; }
+  tasksReloadTags();
+}
+async function tasksRenameTag(id, name) {
+  name = (name || '').trim(); if (!name) return;
+  try { await api('PATCH', '/api/tags/' + id, { name }); }
+  catch (e) { toast(e.status === 409 ? 'A tag with that name exists' : 'Rename failed'); }
+  tasksReloadTags();
+}
+async function tasksDeleteTag(id) {
+  if (!(await askDelete('Delete this tag? It will be removed from all tasks.'))) return;
+  try { await api('DELETE', '/api/tags/' + id); }
+  catch (e) { toast('Delete failed'); return; }
+  _task.filter = _task.filter.filter(x => x !== id);
+  tasksReloadTags();
+}
+function tasksPickNewColor(c) { _task.tagMgr.newColor = c; tasksRenderTagMgr(); }
+async function tasksAddTag() {
+  const name = ($('tag-new-name') ? $('tag-new-name').value : '').trim();
+  if (!name) { toast('Enter a tag name'); return; }
+  try { await api('POST', '/api/tags', { name, color: _task.tagMgr.newColor || _TAG_PALETTE[0] }); }
+  catch (e) { toast(e.status === 409 ? 'A tag with that name exists' : 'Add failed'); return; }
+  _task.tagMgr.newColor = _TAG_PALETTE[0];
+  tasksReloadTags();
+}
+
+// ---- archive / restore / delete ----
+async function tasksArchiveCard(id, fromDetail) {
+  if (fromDetail) tasksCloseDetail();
+  const t = _task.all.find(x => x.id === id);
+  if (t) { t.archived = true; t.archived_at = new Date().toISOString(); }
+  tasksRender();
+  toast('Task archived', 'success');
+  try { await api('PATCH', '/api/tasks/' + id, { archived: true }); tasksLoad(); }
+  catch (e) { toast('Archive failed'); tasksLoad(); }
+}
+async function tasksArchiveAllDone() {
+  const done = _task.all.filter(t => !t.archived && t.status === 'done');
+  if (!done.length) return;
+  done.forEach(t => { t.archived = true; t.archived_at = new Date().toISOString(); });
+  tasksRender();
+  toast(done.length + ' done task' + (done.length > 1 ? 's' : '') + ' archived', 'success');
+  try { await Promise.all(done.map(t => api('PATCH', '/api/tasks/' + t.id, { archived: true }))); tasksLoad(); }
+  catch (e) { toast('Archive failed'); tasksLoad(); }
+}
+async function tasksRestore(id) {
+  const t = _task.all.find(x => x.id === id);
+  if (t) { t.archived = false; t.archived_at = null; }
+  tasksRender();
+  toast('Restored to board', 'success');
+  try { await api('PATCH', '/api/tasks/' + id, { archived: false }); tasksLoad(); }
+  catch (e) { tasksLoad(); }
+}
+async function tasksDeleteArchived(id) {
+  if (!(await askDelete('Delete this archived task permanently? This cannot be undone.'))) return;
+  _task.all = _task.all.filter(x => x.id !== id);
+  tasksRender();
+  try { await api('DELETE', '/api/tasks/' + id); }
+  catch (e) { toast('Delete failed'); tasksLoad(); }
+}
+function tasksArchiveHtml() {
+  const arch = _task.all.filter(t => t.archived);
+  let inner;
+  if (!arch.length) {
+    inner = '<div class="empty-state"><div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">Nothing archived yet</div><p style="font-size:14px;color:#6B6B6B;">Finished tasks you archive from the board land here as a history you can restore.</p></div>';
+  } else {
+    inner = tasksGroupArchive(arch).map(g => '<div style="font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.1px;margin:18px 0 8px;">' + g.label + '</div>'
+      + '<div style="display:flex;flex-direction:column;gap:7px;">' + g.items.map(tasksArchiveItemHtml).join('') + '</div>').join('');
+  }
+  return tasksHeaderHtml(false)
+    + '<div style="flex:1;min-height:0;overflow-y:auto;padding:22px 30px 30px;"><div style="max-width:1100px;margin:0 auto;">' + inner + '</div></div>';
+}
+function tasksGroupArchive(arch) {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const weekAgo = today - 7 * 86400000;
+  const defs = [{ label: 'Today', items: [] }, { label: 'This week', items: [] }, { label: 'Earlier', items: [] }];
+  arch.slice().sort((a, b) => (b.archived_at || '').localeCompare(a.archived_at || '')).forEach(a => {
+    const ts = a.archived_at ? new Date(/[Z+]/.test(a.archived_at) ? a.archived_at : a.archived_at + 'Z').getTime() : 0;
+    defs[ts >= today ? 0 : ts >= weekAgo ? 1 : 2].items.push(a);
+  });
+  return defs.filter(g => g.items.length);
+}
+function tasksArchiveItemHtml(a) {
+  const n = a.msg_count;
+  const when = a.archived_at ? new Date(/[Z+]/.test(a.archived_at) ? a.archived_at : a.archived_at + 'Z').toLocaleDateString([], { day: 'numeric', month: 'short' }) : '';
+  const meta = esc(a.channel_slug) + ' · archived ' + when + ' · ' + n + ' msg' + (n === 1 ? '' : 's');
+  return '<div style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:12px 14px;display:flex;align-items:center;gap:12px;">'
+    + '<span style="width:38px;height:38px;border-radius:9px;background:#F2F0EC;color:#9B9B9B;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"></rect><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"></path><path d="M10 12h4"></path></svg></span>'
+    + '<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:13.5px;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(a.title) + '</div>'
+    + '<div style="color:#9B9B9B;font-size:12px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + meta + '</div></div>'
+    + '<button onclick="tasksRestore(\'' + a.id + '\')" title="Restore to board" style="flex-shrink:0;font-size:12px;font-weight:600;color:#1A1A1A;background:#fff;border:1px solid rgba(0,0,0,0.12);border-radius:8px;padding:6px 11px;cursor:pointer;">Restore</button>'
+    + window.btnIco('delete', "tasksDeleteArchived('" + a.id + "')", 'Delete permanently') + '</div>';
+}
+
+// ---- send-from-topic modal ----
+// taskId set → "add messages to this task" mode (topic locked to that task's channel).
+async function tasksOpenSend(taskId, channelId, preselectId) {
+  _task.send = { taskId: taskId || null, channelId: null, channels: [], msgs: [], sel: {}, fromTopic: !!preselectId };
+  try { _task.send.channels = await api('GET', '/api/channels') || []; }
+  catch (e) { _task.send.channels = []; }
+  if (channelId) _task.send.channelId = channelId;
+  else if (_task.send.channels.length) _task.send.channelId = _task.send.channels[0].id;
+  if (_task.send.channelId) await tasksSendLoadMsgs();
+  if (preselectId) _task.send.sel = { [preselectId]: true };  // after loadMsgs (which clears sel)
+  $('task-send-overlay').style.display = 'flex';
+  tasksRenderSend();
+}
+// Send one topic message straight to the board (create-new-task mode, pre-selected).
+function tasksSendFromMessage(channelId, msgId) { tasksOpenSend(null, channelId, msgId); }
+function tasksCloseSend() { const o = $('task-send-overlay'); if (o) o.style.display = 'none'; }
+async function tasksSendLoadMsgs() {
+  _task.send.sel = {};
+  const id = _task.send.channelId;
+  try { _task.send.msgs = await api('GET', '/api/channels/' + id + '/messages') || []; }
+  catch (e) { _task.send.msgs = []; }
+}
+function tasksSendPickTopic(id) {
+  _task.send.channelId = id;
+  tasksSendLoadMsgs().then(tasksRenderSend);
+}
+function tasksSendToggle(mid) {
+  // Messages already on the board are locked — can't be re-added.
+  const m = _task.send.msgs.find(x => x.id === mid);
+  if (m && m.task) return;
+  _task.send.sel[mid] = !_task.send.sel[mid];
+  tasksRenderSend();
+}
+async function tasksSendAdd() {
+  const ids = _task.send.msgs.filter(m => _task.send.sel[m.id] && !m.task).map(m => m.id);
+  if (!ids.length) return;
+  if (_task.send.taskId) {
+    try { await api('PATCH', '/api/tasks/' + _task.send.taskId, { add_message_ids: ids }); }
+    catch (e) { toast('Add failed: ' + e.message); return; }
+    const tid = _task.send.taskId;
+    tasksCloseSend();
+    toast(ids.length + (ids.length === 1 ? ' message' : ' messages') + ' added', 'success');
+    if (_task.detail && _task.detail.id === tid) {
+      try { _task.detail = await api('GET', '/api/tasks/' + tid); tasksRenderDetail(); } catch (e) {}
+    }
+    tasksLoad();
+  } else {
+    try { await api('POST', '/api/tasks', { channel_id: _task.send.channelId, message_ids: ids }); }
+    catch (e) { toast('Add failed: ' + e.message); return; }
+    const fromTopic = _task.send.fromTopic;
+    tasksCloseSend();
+    _task.view = 'board';
+    toast(ids.length + (ids.length === 1 ? ' message' : ' messages') + ' added to To do', 'success');
+    tasksLoad();
+    if (fromTopic && state.screen === 'topic') topicLoadMessages(true);
+  }
+}
+function tasksRenderSend() {
+  const body = $('task-send-body'); if (!body) return;
+  const s = _task.send;
+  const addMode = !!s.taskId;
+  let topicArea;
+  if (addMode) {
+    const ch = s.channels.find(c => c.id === s.channelId);
+    topicArea = '<span style="padding:5px 11px;border-radius:7px;font-size:12px;font-weight:600;border:1px solid #CC0000;background:#FCE9E9;color:#B0202E;"># ' + esc(ch ? ch.slug : '') + '</span>';
+  } else {
+    topicArea = s.channels.length
+      ? s.channels.map(c => {
+          const on = c.id === s.channelId;
+          return '<button onclick="tasksSendPickTopic(\'' + c.id + '\')" style="padding:5px 11px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid '
+            + (on ? '#CC0000;background:#FCE9E9;color:#B0202E;' : 'rgba(0,0,0,0.1);background:#fff;color:#6B6B6B;') + '"># ' + esc(c.slug) + '</button>';
+        }).join('')
+      : '<span style="font-size:12px;color:#9B9B9B;">No topics yet.</span>';
+  }
+  let msgList;
+  if (!s.channels.length) msgList = '<div style="text-align:center;padding:40px 20px;color:#9B9B9B;font-size:13px;">Create a topic first, then send its messages here.</div>';
+  else if (!s.msgs.length) msgList = '<div style="text-align:center;padding:40px 20px;color:#9B9B9B;font-size:13px;">No messages in this topic yet.</div>';
+  else msgList = s.msgs.map(tasksSendMsgHtml).join('');
+  const selCount = Object.keys(s.sel).filter(k => s.sel[k]).length;
+  const addStyle = 'padding:9px 16px;border-radius:9px;font-size:13px;font-weight:700;cursor:' + (selCount ? 'pointer' : 'default')
+    + ';background:' + (selCount ? '#CC0000' : '#E4E0D9') + ';color:' + (selCount ? '#fff' : '#A8A39A') + ';';
+  const addLabel = addMode
+    ? (selCount > 1 ? ('Add ' + selCount + ' messages') : 'Add to task')
+    : (selCount > 1 ? ('Add card (' + selCount + ' msgs)') : 'Add to board');
+  const selLabel = selCount ? (selCount + ' selected') : 'Select one or more messages';
+  const title = addMode ? 'Add messages' : 'Send to board';
+  const subtitle = addMode
+    ? 'Pick more messages from this topic to add to the task.'
+    : 'Tap each message you want — pick several to group them into one card.';
+  body.innerHTML =
+    '<div style="padding:18px 22px 15px;border-bottom:1px solid rgba(0,0,0,0.07);flex-shrink:0;">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">'
+    + '<div><div style="font-size:16px;font-weight:800;letter-spacing:-0.2px;">' + title + '</div>'
+    + '<div style="font-size:12.5px;color:#8A8A8A;margin-top:2px;">' + subtitle + '</div></div>'
+    + '<button onclick="tasksCloseSend()" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,0,0,0.08);background:#fff;color:#6B6B6B;font-size:17px;line-height:1;flex-shrink:0;">✕</button></div>'
+    + '<div style="display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap;"><span style="font-size:11px;font-weight:600;color:#9B9B9B;">Topic</span>'
+    + '<div style="display:flex;gap:5px;flex-wrap:wrap;">' + topicArea + '</div></div></div>'
+    + '<div style="flex:1;min-height:0;overflow-y:auto;padding:14px 20px;background:#F5F4F1;"><div style="display:flex;flex-direction:column;gap:9px;">' + msgList + '</div></div>'
+    + '<div style="flex-shrink:0;padding:14px 22px;border-top:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;gap:12px;">'
+    + '<span style="font-size:12.5px;color:#8A8A8A;">' + selLabel + '</span>'
+    + '<div style="display:flex;gap:9px;"><button onclick="tasksCloseSend()" style="padding:9px 16px;border-radius:9px;background:#fff;border:1px solid rgba(0,0,0,0.12);font-size:13px;font-weight:600;color:#1A1A1A;">Cancel</button>'
+    + '<button onclick="tasksSendAdd()" style="' + addStyle + '">' + addLabel + '</button></div></div>';
+}
+function tasksSendMsgHtml(m) {
+  const thumb = (m.images && m.images.length) ? '<img src="' + m.images[0] + '" style="margin-top:7px;height:84px;width:120px;object-fit:cover;border-radius:9px;border:1px solid rgba(0,0,0,0.05);display:block;" alt="">' : '';
+  // Already on the board: locked row, tinted by status, with a status badge.
+  if (m.task) {
+    const col = _TASK_DOT[m.task.status] || '#6B6B6B';
+    return '<div title="Already on the board" style="display:flex;gap:11px;align-items:flex-start;background:' + hexA(col, 0.08) + ';border:1.5px solid ' + hexA(col, 0.30) + ';border-radius:12px;padding:11px 13px;opacity:0.9;">'
+      + '<div style="flex-shrink:0;width:20px;height:20px;border-radius:6px;margin-top:1px;display:flex;align-items:center;justify-content:center;color:' + col + ';"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></div>'
+      + '<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;"><span style="font-size:10px;font-weight:800;letter-spacing:0.3px;color:' + col + ';">ON BOARD · ' + esc(m.task.status_label) + '</span><span style="font-size:10.5px;color:#A0A0A0;">' + esc(taskMsgTime(m.created_at)) + '</span></div>'
+      + (m.text ? '<div style="font-size:13px;color:#666;line-height:1.4;margin-top:2px;white-space:pre-wrap;">' + esc(m.text) + '</div>' : '')
+      + thumb + '</div></div>';
+  }
+  const on = !!_task.send.sel[m.id];
+  return '<div onclick="tasksSendToggle(\'' + m.id + '\')" style="display:flex;gap:11px;align-items:flex-start;background:' + (on ? '#FFF6F6' : '#fff') + ';border:1.5px solid '
+    + (on ? '#CC0000' : 'rgba(0,0,0,0.07)') + ';border-radius:12px;padding:11px 13px;cursor:pointer;">'
+    + '<div style="flex-shrink:0;width:20px;height:20px;border-radius:6px;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;background:'
+    + (on ? '#CC0000' : '#fff') + ';border:1.5px solid ' + (on ? '#CC0000' : 'rgba(0,0,0,0.18)') + ';">' + (on ? '✓' : '') + '</div>'
+    + '<div style="flex:1;min-width:0;"><div style="font-size:10.5px;color:#A0A0A0;">' + esc(taskMsgTime(m.created_at)) + '</div>'
+    + (m.text ? '<div style="font-size:13px;color:#444;line-height:1.4;margin-top:2px;white-space:pre-wrap;">' + esc(m.text) + '</div>' : '')
+    + thumb + '</div></div>';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
