@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
   <title>IXL | Studio</title>
   <link rel="manifest" href="/static/manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16.png">
   <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
   <meta name="theme-color" content="#1A1A1A">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -691,7 +693,7 @@
 <!-- LOOK UP — create / edit drawer (rendered by lookupRenderForm) -->
 <div id="lookup-drawer-overlay" style="display:none;position:fixed;inset:0;z-index:700;">
   <div onclick="lookupCloseForm()" style="position:absolute;inset:0;background:rgba(20,18,16,0.34);animation:fadeIn 0.14s ease;"></div>
-  <aside id="lookup-drawer-body" style="position:absolute;top:0;right:0;bottom:0;width:520px;max-width:96vw;background:#F5F4F1;box-shadow:-12px 0 44px rgba(0,0,0,0.22);display:flex;flex-direction:column;"></aside>
+  <aside id="lookup-drawer-body" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100% - 48px);max-width:900px;max-height:90vh;border-radius:16px;overflow:hidden;background:#F5F4F1;box-shadow:0 18px 60px rgba(0,0,0,0.28);display:flex;flex-direction:column;"></aside>
 </div>
 
 <!-- ═══════════════════ LOOK UP — MOBILE OPERATOR ═══════════════════ -->
@@ -1117,7 +1119,7 @@
 <!-- TASKS card detail drawer -->
 <div id="task-detail-overlay" style="display:none;position:fixed;inset:0;z-index:700;">
   <div onclick="tasksCloseDetail()" style="position:absolute;inset:0;background:rgba(20,18,16,0.34);animation:fadeIn 0.14s ease;"></div>
-  <aside id="task-detail-body" style="position:absolute;top:0;right:0;bottom:0;width:480px;max-width:94vw;background:#F5F4F1;box-shadow:-12px 0 44px rgba(0,0,0,0.22);display:flex;flex-direction:column;"></aside>
+  <aside id="task-detail-body" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100% - 48px);max-width:900px;max-height:90vh;border-radius:16px;overflow:hidden;background:#F5F4F1;box-shadow:0 18px 60px rgba(0,0,0,0.28);display:flex;flex-direction:column;"></aside>
 </div>
 
 <!-- TASKS send-from-topic modal -->
@@ -1993,9 +1995,9 @@ const EXP_EXPIRY_MONTHS = 3, EXP_HORIZON_MONTHS = 12, EXP_ACTIVE_ONLY = true, EX
 const EXP_MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 let _expRows = [];        // parsed product rows (allRows)
 let _expHistory = [];
-let _expS = { loaded:false, parsing:false, error:null, fileName:'—', group:'All', site:'All', q:'' };
+let _expS = { loaded:false, parsing:false, error:null, fileName:'—', group:'All', site:'All', q:'', dim:'bom' };
 
-function expDefaultState() { return { loaded:false, parsing:false, error:null, fileName:'—', group:'All', site:'All', q:'' }; }
+function expDefaultState() { return { loaded:false, parsing:false, error:null, fileName:'—', group:'All', site:'All', q:'', dim:'bom' }; }
 
 // ---- navigation ----
 function enterExp() { expLoadHistory(); showScreen('exp-list'); expListRender(); }
@@ -2119,8 +2121,9 @@ function expComputeView() {
   const q = (_expS.q || '').trim().toLowerCase();
   const grp = _expS.group, site = _expS.site || 'All';
   const colorFor = (days) => { if (days < 0) return '#7A0000'; if (days <= expiryMonths * 30 + 2) return '#CC0000'; if (days <= 365) return '#D9982A'; return '#2E9E4F'; };
+  const onRoute = _expS.dim === 'route';
   let rows = _expRows.map(r => {
-    const end = expSerialToDate(r.bomEndSerial);
+    const end = expSerialToDate(onRoute ? r.routeEndSerial : r.bomEndSerial);
     const perpetual = !end || end.getUTCFullYear() >= PERPETUAL_YEAR;
     const days = end ? Math.round((end - T) / 86400000) : null;
     return { ...r, end, perpetual, days };
@@ -2129,7 +2132,7 @@ function expComputeView() {
   const matchG = (r) => grp === 'All' || r.group === grp;
   const matchQ = (r) => !q || (r.num && r.num.toLowerCase().includes(q)) || (r.name && r.name.toLowerCase().includes(q)) || (r.bom && r.bom.toLowerCase().includes(q)) || (r.pool && r.pool.toLowerCase().includes(q));
   const filtered = rows.filter(r => matchS(r) && matchG(r) && matchQ(r));
-  const isActive = (r) => !activeOnly || r.activeBom === 'Yes';
+  const isActive = (r) => !activeOnly || (onRoute ? r.activeRoute === 'Yes' : r.activeBom === 'Yes');
   const expiring = filtered.filter(r => isActive(r) && !r.perpetual && r.days >= 0 && r.end <= expiryEnd);
   const kpiExpiring = expiring.length;
   const kpiExpired = filtered.filter(r => isActive(r) && !r.perpetual && r.days < 0).length;
@@ -2170,19 +2173,21 @@ function expComputeView() {
 // Unfiltered export rows (all sites/groups) — used for CSV download.
 function expBuildExport(rows) {
   const today = new Date(); const T = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+  const onRoute = _expS.dim === 'route';
   const enr = rows.map(r => {
-    const end = expSerialToDate(r.bomEndSerial);
+    const end = expSerialToDate(onRoute ? r.routeEndSerial : r.bomEndSerial);
     const perpetual = !end || end.getUTCFullYear() >= 2050;
     const days = end ? Math.round((end - T) / 86400000) : null;
     return { ...r, end, perpetual, days };
   });
-  const isActive = (r) => !EXP_ACTIVE_ONLY || r.activeBom === 'Yes';
+  const isActive = (r) => !EXP_ACTIVE_ONLY || (onRoute ? r.activeRoute === 'Yes' : r.activeBom === 'Yes');
   const src = enr.filter(r => isActive(r) && !r.perpetual && r.days <= 365).sort((a, b) => a.end - b.end);
   const statusOf = (r) => r.days < 0 ? 'Expired' : (r.days <= EXP_EXPIRY_MONTHS * 30 + 2 ? 'Expiring ≤ ' + EXP_EXPIRY_MONTHS + 'm' : 'Within 1 year');
   return src.map(r => ({ num: r.num, name: r.name, pool: r.pool || '', bom: r.bom || '', group: r.group || '', site: r.site || '', endLabel: expFmtDate(r.end), status: statusOf(r) }));
 }
 
 // ---- report render ----
+function expSetDim(d) { _expS.dim = d; expRenderReport(); }   // full re-render → KPIs + chart switch
 function expSetGroup(g) { _expS.group = g; expRenderDash(); }
 function expSetSite(s) { _expS.site = s; expRenderDash(); }
 function expSearch(v) { _expS.q = v; expRenderGantt(); }   // gantt only → search input keeps focus
@@ -2223,8 +2228,14 @@ function expRenderDash() {
     const active = _expS.group === g;
     return '<div onclick="expSetGroup(\'' + g + '\')" style="padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;' + (active ? 'background:#1A1A1A;color:#fff;' : 'color:#7A7A7A;') + '">' + g + '</div>';
   }).join('');
+  const dimHtml = [['bom','BOM'],['route','Route']].map(([k,lbl]) => {
+    const active = _expS.dim === k;
+    return '<div onclick="expSetDim(\'' + k + '\')" style="padding:7px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;' + (active ? 'background:#CC0000;color:#fff;' : 'color:#7A7A7A;') + '">' + lbl + '</div>';
+  }).join('');
   host.innerHTML =
     '<div style="display:flex;align-items:center;gap:12px;margin-top:22px;flex-wrap:wrap;">'
+    + '<div style="display:flex;gap:4px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:11px;padding:4px;">' + dimHtml + '</div>'
+    + '<div style="width:1px;height:26px;background:rgba(0,0,0,0.1);"></div>'
     + '<div style="display:flex;gap:4px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:11px;padding:4px;">' + siteHtml + '</div>'
     + '<div style="width:1px;height:26px;background:rgba(0,0,0,0.1);"></div>'
     + '<div style="display:flex;gap:4px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:11px;padding:4px;">' + groupHtml + '</div>'
@@ -4032,10 +4043,17 @@ function tasksRenderDetail() {
         : '<button onclick="tasksDetailAdvance()" class="btn btn-dark btn-sm">' + advanceLabel + '</button>') + '</div>';
 }
 function tasksDetailMsgHtml(m) {
-  const imgs = (m.images || []).map(u => '<img src="' + u + '" style="width:100%;max-height:220px;object-fit:cover;border-radius:11px;border:1px solid rgba(0,0,0,0.05);margin-top:7px;display:block;" alt="">').join('');
+  const imgs = (m.images || []).map(u => '<img src="' + u + '" onclick="taskLbOpen(this)" style="width:100%;max-height:220px;object-fit:cover;border-radius:11px;border:1px solid rgba(0,0,0,0.05);margin-top:7px;display:block;cursor:zoom-in;" alt="">').join('');
   return '<div><div style="font-size:11px;color:#A0A0A0;margin-bottom:4px;">' + esc(taskMsgTime(m.created_at)) + (m.edited ? ' · edited' : '') + '</div>'
     + (m.text ? '<div style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:4px 13px 13px 13px;padding:10px 13px;font-size:13px;color:#33312E;line-height:1.45;white-space:pre-wrap;">' + esc(m.text) + '</div>' : '')
     + imgs + '</div>';
+}
+// reuse the Topics lightbox; gather sibling imgs in this message for prev/next
+function taskLbOpen(imgEl) {
+  const all = [...imgEl.parentElement.querySelectorAll('img')];
+  _topic.lb = { imgs: all.map(i => i.src), idx: all.indexOf(imgEl) };
+  topicLbShow();
+  $('topic-lb').style.display = 'flex';
 }
 
 // ---- comments (free-text notes on a task) ----
