@@ -3396,7 +3396,7 @@ function topicBubble(m) {
   let bodyBg = '#fff', bodyBorder = 'rgba(0,0,0,0.07)', tkBadge = '';
   if (m.task) {
     const col = _TASK_DOT[m.task.status] || '#6B6B6B';
-    bodyBg = hexA(col, 0.07); bodyBorder = hexA(col, 0.34);
+    bodyBg = hexA(col, 0.10); bodyBorder = hexA(col, 0.45);
     const tagChips = (m.task.tags || []).map(g =>
       '<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;background:' + hexA(g.color, 0.16) + ';color:' + g.color + ';">' + esc(g.name) + '</span>').join('');
     tkBadge = '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:9px;">'
@@ -3658,13 +3658,15 @@ function hexA(hex, a) {
   return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
 }
 const _TASK_COLS = [
-  { key: 'todo',  label: 'To do',       dot: '#6B6B6B' },
-  { key: 'doing', label: 'In progress', dot: '#D9982A' },
+  { key: 'todo',  label: 'To do',       dot: '#2D6CDF' },
+  { key: 'doing', label: 'In progress', dot: '#E08A00' },
   { key: 'done',  label: 'Done',        dot: '#2E9E4F' },
 ];
 // Derived from _TASK_COLS so status labels/colours live in one place.
 const _TASK_LABELS = Object.fromEntries(_TASK_COLS.map(c => [c.key, c.label]));
 const _TASK_DOT = Object.fromEntries(_TASK_COLS.map(c => [c.key, c.dot]));
+// Archived shares Done's colour — distinguished only by its badge text.
+_TASK_DOT.archived = _TASK_DOT.done;
 
 function taskPrioStyle(p) {
   const m = { High: ['#FCE9E9', '#B0202E'], Medium: ['#F6EFD9', '#9B7B2E'], Low: ['#ECEAE4', '#7A766E'] };
