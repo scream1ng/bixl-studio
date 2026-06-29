@@ -1994,6 +1994,7 @@ const EXP_HKEY = 'exp_history_v1';
 const EXP_EXPIRY_MONTHS = 3, EXP_HORIZON_MONTHS = 12, EXP_ACTIVE_ONLY = true, EXP_CAP = 90;
 const EXP_MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 let _expRows = [];        // parsed product rows (allRows)
+let _expChecked = new Set();   // transient "done" ticks (session only, not saved to DB/history)
 let _expHistory = [];
 let _expS = { loaded:false, parsing:false, error:null, fileName:'—', group:'All', site:'All', q:'', dim:'bom' };
 
@@ -2001,7 +2002,7 @@ function expDefaultState() { return { loaded:false, parsing:false, error:null, f
 
 // ---- navigation ----
 function enterExp() { expLoadHistory(); showScreen('exp-list'); expListRender(); }
-function expNew() { _expRows = []; _expS = expDefaultState(); showScreen('exp'); expRenderReport(); }
+function expNew() { _expRows = []; _expChecked = new Set(); _expS = expDefaultState(); showScreen('exp'); expRenderReport(); }
 function expBack() { showScreen('exp-list'); expListRender(); }
 
 // ---- history (localStorage) ----
@@ -2148,6 +2149,7 @@ function expComputeView() {
     const s = Math.min(T, r.end), e = Math.max(T, r.end);
     const left = pct(s), width = Math.max(0.6, pct(e) - pct(s));
     return {
+      key: (r.num || '') + '|' + (r.bom || '') + '|' + (r.site || ''),
       num: r.num, name: r.name, color, endShort: expFmtShort(r.end), pool: r.pool || '—',
       poolStyle: 'width:96px;flex-shrink:0;font-size:11px;font-weight:600;color:#5A5A5A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;' + (r.pool ? 'background:#EFEDE7;padding:3px 8px;border-radius:6px;' : 'color:#C0C0C0;'),
       barStyle: 'position:absolute;top:6px;height:20px;border-radius:5px;left:' + left + '%;width:' + width + '%;min-width:4px;background:' + color + ';'
@@ -2191,6 +2193,16 @@ function expSetDim(d) { _expS.dim = d; expRenderReport(); }   // full re-render 
 function expSetGroup(g) { _expS.group = g; expRenderDash(); }
 function expSetSite(s) { _expS.site = s; expRenderDash(); }
 function expSearch(v) { _expS.q = v; expRenderGantt(); }   // gantt only → search input keeps focus
+
+// Transient "done" tick in front of each part number — session only, never saved.
+function expToggleCheck(key) { if (_expChecked.has(key)) _expChecked.delete(key); else _expChecked.add(key); expRenderGantt(); }
+function expCheckbox(key) {
+  const on = _expChecked.has(key);
+  return '<span onclick="event.stopPropagation();expToggleCheck(\'' + esc(key).replace(/'/g, "\\'") + '\')" role="checkbox" aria-checked="' + on + '" title="Tick when done"'
+    + ' style="width:18px;height:18px;flex-shrink:0;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;'
+    + (on ? 'background:#CC0000;border:1px solid #CC0000;color:#fff;' : 'background:#fff;border:1.5px solid #C9C5BD;color:transparent;') + '">'
+    + (on ? '&#10003;' : '') + '</span>';
+}
 
 function expRenderReport() {
   const body = $('exp-report-body'), save = $('exp-save-btn');
@@ -2254,6 +2266,7 @@ function expLegend(color, label) {
 function expGanttMobileList(v) {
   const rows = v.ganttRows.map(r =>
     '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F1EFEA;">'
+    + expCheckbox(r.key)
     + '<span style="width:6px;height:30px;border-radius:3px;flex-shrink:0;background:' + r.color + ';"></span>'
     + '<div style="flex:1;min-width:0;">'
     +   '<div style="display:flex;align-items:center;gap:7px;">'
@@ -2276,6 +2289,7 @@ function expRenderGantt(v) {
   } else if (v.hasGantt) {
     const labelRows = v.ganttRows.map(r =>
       '<div style="height:32px;display:flex;align-items:center;gap:10px;padding-right:14px;">'
+      + expCheckbox(r.key)
       + '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12.5px;font-weight:600;width:122px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;">' + esc(r.num) + '</span>'
       + '<span style="font-size:12.5px;color:#6B6B6B;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(r.name) + '</span>'
       + '<span style="' + r.poolStyle + '">' + esc(r.pool) + '</span>'
@@ -2288,7 +2302,7 @@ function expRenderGantt(v) {
     chart = '<div style="display:flex;margin-top:18px;overflow-x:auto;">'
       + '<div style="width:430px;flex-shrink:0;">'
       +   '<div style="height:30px;display:flex;align-items:center;gap:10px;padding-right:14px;font-size:10px;font-weight:700;color:#A8A8A8;text-transform:uppercase;letter-spacing:0.9px;">'
-      +     '<span style="width:122px;flex-shrink:0;">PART#</span><span style="flex:1;">DESCRIPTION</span><span style="width:96px;flex-shrink:0;">Pool</span><span style="flex-shrink:0;">Ends</span>'
+      +     '<span style="width:18px;flex-shrink:0;"></span><span style="width:122px;flex-shrink:0;">PART#</span><span style="flex:1;">DESCRIPTION</span><span style="width:96px;flex-shrink:0;">Pool</span><span style="flex-shrink:0;">Ends</span>'
       +   '</div>' + labelRows + '</div>'
       + '<div style="flex:1;min-width:420px;position:relative;border-left:1px solid #ECEAE5;">'
       +   monthTicks
@@ -2331,6 +2345,7 @@ function expFindRec(id) { return _expHistory.find(r => r.id === id); }
 function expOpenRec(id) {
   const r = expFindRec(id); if (!r) return;
   _expRows = r.rows || [];
+  _expChecked = new Set();
   _expS = expDefaultState(); _expS.loaded = _expRows.length > 0; _expS.fileName = r.fileName || '—';
   showScreen('exp'); expRenderReport();
 }
