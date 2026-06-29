@@ -3396,7 +3396,7 @@ function topicBubble(m) {
   let bodyBg = '#fff', bodyBorder = 'rgba(0,0,0,0.07)', tkBadge = '';
   if (m.task) {
     const col = _TASK_DOT[m.task.status] || '#6B6B6B';
-    bodyBg = hexA(col, 0.07); bodyBorder = hexA(col, 0.34);
+    bodyBg = hexA(col, 0.10); bodyBorder = hexA(col, 0.45);
     const tagChips = (m.task.tags || []).map(g =>
       '<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;background:' + hexA(g.color, 0.16) + ';color:' + g.color + ';">' + esc(g.name) + '</span>').join('');
     tkBadge = '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:9px;">'
@@ -3658,13 +3658,15 @@ function hexA(hex, a) {
   return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
 }
 const _TASK_COLS = [
-  { key: 'todo',  label: 'To do',       dot: '#6B6B6B' },
-  { key: 'doing', label: 'In progress', dot: '#D9982A' },
+  { key: 'todo',  label: 'To do',       dot: '#2D6CDF' },
+  { key: 'doing', label: 'In progress', dot: '#E08A00' },
   { key: 'done',  label: 'Done',        dot: '#2E9E4F' },
 ];
 // Derived from _TASK_COLS so status labels/colours live in one place.
 const _TASK_LABELS = Object.fromEntries(_TASK_COLS.map(c => [c.key, c.label]));
 const _TASK_DOT = Object.fromEntries(_TASK_COLS.map(c => [c.key, c.dot]));
+// Archived shares Done's colour — distinguished only by its badge text.
+_TASK_DOT.archived = _TASK_DOT.done;
 
 function taskPrioStyle(p) {
   const m = { High: ['#FCE9E9', '#B0202E'], Medium: ['#F6EFD9', '#9B7B2E'], Low: ['#ECEAE4', '#7A766E'] };
@@ -4296,7 +4298,38 @@ function tasksSendToggle(mid) {
   const m = _task.send.msgs.find(x => x.id === mid);
   if (m && m.task) return;
   _task.send.sel[mid] = !_task.send.sel[mid];
-  tasksRenderSend();
+  // Update only the toggled row + footer in place. A full tasksRenderSend()
+  // rebuilds body.innerHTML, which destroys the scrollable list and snaps it
+  // back to the top on every tap — jarring when picking several messages.
+  const row = document.getElementById('tsend-row-' + mid);
+  if (!row) { tasksRenderSend(); return; }
+  row.outerHTML = tasksSendMsgHtml(m);
+  tasksSendUpdateFooter();
+}
+// Selection-derived labels, shared by the full render and the in-place update.
+function tasksSendBtnState() {
+  const s = _task.send;
+  const addMode = !!s.taskId;
+  const selCount = Object.keys(s.sel).filter(k => s.sel[k]).length;
+  return {
+    selCount,
+    selLabel: selCount ? (selCount + ' selected') : 'Select one or more messages',
+    addLabel: addMode
+      ? (selCount > 1 ? ('Add ' + selCount + ' messages') : 'Add to task')
+      : (selCount > 1 ? ('Add card (' + selCount + ' msgs)') : 'Add to board'),
+  };
+}
+function tasksSendUpdateFooter() {
+  const { selCount, selLabel, addLabel } = tasksSendBtnState();
+  const lbl = document.getElementById('tsend-sellabel');
+  if (lbl) lbl.textContent = selLabel;
+  const btn = document.getElementById('tsend-addbtn');
+  if (btn) {
+    btn.style.cursor = selCount ? 'pointer' : 'default';
+    btn.style.background = selCount ? '#CC0000' : '#E4E0D9';
+    btn.style.color = selCount ? '#fff' : '#A8A39A';
+    btn.textContent = addLabel;
+  }
 }
 async function tasksSendAdd() {
   const ids = _task.send.msgs.filter(m => _task.send.sel[m.id] && !m.task).map(m => m.id);
@@ -4343,13 +4376,9 @@ function tasksRenderSend() {
   if (!s.channels.length) msgList = '<div style="text-align:center;padding:40px 20px;color:#9B9B9B;font-size:13px;">Create a topic first, then send its messages here.</div>';
   else if (!s.msgs.length) msgList = '<div style="text-align:center;padding:40px 20px;color:#9B9B9B;font-size:13px;">No messages in this topic yet.</div>';
   else msgList = s.msgs.map(tasksSendMsgHtml).join('');
-  const selCount = Object.keys(s.sel).filter(k => s.sel[k]).length;
+  const { selCount, selLabel, addLabel } = tasksSendBtnState();
   const addStyle = 'padding:9px 16px;border-radius:9px;font-size:13px;font-weight:700;cursor:' + (selCount ? 'pointer' : 'default')
     + ';background:' + (selCount ? '#CC0000' : '#E4E0D9') + ';color:' + (selCount ? '#fff' : '#A8A39A') + ';';
-  const addLabel = addMode
-    ? (selCount > 1 ? ('Add ' + selCount + ' messages') : 'Add to task')
-    : (selCount > 1 ? ('Add card (' + selCount + ' msgs)') : 'Add to board');
-  const selLabel = selCount ? (selCount + ' selected') : 'Select one or more messages';
   const title = addMode ? 'Add messages' : 'Send to board';
   const subtitle = addMode
     ? 'Pick more messages from this topic to add to the task.'
@@ -4364,9 +4393,9 @@ function tasksRenderSend() {
     + '<div style="display:flex;gap:5px;flex-wrap:wrap;">' + topicArea + '</div></div></div>'
     + '<div style="flex:1;min-height:0;overflow-y:auto;padding:14px 20px;background:#F5F4F1;"><div style="display:flex;flex-direction:column;gap:9px;">' + msgList + '</div></div>'
     + '<div style="flex-shrink:0;padding:14px 22px;border-top:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;gap:12px;">'
-    + '<span style="font-size:12.5px;color:#8A8A8A;">' + selLabel + '</span>'
+    + '<span id="tsend-sellabel" style="font-size:12.5px;color:#8A8A8A;">' + selLabel + '</span>'
     + '<div style="display:flex;gap:9px;"><button onclick="tasksCloseSend()" style="padding:9px 16px;border-radius:9px;background:#fff;border:1px solid rgba(0,0,0,0.12);font-size:13px;font-weight:600;color:#1A1A1A;">Cancel</button>'
-    + '<button onclick="tasksSendAdd()" style="' + addStyle + '">' + addLabel + '</button></div></div>';
+    + '<button id="tsend-addbtn" onclick="tasksSendAdd()" style="' + addStyle + '">' + addLabel + '</button></div></div>';
 }
 function tasksSendMsgHtml(m) {
   const thumb = (m.images && m.images.length) ? '<img src="' + m.images[0] + '" style="margin-top:7px;height:84px;width:120px;object-fit:cover;border-radius:9px;border:1px solid rgba(0,0,0,0.05);display:block;" alt="">' : '';
@@ -4387,7 +4416,7 @@ function tasksSendMsgHtml(m) {
       + thumb + '</div>' + removeBtn + '</div>';
   }
   const on = !!_task.send.sel[m.id];
-  return '<div onclick="tasksSendToggle(\'' + m.id + '\')" style="display:flex;gap:11px;align-items:flex-start;background:' + (on ? '#FFF6F6' : '#fff') + ';border:1.5px solid '
+  return '<div id="tsend-row-' + m.id + '" onclick="tasksSendToggle(\'' + m.id + '\')" style="display:flex;gap:11px;align-items:flex-start;background:' + (on ? '#FFF6F6' : '#fff') + ';border:1.5px solid '
     + (on ? '#CC0000' : 'rgba(0,0,0,0.07)') + ';border-radius:12px;padding:11px 13px;cursor:pointer;">'
     + '<div style="flex-shrink:0;width:20px;height:20px;border-radius:6px;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;background:'
     + (on ? '#CC0000' : '#fff') + ';border:1.5px solid ' + (on ? '#CC0000' : 'rgba(0,0,0,0.18)') + ';">' + (on ? '✓' : '') + '</div>'
