@@ -1620,6 +1620,11 @@ def update_task(task_id):
             if mid not in cur and db.session.get(Message, mid):
                 cur.append(mid)
         t.message_ids = json.dumps(cur)
+    if "remove_message_ids" in d and isinstance(d.get("remove_message_ids"), list):
+        rm = set(d["remove_message_ids"])
+        cur = [mid for mid in t.msg_id_list() if mid not in rm]
+        if cur:  # never strip a card down to zero messages
+            t.message_ids = json.dumps(cur)
     if "title" in d:
         t.title = (d.get("title") or "").strip() or t.title
     if "priority" in d and (d.get("priority") or "") in _TASK_PRIORITIES:
