@@ -1043,21 +1043,35 @@
     <header class="mb-only" style="height:58px;display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);background:#F5F4F1;">
       <button onclick="enterTopics()" style="color:#CC0000;font-size:22px;font-weight:400;flex-shrink:0;padding:0 4px;">&#8249;</button>
       <div style="flex:1;min-width:0;display:flex;align-items:center;gap:5px;"><span style="font-size:16px;font-weight:800;color:#BCBCBC;">#</span><span id="topic-title-mb" style="font-size:16px;font-weight:800;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">general</span></div>
+      <button id="topic-select-btn-mb" onclick="topicSelectStart()" style="flex-shrink:0;padding:7px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);background:#fff;font-size:12.5px;font-weight:600;color:#1A1A1A;">Send</button>
     </header>
 
     <!-- desktop header -->
     <div class="dt-only" style="padding:14px 26px 16px;border-bottom:1px solid rgba(0,0,0,0.07);flex-shrink:0;">
       <div style="max-width:1100px;margin:0 auto;width:100%;">
         <button onclick="enterTopics()" style="color:#9B9B9B;font-size:12.5px;font-weight:600;margin-bottom:8px;display:inline-flex;align-items:center;gap:4px;">&#8249; All topics</button>
-        <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:19px;font-weight:800;color:#BCBCBC;">#</span><h1 id="topic-title" style="font-size:19px;font-weight:800;letter-spacing:-0.3px;">general</h1></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:19px;font-weight:800;color:#BCBCBC;">#</span><h1 id="topic-title" style="font-size:19px;font-weight:800;letter-spacing:-0.3px;">general</h1>
+          <button id="topic-select-btn" onclick="topicSelectStart()" style="margin-left:auto;padding:8px 15px;border-radius:9px;border:1px solid rgba(0,0,0,0.12);background:#fff;font-size:12.5px;font-weight:600;color:#1A1A1A;cursor:pointer;display:inline-flex;align-items:center;gap:7px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>Send to board</button></div>
         <p style="color:#8A8A8A;font-size:12.5px;margin-top:2px;">Post updates, photos, and replies for the team.</p>
       </div>
     </div>
 
     <div id="topic-messages" style="flex:1;min-height:0;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:16px;max-width:1100px;width:100%;margin:0 auto;"></div>
 
+    <!-- selection action bar (shown while picking messages to send to the board) -->
+    <div id="topic-select-bar" style="display:none;padding:0 18px 16px;flex-shrink:0;max-width:1100px;width:100%;margin:0 auto;">
+      <div style="background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:15px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);">
+        <span id="topic-select-count" style="font-size:13px;color:#8A8A8A;font-weight:600;">Tap messages to add to a card</span>
+        <div style="display:flex;gap:9px;">
+          <button onclick="topicSelectCancel()" style="padding:9px 16px;border-radius:9px;background:#fff;border:1px solid rgba(0,0,0,0.12);font-size:13px;font-weight:600;color:#1A1A1A;cursor:pointer;">Cancel</button>
+          <button id="topic-select-add" onclick="topicSelectAdd()" style="padding:9px 16px;border-radius:9px;font-size:13px;font-weight:700;background:#E4E0D9;color:#A8A39A;cursor:default;">Add to board</button>
+        </div>
+      </div>
+    </div>
+
     <!-- composer -->
-    <div style="padding:0 18px 16px;flex-shrink:0;max-width:1100px;width:100%;margin:0 auto;">
+    <div id="topic-composer" style="padding:0 18px 16px;flex-shrink:0;max-width:1100px;width:100%;margin:0 auto;">
       <input id="topic-file" type="file" accept="image/*" multiple style="display:none;" onchange="topicAttach(this.files)">
       <input id="topic-camera" type="file" accept="image/*" capture="environment" style="display:none;" onchange="topicAttach(this.files)">
       <div id="topic-tray" style="display:none;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
@@ -3210,7 +3224,7 @@ function onPhotoSelected(file) {
 }
 
 // ── Topics (team discussion threads) ─────────────────────────────────────────
-const _topic = { channelId: null, channels: [], lastAt: null, lastDay: null, poll: null, images: [], msgs: {} };
+const _topic = { channelId: null, channels: [], lastAt: null, lastDay: null, poll: null, images: [], msgs: {}, selecting: false, sel: {} };
 
 // Composer draft persistence. Mobile (esp. iOS standalone PWA) often evicts and
 // reloads the page when the OS camera takes over, which would otherwise wipe the
@@ -3325,6 +3339,7 @@ function topicRenderChannels() {
 }
 
 function topicSelectChannel(id) {
+  if (_topic.selecting) topicSelectResetUI();   // leave selection mode when switching topics
   _topic.channelId = id;
   _topic.lastAt = null;
   const ch = _topic.channels.find(c => c.id === id);
@@ -3404,6 +3419,8 @@ function topicBubble(m) {
       + '<span style="width:7px;height:7px;border-radius:50%;background:' + col + ';"></span>ON BOARD · ' + esc(m.task.status_label) + '</span>' + tagChips + '</div>';
   }
   const edited = m.edited ? ' <span style="color:#B8B2AA;">(edited)</span>' : '';
+  // In selection mode the whole message is a tap target — render it full-size with a checkbox.
+  if (_topic.selecting) return topicBubbleSelect(m, { gal, txt, tkBadge, bodyBg, bodyBorder, edited });
   const ico = {
     task: '<span style="font-size:9px;font-weight:800;letter-spacing:0.3px;line-height:1;">TSK</span>',
     copy: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h8"></path></svg>',
@@ -3429,6 +3446,103 @@ function topicBubble(m) {
     + actions + '</div>'
     + '<span class="topic-stamp" style="font-size:10.5px;color:#A8A8A8;font-family:\'JetBrains Mono\',monospace;padding-left:6px;">' + topicTime(m.created_at) + edited + '</span>'
     + '</div>';
+}
+
+// Full-size message row used while picking messages to send to the board.
+// A transparent overlay captures the tap (so clicking a photo selects rather than
+// opening the lightbox); on-board messages are locked and shown dimmed.
+function topicBubbleSelect(m, p) {
+  const onBoard = !!m.task;
+  const sel = !!_topic.sel[m.id];
+  let bodyBg = p.bodyBg, bodyBorder = p.bodyBorder;
+  if (sel) { bodyBg = '#FFF6F6'; bodyBorder = '#CC0000'; }
+  const boxCol = onBoard ? (_TASK_DOT[m.task.status] || '#6B6B6B') : '#CC0000';
+  const checkbox = '<div style="position:absolute;top:12px;left:12px;z-index:6;pointer-events:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;'
+    + 'background:' + (sel ? '#CC0000' : (onBoard ? hexA(boxCol, 0.15) : 'rgba(255,255,255,0.96)')) + ';'
+    + 'color:' + (sel ? '#fff' : boxCol) + ';'
+    + 'border:1.5px solid ' + (sel ? '#CC0000' : (onBoard ? hexA(boxCol, 0.5) : 'rgba(0,0,0,0.28)')) + ';'
+    + 'box-shadow:0 1px 4px rgba(0,0,0,0.18);">' + ((sel || onBoard) ? '&#10003;' : '') + '</div>';
+  const overlay = '<div' + (onBoard ? '' : ' onclick="topicSelectToggle(\'' + m.id + '\')"')
+    + ' title="' + (onBoard ? 'Already on the board' : 'Tap to select') + '"'
+    + ' style="position:absolute;inset:0;z-index:5;border-radius:14px;cursor:' + (onBoard ? 'not-allowed' : 'pointer') + ';"></div>';
+  return '<div class="topic-msg" id="tm-' + m.id + '" style="position:relative;display:flex;flex-direction:column;align-items:stretch;gap:5px;' + (onBoard ? 'opacity:0.72;' : '') + '">'
+    + '<div style="position:relative;">'
+    + '<div class="topic-body" style="width:100%;background:' + bodyBg + ';border:1.5px solid ' + bodyBorder + ';border-radius:14px;padding:14px 16px 14px 50px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">' + p.tkBadge + p.txt + p.gal + '</div>'
+    + overlay + checkbox + '</div>'
+    + '<span class="topic-stamp" style="font-size:10.5px;color:#A8A8A8;font-family:\'JetBrains Mono\',monospace;padding-left:6px;">' + topicTime(m.created_at) + p.edited + '</span>'
+    + '</div>';
+}
+
+// Re-render every loaded message in place (used when toggling selection mode),
+// preserving scroll position. Rebuilds from _topic.msgs in chronological order.
+function topicRerender() {
+  const box = $('topic-messages'); if (!box) return;
+  const keep = box.scrollTop;
+  const all = Object.values(_topic.msgs).slice().sort((a, b) => (a.created_at || '').localeCompare(b.created_at || ''));
+  box.innerHTML = '';
+  _topic.lastDay = null;
+  if (!all.length) { box.insertAdjacentHTML('beforeend', topicEmpty()); return; }
+  all.forEach(m => {
+    const day = topicDayKey(m.created_at);
+    if (day !== _topic.lastDay) { box.insertAdjacentHTML('beforeend', topicDivider(topicDayLabel(m.created_at))); _topic.lastDay = day; }
+    box.insertAdjacentHTML('beforeend', topicBubble(m));
+  });
+  box.scrollTop = keep;
+}
+
+function topicSelectStart() {
+  if (!_topic.channelId) return;
+  _topic.selecting = true;
+  _topic.sel = {};
+  topicStopPoll();   // freeze the list while picking
+  const set = (id, disp) => { const e = $(id); if (e) e.style.display = disp; };
+  set('topic-composer', 'none'); set('topic-select-bar', '');
+  set('topic-select-btn', 'none'); set('topic-select-btn-mb', 'none');
+  topicRerender();
+  topicSelectUpdateBar();
+}
+// Restore composer/header UI and clear selection — no re-render or polling change.
+function topicSelectResetUI() {
+  _topic.selecting = false;
+  _topic.sel = {};
+  const set = (id, disp) => { const e = $(id); if (e) e.style.display = disp; };
+  set('topic-composer', ''); set('topic-select-bar', 'none');
+  set('topic-select-btn', ''); set('topic-select-btn-mb', '');
+}
+function topicSelectCancel() {
+  topicSelectResetUI();
+  topicRerender();
+  topicStopPoll();
+  _topic.poll = setInterval(() => topicLoadMessages(false), 4000);
+}
+function topicSelectToggle(mid) {
+  const m = _topic.msgs[mid];
+  if (!m || m.task) return;   // on-board messages are locked
+  _topic.sel[mid] = !_topic.sel[mid];
+  const el = $('tm-' + mid);
+  if (el) el.outerHTML = topicBubble(m); else topicRerender();
+  topicSelectUpdateBar();
+}
+function topicSelectUpdateBar() {
+  const n = Object.keys(_topic.sel).filter(k => _topic.sel[k]).length;
+  const c = $('topic-select-count');
+  if (c) c.textContent = n ? (n + ' selected') : 'Tap messages to add to a card';
+  const btn = $('topic-select-add');
+  if (btn) {
+    btn.textContent = n > 1 ? ('Add card (' + n + ' msgs)') : 'Add to board';
+    btn.style.background = n ? '#CC0000' : '#E4E0D9';
+    btn.style.color = n ? '#fff' : '#A8A39A';
+    btn.style.cursor = n ? 'pointer' : 'default';
+  }
+}
+async function topicSelectAdd() {
+  const ids = Object.keys(_topic.sel).filter(k => _topic.sel[k]);
+  if (!ids.length) return;
+  try { await api('POST', '/api/tasks', { channel_id: _topic.channelId, message_ids: ids }); }
+  catch (e) { toast('Add failed: ' + e.message); return; }
+  toast(ids.length + (ids.length === 1 ? ' message' : ' messages') + ' added to To do', 'success');
+  topicSelectCancel();
+  topicLoadMessages(true);   // refresh so the new card's messages show the on-board tint
 }
 
 function topicEmpty() {
