@@ -1447,19 +1447,28 @@ def list_messages(channel_id):
     rows = q.order_by(Message.created_at).all()
     if not rows:  # common case on a quiet 4s poll — skip the task scan
         return jsonify([])
-    # Map each message → the (non-archived) task it sits on, so the chat can
-    # colour picked messages by task status and show the task's tags.
+    # Map each message → the task it sits on, so the chat can colour picked
+    # messages by task status and show the task's tags. Archived tasks still
+    # highlight their messages (marked "archived") so the topic keeps showing
+    # that a message was actioned; active tasks take precedence for a message
+    # that lives on both.
     labels = {"todo": "To do", "doing": "In progress", "done": "Done"}
     tag_map = {tg.id: tg.to_dict() for tg in Tag.query.all()}
     task_by_msg = {}
-    for t in Task.query.filter(Task.archived_at.is_(None)).all():
-        info = {
-            "status": t.status,
-            "status_label": labels.get(t.status, t.status),
-            "tags": [tag_map[ti] for ti in t.tag_id_list() if ti in tag_map],
-        }
-        for mid in t.msg_id_list():
-            task_by_msg.setdefault(mid, info)
+
+    def _index(tasks, *, archived):
+        for t in tasks:
+            info = {
+                "status": "archived" if archived else t.status,
+                "status_label": "Archived" if archived else labels.get(t.status, t.status),
+                "tags": [tag_map[ti] for ti in t.tag_id_list() if ti in tag_map],
+            }
+            for mid in t.msg_id_list():
+                task_by_msg.setdefault(mid, info)
+
+    # Active first so they win the setdefault over an archived task on the same message.
+    _index(Task.query.filter(Task.archived_at.is_(None)).all(), archived=False)
+    _index(Task.query.filter(Task.archived_at.isnot(None)).all(), archived=True)
     out = []
     for m in rows:
         d = m.to_dict()
