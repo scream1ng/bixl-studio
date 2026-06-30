@@ -1988,9 +1988,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── EXP (BOM expiry timeline) ─────────────────────────────────────────────────
-// Fully client-side: parses a Product Detail Report .xlsx in-browser (zip + sheet,
-// no libs) into a BOM runway Gantt. History persists in localStorage.
-const EXP_HKEY = 'exp_history_v1';
+// Parses a Product Detail Report .xlsx in-browser (zip + sheet, no libs) into a
+// BOM runway Gantt. History persists server-side (/api/exps), same as SOP/PFC/ICL.
 const EXP_EXPIRY_MONTHS = 3, EXP_HORIZON_MONTHS = 12, EXP_ACTIVE_ONLY = true, EXP_CAP = 90;
 const EXP_MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 let _expRows = [];        // parsed product rows (allRows)
@@ -2001,13 +2000,20 @@ let _expS = { loaded:false, parsing:false, error:null, fileName:'—', group:'Al
 function expDefaultState() { return { loaded:false, parsing:false, error:null, fileName:'—', group:'All', site:'All', q:'', dim:'bom' }; }
 
 // ---- navigation ----
-function enterExp() { expLoadHistory(); showScreen('exp-list'); expListRender(); }
+async function enterExp() { showScreen('exp-list'); expListRender(); await expLoadHistory(); expListRender(); }
 function expNew() { _expRows = []; _expChecked = new Set(); _expS = expDefaultState(); showScreen('exp'); expRenderReport(); }
 function expBack() { showScreen('exp-list'); expListRender(); }
 
-// ---- history (localStorage) ----
-function expLoadHistory() { let h = []; try { h = JSON.parse(localStorage.getItem(EXP_HKEY) || 'null'); } catch (e) {} _expHistory = Array.isArray(h) ? h : []; }
-function expSaveHistory(h) { try { localStorage.setItem(EXP_HKEY, JSON.stringify(h)); } catch (e) {} }
+// ---- history (server-side, /api/exps) ----
+// Server returns lightweight summaries (no rows); rows are fetched on open/download.
+function expNormRec(d) {
+  return { id: d.id, created_at: d.created_at, sites: d.sites || [], fileName: d.file_name || '',
+           counts: d.counts || {}, spark: d.spark || [], rows: d.rows || null };
+}
+async function expLoadHistory() {
+  try { const list = await api('GET', '/api/exps') || []; _expHistory = list.map(expNormRec); }
+  catch (e) { _expHistory = []; }
+}
 
 // ---- date helpers ----
 function expSerialToDate(s) { if (s == null || s === '') return null; const n = +s; if (!isFinite(n) || n <= 0) return null; return new Date(Date.UTC(1899, 11, 30) + Math.round(n) * 86400000); }
@@ -2328,37 +2334,60 @@ function expRenderGantt(v) {
 }
 
 // ---- save / history list ----
-function expSave() {
+async function expSave() {
   if (!_expS.loaded) return;
   const v = expComputeView();
-  const rec = {
-    id: 'r' + Date.now(), created_at: Date.now(), sites: expSiteList(), fileName: _expS.fileName,
+  const payload = {
+    sites: expSiteList(), file_name: _expS.fileName,
     counts: { expiring: v.kpiExpiring, within1y: v.within1yCount, expired: v.kpiExpired, total: _expRows.length },
     spark: v.sparkHeights, rows: _expRows
   };
-  _expHistory = [rec, ..._expHistory].slice(0, 20);
-  expSaveHistory(_expHistory);
   const b = $('exp-save-btn');
-  if (b) { b.textContent = 'Saved ✓'; setTimeout(() => { b.textContent = 'Save to history'; }, 1800); }
+  if (b) b.disabled = true;
+  try {
+    await api('POST', '/api/exps', payload);
+    await expLoadHistory();
+    if (b) { b.textContent = 'Saved ✓'; setTimeout(() => { b.textContent = 'Save to history'; }, 1800); }
+  } catch (e) {
+    toast(e.message || 'Save failed');
+  } finally {
+    if (b) b.disabled = false;
+  }
 }
 function expFindRec(id) { return _expHistory.find(r => r.id === id); }
-function expOpenRec(id) {
-  const r = expFindRec(id); if (!r) return;
-  _expRows = r.rows || [];
+async function expFetchRows(id) {
+  const r = expFindRec(id);
+  if (r && Array.isArray(r.rows)) return r.rows;
+  const d = await api('GET', '/api/exps/' + id);
+  const rows = (d && d.rows) || [];
+  if (r) r.rows = rows;  // cache for subsequent open/download
+  return rows;
+}
+async function expOpenRec(id) {
+  let rows;
+  try { rows = await expFetchRows(id); }
+  catch (e) { toast(e.message || 'Could not load report'); return; }
+  const r = expFindRec(id) || {};
+  _expRows = rows || [];
   _expChecked = new Set();
   _expS = expDefaultState(); _expS.loaded = _expRows.length > 0; _expS.fileName = r.fileName || '—';
   showScreen('exp'); expRenderReport();
 }
 function expDeleteRec(id) {
-  askDelete('Delete this saved report? This cannot be undone.').then(ok => {
+  askDelete('Delete this saved report? This cannot be undone.').then(async ok => {
     if (!ok) return;
+    try { await api('DELETE', '/api/exps/' + id); }
+    catch (e) { toast(e.message || 'Delete failed'); return; }
     _expHistory = _expHistory.filter(r => r.id !== id);
-    expSaveHistory(_expHistory); expListRender();
+    expListRender();
   });
 }
-function expDownloadRec(id) {
-  const r = expFindRec(id); if (!r) return;
-  const out = expBuildExport(r.rows || []);
+async function expDownloadRec(id) {
+  let rows;
+  try { rows = await expFetchRows(id); }
+  catch (e) { toast(e.message || 'Could not load report'); return; }
+  const r = expFindRec(id) || {};
+  const out = expBuildExport(rows || []);
   const head = ['Part #','Description','Pool','BOM number','Group','Site','Ends','Status'];
   const escc = (s) => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
   const csvBody = out.map(x => [x.num, x.name, x.pool, x.bom, x.group, x.site, x.endLabel, x.status].map(escc).join(',')).join('\n');

@@ -256,6 +256,43 @@ class PFC(db.Model):
         }
 
 
+class EXP(db.Model):
+    """One saved BOM expiry report (EXP module).
+
+    Pure data — no images. Stores the parsed product rows plus the precomputed
+    summary (site list, KPI counts, sparkline heights) used by the history list,
+    so a saved report can be listed, re-opened, and re-exported to CSV.
+    """
+    __tablename__ = "exps"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    sites = db.Column(db.Text, nullable=False, default="[]")     # JSON list of site codes
+    file_name = db.Column(db.Text, nullable=False, default="")
+    counts = db.Column(db.Text, nullable=False, default="{}")    # JSON {expiring, within1y, expired, total}
+    spark = db.Column(db.Text, nullable=False, default="[]")     # JSON sparkline heights
+    rows = db.Column(db.Text, nullable=False, default="[]")      # JSON parsed product rows
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def _json(self, raw, fallback):
+        try:
+            return json.loads(raw or fallback)
+        except Exception:
+            return json.loads(fallback)
+
+    def to_dict(self, with_rows: bool = False) -> dict:
+        d = {
+            "id": self.id,
+            "sites": self._json(self.sites, "[]"),
+            "file_name": self.file_name,
+            "counts": self._json(self.counts, "{}"),
+            "spark": self._json(self.spark, "[]"),
+            "created_at": self.created_at.isoformat(),
+        }
+        if with_rows:
+            d["rows"] = self._json(self.rows, "[]")
+        return d
+
+
 class Channel(db.Model):
     """One Topics thread — an open feed the team posts to."""
     __tablename__ = "channels"
@@ -1395,6 +1432,50 @@ def delete_pfc(pfc_id):
         db.session.delete(pfc)
         db.session.flush()
         _gc_blobs([h])
+        db.session.commit()
+    return "", 204
+
+
+# ── EXP history (BOM expiry reports) ──────────────────────────────────────────
+
+@app.route("/api/exps", methods=["GET"])
+def list_exps():
+    rows = EXP.query.order_by(EXP.created_at.desc()).all()
+    return jsonify([r.to_dict() for r in rows])
+
+
+@app.route("/api/exps", methods=["POST"])
+def create_exp():
+    """Save a BOM expiry report to history. Returns the new record (summary)."""
+    payload = request.get_json(silent=True) or {}
+    rows = payload.get("rows")
+    if not isinstance(rows, list) or not rows:
+        return jsonify({"error": "no rows"}), 400
+    exp = EXP(
+        sites=json.dumps(payload.get("sites") or []),
+        file_name=(payload.get("file_name") or "").strip(),
+        counts=json.dumps(payload.get("counts") or {}),
+        spark=json.dumps(payload.get("spark") or []),
+        rows=json.dumps(rows),
+    )
+    db.session.add(exp)
+    db.session.commit()
+    return jsonify(exp.to_dict()), 201
+
+
+@app.route("/api/exps/<exp_id>", methods=["GET"])
+def get_exp(exp_id):
+    exp = db.session.get(EXP, exp_id)
+    if not exp:
+        return jsonify({"error": "not found"}), 404
+    return jsonify(exp.to_dict(with_rows=True))
+
+
+@app.route("/api/exps/<exp_id>", methods=["DELETE"])
+def delete_exp(exp_id):
+    exp = db.session.get(EXP, exp_id)
+    if exp:
+        db.session.delete(exp)
         db.session.commit()
     return "", 204
 
