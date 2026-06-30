@@ -2149,7 +2149,7 @@ function expComputeView() {
     const s = Math.min(T, r.end), e = Math.max(T, r.end);
     const left = pct(s), width = Math.max(0.6, pct(e) - pct(s));
     return {
-      key: (r.num || '') + '|' + (r.bom || '') + '|' + (r.site || ''),
+      key: _expS.dim + '|' + (r.num || '') + '|' + (r.bom || '') + '|' + (r.site || ''),
       num: r.num, name: r.name, color, endShort: expFmtShort(r.end), pool: r.pool || '—',
       poolStyle: 'width:96px;flex-shrink:0;font-size:11px;font-weight:600;color:#5A5A5A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;' + (r.pool ? 'background:#EFEDE7;padding:3px 8px;border-radius:6px;' : 'color:#C0C0C0;'),
       barStyle: 'position:absolute;top:6px;height:20px;border-radius:5px;left:' + left + '%;width:' + width + '%;min-width:4px;background:' + color + ';'
