@@ -1036,6 +1036,46 @@
   </main>
 </div>
 
+<!-- ═══════════════════ TOPIC HOME (chats within a topic) ═══════════════════ -->
+<div id="screen-topic-home" class="screen">
+  <aside class="shell-rail"></aside>
+
+  <main class="shell-panel">
+    <!-- mobile header -->
+    <header class="mb-only" style="height:58px;display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
+      <button onclick="enterTopics()" style="color:#CC0000;font-size:22px;font-weight:400;flex-shrink:0;padding:0 4px;">&#8249;</button>
+      <div style="flex:1;min-width:0;display:flex;align-items:center;gap:5px;"><span style="font-size:16px;font-weight:800;color:#BCBCBC;">#</span><span id="thome-title-mb" style="font-size:16px;font-weight:800;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">general</span></div>
+      <button onclick="topicNewChat()" style="width:38px;height:38px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;color:#CC0000;font-size:22px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
+    </header>
+
+    <!-- desktop header -->
+    <div class="dt-only" style="padding:14px 26px 16px;border-bottom:1px solid rgba(0,0,0,0.07);flex-shrink:0;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;">
+        <button onclick="enterTopics()" style="color:#9B9B9B;font-size:12.5px;font-weight:600;margin-bottom:8px;display:inline-flex;align-items:center;gap:4px;">&#8249; All topics</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:19px;font-weight:800;color:#BCBCBC;">#</span><h1 id="thome-title" style="font-size:19px;font-weight:800;letter-spacing:-0.3px;">general</h1>
+          <button class="btn btn-primary" style="margin-left:auto;" onclick="topicNewChat()">+ New chat</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
+      <div style="max-width:1100px;margin:0 auto;">
+        <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
+          <input id="thome-search" oninput="topicHomeRender()" placeholder="Search chats&hellip;" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
+        </div>
+        <div id="thome-chips" style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:14px;"></div>
+        <div id="thome-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
+          <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No chats yet</div>
+          <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New chat</strong> to start one.</p>
+        </div>
+        <div id="thome-items"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
 <!-- ═══════════════════ TOPICS (chat) ═══════════════════ -->
 <div id="screen-topic" class="screen">
   <aside class="shell-rail"></aside>
@@ -1043,18 +1083,30 @@
   <main class="shell-panel">
     <!-- mobile header -->
     <header class="mb-only" style="height:58px;display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);background:#F5F4F1;">
-      <button onclick="enterTopics()" style="color:#CC0000;font-size:22px;font-weight:400;flex-shrink:0;padding:0 4px;">&#8249;</button>
-      <div style="flex:1;min-width:0;display:flex;align-items:center;gap:5px;"><span style="font-size:16px;font-weight:800;color:#BCBCBC;">#</span><span id="topic-title-mb" style="font-size:16px;font-weight:800;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">general</span></div>
+      <button onclick="topicBackToHome()" style="color:#CC0000;font-size:22px;font-weight:400;flex-shrink:0;padding:0 4px;">&#8249;</button>
+      <div style="flex:1;min-width:0;">
+        <div id="topic-crumb-mb" style="font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:0.6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">general</div>
+        <span id="topic-title-mb" style="font-size:16px;font-weight:800;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;">Chat</span>
+      </div>
       <button id="topic-select-btn-mb" onclick="topicSelectStart()" style="flex-shrink:0;padding:7px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);background:#fff;font-size:12.5px;font-weight:600;color:#1A1A1A;">Send</button>
     </header>
 
     <!-- desktop header -->
     <div class="dt-only" style="padding:14px 26px 16px;border-bottom:1px solid rgba(0,0,0,0.07);flex-shrink:0;">
       <div style="max-width:1100px;margin:0 auto;width:100%;">
-        <button onclick="enterTopics()" style="color:#9B9B9B;font-size:12.5px;font-weight:600;margin-bottom:8px;display:inline-flex;align-items:center;gap:4px;">&#8249; All topics</button>
-        <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:19px;font-weight:800;color:#BCBCBC;">#</span><h1 id="topic-title" style="font-size:19px;font-weight:800;letter-spacing:-0.3px;">general</h1>
-          <button id="topic-select-btn" onclick="topicSelectStart()" style="margin-left:auto;padding:8px 15px;border-radius:9px;border:1px solid rgba(0,0,0,0.12);background:#fff;font-size:12.5px;font-weight:600;color:#1A1A1A;cursor:pointer;display:inline-flex;align-items:center;gap:7px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>Send to board</button></div>
+        <button onclick="topicBackToHome()" id="topic-crumb" style="color:#9B9B9B;font-size:12.5px;font-weight:600;margin-bottom:8px;display:inline-flex;align-items:center;gap:4px;">&#8249; general</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <h1 id="topic-title" style="font-size:19px;font-weight:800;letter-spacing:-0.3px;">Chat</h1>
+          <span id="topic-task-badge" style="display:none;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#FBF1F1;color:#CC0000;border:1px solid rgba(204,0,0,0.18);"></span>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:8px;position:relative;">
+            <button onclick="topicArchiveChat()" id="topic-archive-btn" title="Archive chat" style="width:36px;height:36px;border-radius:9px;border:1px solid rgba(0,0,0,0.12);background:#fff;display:flex;align-items:center;justify-content:center;color:#6B6B6B;cursor:pointer;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"></rect><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"></path><path d="M10 12h4"></path></svg>
+            </button>
+            <button onclick="topicToggleSendMenu(event)" style="padding:8px 15px;border-radius:9px;border:1px solid rgba(0,0,0,0.12);background:#fff;font-size:12.5px;font-weight:600;color:#1A1A1A;cursor:pointer;display:inline-flex;align-items:center;gap:7px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>Send to &#9662;</button>
+            <div id="topic-send-menu" style="display:none;position:absolute;top:44px;right:0;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:11px;box-shadow:0 6px 20px rgba(0,0,0,0.1);min-width:190px;overflow:hidden;z-index:30;"></div>
+          </div>
+        </div>
         <p style="color:#8A8A8A;font-size:12.5px;margin-top:2px;">Post updates, photos, and replies for the team.</p>
       </div>
     </div>
@@ -1086,13 +1138,13 @@
     </div>
   </main>
 
-  <!-- topics list (3rd card, desktop) -->
-  <aside class="dt-only" style="width:300px;flex-shrink:0;background:#fff;border-radius:18px;display:flex;flex-direction:column;overflow:hidden;">
-    <div style="padding:18px 20px 15px;border-bottom:1px solid #EFEDEA;flex-shrink:0;">
+  <!-- topic tree (3rd card, desktop): every topic, expandable to its chats -->
+  <aside class="dt-only" style="width:300px;flex-shrink:0;background:#E7E5E0;border-radius:18px;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:18px 20px 15px;border-bottom:1px solid rgba(0,0,0,0.06);flex-shrink:0;">
       <div style="font-size:15px;font-weight:800;letter-spacing:-0.2px;">Topics</div>
-      <div id="topic-channels-sub" style="font-size:11.5px;color:#9A9A9A;margin-top:1px;">&mdash;</div>
+      <div id="topic-tree-sub" style="font-size:11.5px;color:#8A8A8A;margin-top:1px;">&mdash;</div>
     </div>
-    <div id="topic-channels" style="flex:1;min-height:0;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:3px;"></div>
+    <div id="topic-tree" style="flex:1;min-height:0;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:3px;"></div>
   </aside>
 </div>
 
@@ -1363,17 +1415,23 @@ async function api(method, path, body) {
 }
 
 // Single source of truth for the product rail (order + styling). Rendered into
-// each screen's .shell-rail on show, so all 13 rails stay identical.
+// each screen's .shell-rail on show, so all 13 rails stay identical. Grouped into
+// WORKSPACE (chat-style collaboration + work tracking) and TOOLS (single-purpose
+// document generators). Incident / Action Request are permanently disabled stubs —
+// no route/model/screen behind them yet.
 const RAIL_PRODUCTS = [
-  { key: 'topic',  abbr: 'TP',  label: 'Topics',               sub: 'Team discussion',       fn: 'enterTopics' },
-  { key: 'task',   abbr: 'TSK', label: 'Tasks',                sub: 'From topics',           fn: 'enterTasks' },
-  { key: 'lookup', abbr: 'LU',  label: 'Look Up',              sub: 'FG &#8596; WIP finder',  fn: 'enterLookup' },
-  { key: 'sop',    abbr: 'SOP', label: 'SOP',                  sub: 'Operating procedures',  fn: 'enterSop' },
-  { key: 'label',  abbr: 'LB',  label: 'Label',                sub: 'Part labels',           fn: 'enterLabel' },
-  { key: 'icl',    abbr: 'ICL', label: 'Inspection Checklist', sub: 'Quality checks',        fn: 'enterIcl' },
-  { key: 'pfc',    abbr: 'PFC', label: 'Process Flow Chart',   sub: 'BOM &#8594; flow',       fn: 'enterPfc' },
-  { key: 'exp',    abbr: 'EXP', label: 'Expiry',               sub: 'BOM runway',            fn: 'enterExp' },
+  { key: 'topic',    abbr: 'TP',  label: 'Topics',               sub: 'Team discussion',       fn: 'enterTopics', group: 'workspace' },
+  { key: 'task',     abbr: 'TSK', label: 'Tasks',                sub: 'From topics',           fn: 'enterTasks', group: 'workspace' },
+  { key: 'incident', abbr: 'INC', label: 'Incident',             sub: 'Coming soon',           fn: null, group: 'workspace', disabled: true },
+  { key: 'action',   abbr: 'AR',  label: 'Action Request',       sub: 'Coming soon',           fn: null, group: 'workspace', disabled: true },
+  { key: 'lookup',   abbr: 'LU',  label: 'Look Up',              sub: 'FG &#8596; WIP finder',  fn: 'enterLookup', group: 'tools' },
+  { key: 'sop',      abbr: 'SOP', label: 'SOP',                  sub: 'Operating procedures',  fn: 'enterSop', group: 'tools' },
+  { key: 'label',    abbr: 'LB',  label: 'Label',                sub: 'Part labels',           fn: 'enterLabel', group: 'tools' },
+  { key: 'icl',      abbr: 'ICL', label: 'Inspection Checklist', sub: 'Quality checks',        fn: 'enterIcl', group: 'tools' },
+  { key: 'pfc',      abbr: 'PFC', label: 'Process Flow Chart',   sub: 'BOM &#8594; flow',       fn: 'enterPfc', group: 'tools' },
+  { key: 'exp',      abbr: 'EXP', label: 'Expiry',               sub: 'BOM runway',            fn: 'enterExp', group: 'tools' },
 ];
+const RAIL_GROUPS = [{ key: 'workspace', label: 'WORKSPACE' }, { key: 'tools', label: 'TOOLS' }];
 
 function railKeyFor(s) {
   if (['lookup', 'lookup-mobile'].includes(s)) return 'lookup';
@@ -1381,30 +1439,44 @@ function railKeyFor(s) {
   if (['icl', 'icl-list'].includes(s)) return 'icl';
   if (['pfc', 'pfc-list'].includes(s)) return 'pfc';
   if (['exp', 'exp-list'].includes(s)) return 'exp';
-  if (['topic', 'topic-list'].includes(s)) return 'topic';
+  if (['topic', 'topic-list', 'topic-home'].includes(s)) return 'topic';
   if (s === 'tasks') return 'task';
   if (['home', 'editor', 'capture'].includes(s)) return 'sop';
   return '';
 }
 
-function railHtml(active) {
-  const items = RAIL_PRODUCTS.map(p => {
-    if (p.key === active) {
-      return '<div onclick="' + p.fn + '()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;cursor:pointer;">'
-        + '<div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
-        + '<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div><div style="font-size:11px;color:#9A9A9A;">' + p.sub + '</div></div>'
-        + '<span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span></div>';
-    }
-    return '<div class="rail-item" onclick="' + p.fn + '()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">'
-      + '<div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
-      + '<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div><div style="font-size:11px;color:#6E6E6E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.sub + '</div></div></div>';
+function railTileHtml(p, active) {
+  if (p.disabled) {
+    return '<div title="Coming soon" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:not-allowed;opacity:0.5;">'
+      + '<div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#6E6E6E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
+      + '<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#8A8A8A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div><div style="font-size:11px;color:#6E6E6E;">' + p.sub + '</div></div></div>';
+  }
+  if (p.key === active) {
+    return '<div onclick="' + p.fn + '()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;cursor:pointer;">'
+      + '<div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
+      + '<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div><div style="font-size:11px;color:#9A9A9A;">' + p.sub + '</div></div>'
+      + '<span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span></div>';
+  }
+  return '<div class="rail-item" onclick="' + p.fn + '()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">'
+    + '<div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
+    + '<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div><div style="font-size:11px;color:#6E6E6E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.sub + '</div></div></div>';
+}
+// Render RAIL_PRODUCTS split into its WORKSPACE / TOOLS groups, via a caller-supplied
+// per-item renderer (rail tiles, landing cards, and drawer buttons each style differently).
+function railGroupsHtml(headerStyle, renderItem) {
+  return RAIL_GROUPS.map(g => {
+    const items = RAIL_PRODUCTS.filter(p => p.group === g.key);
+    if (!items.length) return '';
+    return '<div style="' + headerStyle + '">' + g.label + '</div>'
+      + '<div style="display:flex;flex-direction:column;gap:5px;">' + items.map(renderItem).join('') + '</div>';
   }).join('');
+}
+function railHtml(active) {
   return '<div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">'
     + '<img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">'
     + '<div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>'
     + '<span style="font-size:16px;font-weight:700;color:#fff;">Studio</span></div>'
-    + '<div style="font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 10px 10px;">PRODUCTS</div>'
-    + '<div style="display:flex;flex-direction:column;gap:5px;">' + items + '</div>'
+    + railGroupsHtml('font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:10px 10px 8px;', p => railTileHtml(p, active))
     + '<button onclick="logout()" title="Lock" class="rail-item" style="margin-top:auto;display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:transparent;color:#8A8A8A;cursor:pointer;width:100%;text-align:left;border:none;">'
     + '<span style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></span>'
     + '<span style="font-size:13px;font-weight:600;color:#C8C8C8;">Lock</span></button>';
@@ -1436,25 +1508,39 @@ function showScreen(name) {
   }
 }
 
-// Mobile landing cards — same source/order as the rail.
-function landingCardsHtml() {
-  return RAIL_PRODUCTS.map(p =>
-    '<div class="module-card" onclick="' + p.fn + '()" style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow 0.12s;">'
+// Mobile landing cards — same source/order/grouping as the rail.
+function landingCardHtml(p) {
+  if (p.disabled) {
+    return '<div class="module-card" title="Coming soon" style="background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:not-allowed;">'
+      + '<div style="width:44px;height:44px;border-radius:12px;background:#BBBBBB;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
+      + '<div style="flex:1;min-width:0;"><div style="font-size:15px;font-weight:700;color:#8A8A8A;">' + p.label + '</div><div style="font-size:12px;color:#9B9B9B;margin-top:2px;">' + p.sub + '</div></div>'
+      + '</div>';
+  }
+  return '<div class="module-card" onclick="' + p.fn + '()" style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow 0.12s;">'
     + '<div style="width:44px;height:44px;border-radius:12px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
     + '<div style="flex:1;min-width:0;"><div style="font-size:15px;font-weight:700;color:#1A1A1A;">' + p.label + '</div><div style="font-size:12px;color:#7A7A7A;margin-top:2px;">' + p.sub + '</div></div>'
-    + '</div>'
-  ).join('');
+    + '</div>';
+}
+function landingCardsHtml() {
+  return railGroupsHtml('font-size:11px;font-weight:700;color:#9B9B9B;letter-spacing:1.2px;margin:6px 2px 2px;', landingCardHtml);
 }
 
-// Mobile drawer items — same source/order as the rail.
-function drawerHtml() {
-  return RAIL_PRODUCTS.map(p =>
-    '<button id="drawer-' + p.key + '" onclick="' + p.fn + '();closeDrawer();" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;text-align:left;width:100%;transition:background 0.1s;">'
+// Mobile drawer items — same source/order/grouping as the rail.
+function drawerBtnHtml(p) {
+  if (p.disabled) {
+    return '<div title="Coming soon" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;width:100%;opacity:0.5;cursor:not-allowed;">'
+      + '<div style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#6E6E6E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
+      + '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:#8A8A8A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div></div>'
+      + '</div>';
+  }
+  return '<button id="drawer-' + p.key + '" onclick="' + p.fn + '();closeDrawer();" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;text-align:left;width:100%;transition:background 0.1s;">'
     + '<div class="dw-tile" style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
     + '<div style="flex:1;min-width:0;"><div class="dw-lbl" style="font-size:13px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div></div>'
     + '<span class="dw-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>'
-    + '</button>'
-  ).join('');
+    + '</button>';
+}
+function drawerHtml() {
+  return railGroupsHtml('font-size:10.5px;font-weight:700;color:#8A8A8A;letter-spacing:1.2px;padding:8px 10px 4px;', drawerBtnHtml);
 }
 
 function setDrawerActive(key) {
@@ -3279,7 +3365,11 @@ function onPhotoSelected(file) {
 }
 
 // ── Topics (team discussion threads) ─────────────────────────────────────────
-const _topic = { channelId: null, channels: [], lastAt: null, lastDay: null, poll: null, images: [], msgs: {}, selecting: false, sel: {} };
+const _topic = {
+  channelId: null, channels: [], chatId: null, chats: [],
+  homeFilter: 'active', archivedOpen: false, treeExpanded: {},
+  lastAt: null, lastDay: null, poll: null, images: [], msgs: {}, selecting: false, sel: {},
+};
 
 // Composer draft persistence. Mobile (esp. iOS standalone PWA) often evicts and
 // reloads the page when the OS camera takes over, which would otherwise wipe the
@@ -3288,28 +3378,33 @@ const _topic = { channelId: null, channels: [], lastAt: null, lastDay: null, pol
 // so it survives a reload — and restore it on boot so a re-lock can't lose work.
 const _DRAFT_KEY = 'bixl_topic_draft';
 function saveTopicDraft() {
-  if (!_topic.channelId) return;
+  if (!_topic.chatId) return;
   const text = $('topic-input') ? $('topic-input').value : '';
   if (!text && !_topic.images.length) { clearTopicDraft(); return; }
   const at = Date.now();
+  const payload = { channelId: _topic.channelId, chatId: _topic.chatId, text, images: _topic.images, at };
   try {
-    localStorage.setItem(_DRAFT_KEY, JSON.stringify({ channelId: _topic.channelId, text, images: _topic.images, at }));
+    localStorage.setItem(_DRAFT_KEY, JSON.stringify(payload));
   } catch (e) {
     // Over quota — drop the photos so at least the typed note survives a relaunch.
-    try { localStorage.setItem(_DRAFT_KEY, JSON.stringify({ channelId: _topic.channelId, text, images: [], at })); } catch (_) {}
+    try { localStorage.setItem(_DRAFT_KEY, JSON.stringify({ ...payload, images: [] })); } catch (_) {}
   }
 }
 function clearTopicDraft() { try { localStorage.removeItem(_DRAFT_KEY); } catch (e) {} }
-function restoreTopicDraft() {
+async function restoreTopicDraft() {
   let d = null;
   try { d = JSON.parse(localStorage.getItem(_DRAFT_KEY) || 'null'); } catch (e) {}
-  if (!d || !d.channelId || (!d.text && !(d.images && d.images.length))) return false;
+  if (!d || !d.chatId || (!d.text && !(d.images && d.images.length))) return false;
   if (d.at && Date.now() - d.at > 60 * 60 * 1000) { clearTopicDraft(); return false; }  // stale > 1h
-  openTopic(d.channelId).then(() => {
-    _topic.images = Array.isArray(d.images) ? d.images : [];
-    if ($('topic-input')) $('topic-input').value = d.text || '';
-    topicRenderTray();
-  });
+  if (!_topic.channels.length) {
+    try { _topic.channels = await api('GET', '/api/channels') || []; } catch (_) {}
+  }
+  _topic.channelId = d.channelId;
+  try { _topic.chats = await api('GET', '/api/channels/' + d.channelId + '/chats') || []; } catch (_) { _topic.chats = []; }
+  chatOpen(d.chatId);
+  _topic.images = Array.isArray(d.images) ? d.images : [];
+  if ($('topic-input')) $('topic-input').value = d.text || '';
+  topicRenderTray();
   return true;
 }
 
@@ -3317,8 +3412,15 @@ function restoreTopicDraft() {
 function topicSub(c) {
   return c.last_text ? esc(c.last_text) : (esc(c.description) || 'No messages yet');
 }
+// Chat row subtitle: latest message, else a "new chat" placeholder.
+function chatSub(c) {
+  return c.last_text ? esc(c.last_text) : 'New chat';
+}
+function chatTaskBadgeText(task) {
+  return 'TSK-' + String((task && task.number) || 0).padStart(3, '0');
+}
 
-// Module landing: list every topic. Click one to open its chat.
+// Module landing: list every topic. Click one to open its home (its chats).
 function enterTopics() {
   showScreen('topic-list');
   topicListLoad();
@@ -3367,47 +3469,273 @@ async function topicDelete(id, slug) {
   toast('Topic deleted', 'success');
 }
 
-// Open one topic's chat (3-pane). Loads topics if not already in memory.
+// Open one topic's home (its list of chats). Loads topics if not already in memory.
 async function openTopic(id) {
-  showScreen('topic');
   if (!_topic.channels.length) {
     try { _topic.channels = await api('GET', '/api/channels') || []; } catch (_) {}
   }
-  topicSelectChannel(id);
+  _topic.channelId = id;
+  _topic.homeFilter = 'active';
+  _topic.archivedOpen = false;
+  showScreen('topic-home');
+  await topicHomeLoadChats();
+  topicHomeRender();
+}
+
+async function topicHomeLoadChats() {
+  try { _topic.chats = await api('GET', '/api/channels/' + _topic.channelId + '/chats') || []; }
+  catch (_) { _topic.chats = []; }
+  const ch = _topic.channels.find(c => c.id === _topic.channelId);
+  const slug = ch ? ch.slug : '';
+  if ($('thome-title')) $('thome-title').textContent = slug;
+  if ($('thome-title-mb')) $('thome-title-mb').textContent = slug;
+}
+
+function topicHomeSetFilter(key) { _topic.homeFilter = key; topicHomeRender(); }
+
+function topicHomeChips() {
+  const chips = [['active', 'Active'], ['promoted', 'Promoted'], ['archived', 'Archived'], ['all', 'All']];
+  return chips.map(([key, label]) => {
+    const on = _topic.homeFilter === key;
+    return '<button onclick="topicHomeSetFilter(\'' + key + '\')" style="font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid '
+      + (on ? '#CC0000' : 'rgba(0,0,0,0.12)') + ';background:' + (on ? '#CC0000' : '#fff') + ';color:' + (on ? '#fff' : '#6B6B6B') + ';">' + label + '</button>';
+  }).join('');
+}
+
+function topicHomeChatCard(c) {
+  const id = esc(c.id);
+  const title = esc(c.title || 'New chat');
+  const sub = chatSub(c);
+  const count = c.message_count || 0;
+  const badge = count
+    ? '<span style="min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:#F2F0EC;color:#7A7A7A;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + count + '</span>'
+    : '';
+  const taskBadge = c.task
+    ? '<span style="font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:20px;background:#FBF1F1;color:#CC0000;border:1px solid rgba(204,0,0,0.18);flex-shrink:0;white-space:nowrap;">' + chatTaskBadgeText(c.task) + '</span>'
+    : '';
+  return '<div class="doc-card" onclick="chatOpen(\'' + id + '\')" style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s;' + (c.archived ? 'opacity:0.7;' : '') + '">'
+    + '<span style="width:38px;height:38px;border-radius:9px;background:#F2F0EC;color:#9B9B9B;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">&#128172;</span>'
+    + '<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1A1A1A;">' + title + '</div>'
+    + '<div style="color:#9B9B9B;font-size:12px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + sub + '</div></div>'
+    + taskBadge + badge
+    + window.btnIco('delete', "event.stopPropagation();chatDelete('" + id + "')", 'Delete chat')
+    + '</div>';
+}
+
+function topicHomeRender() {
+  const chipsEl = $('thome-chips'); if (chipsEl) chipsEl.innerHTML = topicHomeChips();
+  const list = $('thome-items'), empty = $('thome-empty');
+  if (!list) return;
+  if (!_topic.chats.length) { if (empty) empty.style.display = 'block'; list.innerHTML = ''; return; }
+  if (empty) empty.style.display = 'none';
+  const q = ($('thome-search')?.value || '').trim().toLowerCase();
+  let src = _topic.chats.filter(c => !q || (c.title || '').toLowerCase().includes(q) || (c.last_text || '').toLowerCase().includes(q));
+  if (_topic.homeFilter === 'active') src = src.filter(c => !c.archived);
+  else if (_topic.homeFilter === 'promoted') src = src.filter(c => !c.archived && c.task);
+  else if (_topic.homeFilter === 'archived') src = src.filter(c => c.archived);
+  if (!src.length) { list.innerHTML = _histNoMatch; return; }
+  if (_topic.homeFilter !== 'all') {
+    list.innerHTML = '<div style="display:flex;flex-direction:column;gap:7px;">' + src.map(topicHomeChatCard).join('') + '</div>';
+    return;
+  }
+  const active = src.filter(c => !c.archived), archived = src.filter(c => c.archived);
+  let html = '<div style="display:flex;flex-direction:column;gap:7px;">' + active.map(topicHomeChatCard).join('') + '</div>';
+  if (archived.length) {
+    html += '<div onclick="topicHomeToggleArchived()" style="cursor:pointer;font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.1px;margin:20px 0 8px;">'
+      + 'Archived (' + archived.length + ') ' + (_topic.archivedOpen ? '&#9652;' : '&#9662;') + '</div>';
+    if (_topic.archivedOpen) html += '<div style="display:flex;flex-direction:column;gap:7px;">' + archived.map(topicHomeChatCard).join('') + '</div>';
+  }
+  list.innerHTML = html;
+}
+function topicHomeToggleArchived() { _topic.archivedOpen = !_topic.archivedOpen; topicHomeRender(); }
+
+async function chatDelete(id) {
+  if (!(await askDelete('Delete this chat and all its messages? This cannot be undone.'))) return;
+  try { await api('DELETE', '/api/chats/' + encodeURIComponent(id)); }
+  catch (e) { toast('Delete failed: ' + e.message); return; }
+  _topic.chats = _topic.chats.filter(c => c.id !== id);
+  topicHomeRender();
+  toast('Chat deleted', 'success');
+}
+
+async function topicNewChat() {
+  let chat;
+  try { chat = await api('POST', '/api/channels/' + _topic.channelId + '/chats', {}); }
+  catch (e) { toast('Create failed: ' + e.message); return; }
+  _topic.chats.unshift(chat);
+  chatOpen(chat.id);
+}
+
+function topicBackToHome() {
+  showScreen('topic-home');
+  topicHomeRender();
 }
 
 function topicStopPoll() { if (_topic.poll) { clearInterval(_topic.poll); _topic.poll = null; } }
 
-function topicRenderChannels() {
-  const sub = $('topic-channels-sub');
-  if (sub) sub.textContent = _topic.channels.length + ' topic' + (_topic.channels.length === 1 ? '' : 's');
-  const html = _topic.channels.map(c => {
-    const active = c.id === _topic.channelId;
-    const sub2 = topicSub(c);
-    return '<button onclick="topicSelectChannel(\'' + c.id + '\')" style="display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:11px;text-align:left;width:100%;' + (active ? 'background:#FBF1F1;border:1px solid rgba(204,0,0,0.18);' : '') + '">'
-      + '<span style="width:34px;height:34px;border-radius:9px;background:' + (active ? '#CC0000' : '#F2F0EC') + ';color:' + (active ? '#fff' : '#9B9B9B') + ';display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">#</span>'
-      + '<span style="flex:1;min-width:0;"><span style="display:block;font-size:13.5px;font-weight:700;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(c.slug) + '</span>'
-      + '<span style="display:block;font-size:11.5px;color:' + (active ? '#CC0000' : '#9A9A9A') + ';' + (active ? 'font-weight:600;' : '') + 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + sub2 + '</span></span>'
+// ---- topic tree (3rd column in the chat screen): every topic, expandable to its chats ----
+function topicTreeChatsHtml(channelId, chats, expanded) {
+  const SHOW = 3;
+  const shown = expanded ? chats : chats.slice(0, SHOW);
+  const rows = shown.map(c => {
+    const active = c.id === _topic.chatId;
+    return '<button onclick="event.stopPropagation();topicTreeSelectChat(\'' + channelId + '\',\'' + c.id + '\')" style="display:flex;align-items:center;gap:8px;padding:7px 9px 7px 30px;border-radius:9px;text-align:left;width:100%;font-size:12.5px;' + (active ? 'background:#FBF1F1;color:#CC0000;font-weight:700;' : 'color:#5A5A5A;') + '">'
+      + '<span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(c.title || 'New chat') + '</span>'
       + '</button>';
   }).join('');
-  const el = $('topic-channels'); if (el) el.innerHTML = html;
+  const more = chats.length > SHOW && !expanded
+    ? '<button onclick="event.stopPropagation();topicTreeExpand(\'' + channelId + '\')" style="padding:6px 9px 6px 30px;font-size:11.5px;font-weight:600;color:#9B9B9B;text-align:left;width:100%;">Show all ' + chats.length + '&hellip;</button>'
+    : '';
+  const add = '<button onclick="event.stopPropagation();topicNewChatFor(\'' + channelId + '\')" style="padding:6px 9px 6px 30px;font-size:11.5px;font-weight:600;color:#CC0000;text-align:left;width:100%;">+ New chat</button>';
+  return rows + more + add;
 }
 
-function topicSelectChannel(id) {
-  if (_topic.selecting) topicSelectResetUI();   // leave selection mode when switching topics
-  _topic.channelId = id;
+function topicTreeRender() {
+  const sub = $('topic-tree-sub');
+  if (sub) sub.textContent = _topic.channels.length + ' topic' + (_topic.channels.length === 1 ? '' : 's');
+  const html = _topic.channels.map(c => {
+    const isCurrent = c.id === _topic.channelId;
+    const expandedState = _topic.treeExpanded[c.id];
+    const open = isCurrent || !!expandedState;
+    const chats = isCurrent ? _topic.chats : ((expandedState && expandedState.chats) || []);
+    const loading = open && !isCurrent && expandedState && !expandedState.loaded;
+    const sub2 = isCurrent
+      ? (_topic.chats.length || 0) + ' chat' + (_topic.chats.length === 1 ? '' : 's')
+      : topicSub(c);
+    const header = '<button onclick="topicTreeToggle(\'' + c.id + '\')" style="display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:11px;text-align:left;width:100%;' + (isCurrent ? 'background:#fff;' : '') + '">'
+      + '<span style="width:34px;height:34px;border-radius:9px;background:' + (isCurrent ? '#CC0000' : '#F2F0EC') + ';color:' + (isCurrent ? '#fff' : '#9B9B9B') + ';display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">#</span>'
+      + '<span style="flex:1;min-width:0;"><span style="display:block;font-size:13.5px;font-weight:700;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(c.slug) + '</span>'
+      + '<span style="display:block;font-size:11.5px;color:#9A9A9A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + sub2 + '</span></span>'
+      + '<span style="font-size:11px;color:#9B9B9B;flex-shrink:0;">' + (open ? '&#9652;' : '&#9662;') + '</span>'
+      + '</button>';
+    const body = open
+      ? '<div style="display:flex;flex-direction:column;gap:2px;">' + (loading ? '<div style="padding:6px 9px 6px 30px;font-size:11.5px;color:#9B9B9B;">Loading&hellip;</div>' : topicTreeChatsHtml(c.id, chats, !!(expandedState && expandedState.showAll))) + '</div>'
+      : '';
+    return header + body;
+  }).join('');
+  const el = $('topic-tree'); if (el) el.innerHTML = html;
+}
+
+async function topicTreeToggle(channelId) {
+  if (channelId === _topic.channelId) return;  // current topic is always open
+  if (_topic.treeExpanded[channelId]) { delete _topic.treeExpanded[channelId]; topicTreeRender(); return; }
+  _topic.treeExpanded[channelId] = { chats: [], showAll: false, loaded: false };
+  topicTreeRender();
+  let chats = [];
+  try { chats = await api('GET', '/api/channels/' + channelId + '/chats') || []; } catch (_) {}
+  if (_topic.treeExpanded[channelId]) {
+    _topic.treeExpanded[channelId].chats = chats;
+    _topic.treeExpanded[channelId].loaded = true;
+    topicTreeRender();
+  }
+}
+function topicTreeExpand(channelId) {
+  if (_topic.treeExpanded[channelId]) _topic.treeExpanded[channelId].showAll = true;
+  topicTreeRender();
+}
+function topicTreeSelectChat(channelId, chatId) {
+  if (channelId === _topic.channelId) { chatOpen(chatId); return; }
+  const exp = _topic.treeExpanded[channelId];
+  _topic.channelId = channelId;
+  _topic.chats = (exp && exp.chats) || [];
+  delete _topic.treeExpanded[channelId];
+  chatOpen(chatId);
+}
+async function topicNewChatFor(channelId) {
+  let chat;
+  try { chat = await api('POST', '/api/channels/' + channelId + '/chats', {}); }
+  catch (e) { toast('Create failed: ' + e.message); return; }
+  if (channelId === _topic.channelId) { _topic.chats.unshift(chat); chatOpen(chat.id); return; }
+  _topic.channelId = channelId;
+  _topic.chats = [chat];
+  delete _topic.treeExpanded[channelId];
+  chatOpen(chat.id);
+}
+
+function topicRenderTaskBadge(chat) {
+  const el = $('topic-task-badge'); if (!el) return;
+  if (chat && chat.task) { el.style.display = 'inline-flex'; el.textContent = 'Task · ' + chatTaskBadgeText(chat.task); }
+  else { el.style.display = 'none'; el.textContent = ''; }
+}
+function topicRenderArchiveBtn(chat) {
+  const btn = $('topic-archive-btn'); if (!btn) return;
+  const archived = !!(chat && chat.archived);
+  btn.title = archived ? 'Restore chat' : 'Archive chat';
+  btn.style.color = archived ? '#CC0000' : '#6B6B6B';
+  btn.style.borderColor = archived ? 'rgba(204,0,0,0.3)' : 'rgba(0,0,0,0.12)';
+}
+async function topicArchiveChat() {
+  if (!_topic.chatId) return;
+  const chat = _topic.chats.find(c => c.id === _topic.chatId);
+  const archived = !(chat && chat.archived);
+  let updated;
+  try { updated = await api('PATCH', '/api/chats/' + _topic.chatId, { archived }); }
+  catch (e) { toast('Update failed: ' + e.message); return; }
+  const i = _topic.chats.findIndex(c => c.id === _topic.chatId);
+  if (i >= 0) _topic.chats[i] = updated;
+  topicRenderArchiveBtn(updated);
+  toast(archived ? 'Chat archived' : 'Chat restored', 'success');
+}
+
+// "Send to ▾" dropdown on the chat header — Task wired to the existing multi-select
+// flow; Incident / Action Request are permanently disabled stub entries.
+function topicToggleSendMenu(ev) {
+  ev.stopPropagation();
+  const menu = $('topic-send-menu'); if (!menu) return;
+  if (menu.style.display === 'block') { menu.style.display = 'none'; return; }
+  const chat = _topic.chats.find(c => c.id === _topic.chatId);
+  const linked = !!(chat && chat.task);
+  const item = (label, extra, onClick, disabled, checked) =>
+    '<button ' + (disabled ? 'disabled' : ('onclick="' + onClick + '"'))
+    + ' style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:10px 14px;font-size:13px;font-weight:600;background:transparent;border:none;color:'
+    + (disabled ? '#BBBBBB' : '#1A1A1A') + ';cursor:' + (disabled ? 'not-allowed' : 'pointer') + ';">'
+    + '<span>' + label + (extra ? ' <span style="font-size:10px;font-weight:700;color:#9B9B9B;">' + extra + '</span>' : '') + '</span>'
+    + (checked ? '<span style="color:#2E9E4F;">&#10003;</span>' : '') + '</button>';
+  menu.innerHTML = item('Task', '', 'topicSendMenuTask()', linked, linked)
+    + item('Incident', 'Soon', '', true, false)
+    + item('Action Request', 'Soon', '', true, false);
+  menu.style.display = 'block';
+}
+function topicSendMenuTask() { $('topic-send-menu').style.display = 'none'; topicSelectStart(); }
+document.addEventListener('click', () => { const m = $('topic-send-menu'); if (m) m.style.display = 'none'; });
+
+function chatOpen(chatId) {
+  if (_topic.selecting) topicSelectResetUI();   // leave selection mode when switching chats
+  _topic.chatId = chatId;
   _topic.lastAt = null;
-  const ch = _topic.channels.find(c => c.id === id);
+  showScreen('topic');
+  const ch = _topic.channels.find(c => c.id === _topic.channelId);
+  const chat = _topic.chats.find(c => c.id === chatId);
   const slug = ch ? ch.slug : '';
-  if ($('topic-title')) $('topic-title').textContent = slug;
-  if ($('topic-title-mb')) $('topic-title-mb').textContent = slug;
+  const title = chat ? (chat.title || 'New chat') : 'Chat';
+  if ($('topic-crumb')) $('topic-crumb').innerHTML = '&#8249; ' + esc(slug);
+  if ($('topic-crumb-mb')) $('topic-crumb-mb').textContent = slug;
+  if ($('topic-title')) $('topic-title').textContent = title;
+  if ($('topic-title-mb')) $('topic-title-mb').textContent = title;
+  topicRenderTaskBadge(chat);
+  topicRenderArchiveBtn(chat);
   $('topic-messages').innerHTML = '';
   _topic.msgs = {};
   _topic.lastDay = null;
-  topicRenderChannels();
+  topicTreeRender();
   topicStopPoll();
   topicLoadMessages(true);
   _topic.poll = setInterval(() => topicLoadMessages(false), 4000);
+}
+
+// Re-fetch this channel's chats (title/fresh may have just changed by the first
+// message) and refresh the breadcrumb/title/tree/home views that show it.
+async function topicRefreshChatMeta() {
+  let chats;
+  try { chats = await api('GET', '/api/channels/' + _topic.channelId + '/chats') || []; } catch (_) { return; }
+  _topic.chats = chats;
+  const chat = chats.find(c => c.id === _topic.chatId);
+  const title = chat ? (chat.title || 'New chat') : 'Chat';
+  if ($('topic-title')) $('topic-title').textContent = title;
+  if ($('topic-title-mb')) $('topic-title-mb').textContent = title;
+  topicRenderTaskBadge(chat);
+  topicRenderArchiveBtn(chat);
+  topicTreeRender();
 }
 
 function topicTime(iso) {
@@ -3488,7 +3816,7 @@ function topicBubble(m) {
     + ' onmouseout="this.style.background=\'transparent\';this.style.color=\'#6B6B6B\';"'
     + ' style="width:28px;height:28px;border-radius:7px;border:none;background:transparent;color:#6B6B6B;display:flex;align-items:center;justify-content:center;cursor:pointer;">' + svg + '</button>';
   const actions = '<div class="topic-actions" style="position:absolute;top:-15px;right:10px;z-index:5;display:flex;gap:2px;opacity:0;transition:opacity 0.12s;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:9px;padding:2px;box-shadow:0 2px 8px rgba(0,0,0,0.10);">'
-    + (m.task ? '' : actBtn("tasksSendFromMessage('" + _topic.channelId + "','" + m.id + "')", 'Send to task', ico.task, false))
+    + (m.task ? '' : actBtn("tasksSendFromMessage('" + _topic.channelId + "','" + _topic.chatId + "','" + m.id + "')", 'Send to task', ico.task, false))
     + actBtn("topicCopy('" + m.id + "')", 'Copy', ico.copy, false)
     + actBtn("topicEditStart('" + m.id + "')", 'Edit', ico.edit, false)
     + actBtn("topicDeleteMsg('" + m.id + "')", 'Delete', ico.del, true)
@@ -3546,7 +3874,7 @@ function topicRerender() {
 }
 
 function topicSelectStart() {
-  if (!_topic.channelId) return;
+  if (!_topic.chatId) return;
   _topic.selecting = true;
   _topic.sel = {};
   topicStopPoll();   // freeze the list while picking
@@ -3598,6 +3926,7 @@ async function topicSelectAdd() {
   toast(ids.length + (ids.length === 1 ? ' message' : ' messages') + ' added to To do', 'success');
   topicSelectCancel();
   topicLoadMessages(true);   // refresh so the new card's messages show the on-board tint
+  topicRefreshChatMeta();    // refresh so the chat's "Task · TSK-nnn" badge appears everywhere
 }
 
 function topicEmpty() {
@@ -3613,13 +3942,13 @@ function topicDivider(label) {
 }
 
 async function topicLoadMessages(reset) {
-  if (!_topic.channelId) return;
-  const cid = _topic.channelId;
-  let path = '/api/channels/' + cid + '/messages';
+  if (!_topic.chatId) return;
+  const cid = _topic.chatId;
+  let path = '/api/chats/' + cid + '/messages';
   if (!reset && _topic.lastAt) path += '?after=' + encodeURIComponent(_topic.lastAt);
   let msgs;
   try { msgs = await api('GET', path) || []; } catch (_) { return; }
-  if (cid !== _topic.channelId) return;  // channel switched mid-fetch
+  if (cid !== _topic.chatId) return;  // chat switched mid-fetch
   const box = $('topic-messages');
   if (reset) {
     box.innerHTML = '';
@@ -3648,14 +3977,17 @@ async function topicLoadMessages(reset) {
 async function topicSend() {
   const inp = $('topic-input');
   const text = (inp.value || '').trim();
-  if ((!text && !_topic.images.length) || !_topic.channelId) return;
+  if ((!text && !_topic.images.length) || !_topic.chatId) return;
   const body = { text };
   if (_topic.images.length) body.images = _topic.images.slice();
   const keepText = text, keepImgs = _topic.images.slice();
+  const chat = _topic.chats.find(c => c.id === _topic.chatId);
+  const wasFresh = !!(chat && chat.fresh);
   inp.value = ''; topicClearAttach();
-  try { await api('POST', '/api/channels/' + _topic.channelId + '/messages', body); }
+  try { await api('POST', '/api/chats/' + _topic.chatId + '/messages', body); }
   catch (e) { toast('Send failed: ' + e.message); inp.value = keepText; _topic.images = keepImgs; topicRenderTray(); saveTopicDraft(); return; }
   topicLoadMessages(false);
+  if (wasFresh) topicRefreshChatMeta();
 }
 
 function topicAttach(files) {
@@ -3817,7 +4149,7 @@ const _task = {
   detailId: null, detail: null, editTitle: false,
   editCommentId: null, commentDraft: '',
   dragId: null,
-  send: { channelId: null, channels: [], msgs: [], sel: {} },
+  send: { channelId: null, channels: [], chatId: null, chats: [], msgs: [], sel: {} },
   tagMgr: { colorPickFor: null, newColor: '#CC0000' },
 };
 const _TAG_PALETTE = ['#CC0000', '#E8590C', '#D9982A', '#2E9E4F', '#0CA678', '#1C7ED6', '#7048E8', '#C2255C', '#5A5A5A', '#7A766E'];
@@ -3951,14 +4283,23 @@ function tasksToggleFilter(id) {
 }
 function tasksClearFilter() { _task.filter = []; tasksRender(); }
 
+// Sequential display id, e.g. "TSK-014" — falls back to nothing for pre-migration
+// tasks that somehow still lack a number.
+function taskNumLabel(t) {
+  return t.number ? 'TSK-' + String(t.number).padStart(3, '0') : '';
+}
+
 function tasksCardHtml(t) {
   const prio = t.priority ? '<span style="' + taskPrioStyle(t.priority) + '">' + t.priority + '</span>' : '';
   const due = taskDueInfo(t.due);
   const dueBadge = due ? '<span style="' + taskDueStyle(due.warn) + '">' + esc(due.label) + '</span>' : '';
   const photo = t.photo_url ? '<div style="margin-top:11px;height:96px;border-radius:9px;overflow:hidden;border:1px solid rgba(0,0,0,0.05);"><img src="' + t.photo_url + '" style="width:100%;height:100%;object-fit:cover;display:block;" alt=""></div>' : '';
+  const numLabel = taskNumLabel(t);
+  const numBadge = numLabel ? '<span style="flex-shrink:0;margin-top:1px;font-size:10.5px;font-weight:700;color:#9B9B9B;font-family:\'JetBrains Mono\',monospace;">' + numLabel + '</span>' : '';
   return '<div draggable="true" ondragstart="taskDragStart(event,\'' + t.id + '\')" ondragend="taskDragEnd(event)" onclick="tasksOpenDetail(\'' + t.id + '\')" style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:12px 14px;cursor:pointer;">'
     + '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:9px;">' + prio
     + '<div style="flex:1;min-width:0;font-size:14px;font-weight:600;color:#1A1A1A;line-height:1.35;">' + esc(t.title) + '</div>'
+    + numBadge
     + '<span style="flex-shrink:0;margin-top:1px;font-size:11px;font-weight:600;color:#7A7A7A;background:#F2F0EC;padding:2px 8px;border-radius:6px;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(t.channel_slug) + '</span></div>'
     + tasksTagChips(t) + photo
     + '<div style="display:flex;align-items:center;gap:12px;margin-top:12px;">'
@@ -4058,7 +4399,9 @@ function tasksRenderDetail() {
   body.innerHTML =
     '<div style="padding:18px 22px 16px;background:#fff;border-bottom:1px solid rgba(0,0,0,0.07);flex-shrink:0;">'
     + '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">'
-    + '<span style="font-size:11px;font-weight:600;color:#7A7A7A;background:#F2F0EC;padding:3px 10px;border-radius:7px;max-width:80%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(t.channel_slug) + '</span>'
+    + '<div style="display:flex;align-items:center;gap:8px;min-width:0;">'
+    + (taskNumLabel(t) ? '<span style="flex-shrink:0;font-size:11px;font-weight:700;color:#9B9B9B;font-family:\'JetBrains Mono\',monospace;">' + taskNumLabel(t) + '</span>' : '')
+    + '<span style="font-size:11px;font-weight:600;color:#7A7A7A;background:#F2F0EC;padding:3px 10px;border-radius:7px;max-width:80%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(t.channel_slug) + '</span></div>'
     + '<button onclick="tasksCloseDetail()" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,0,0,0.08);background:#fff;color:#6B6B6B;font-size:17px;line-height:1;flex-shrink:0;">✕</button></div>'
     + titleRow
     + '<div style="display:flex;align-items:center;gap:9px;margin-top:12px;flex-wrap:wrap;">' + archBadge + prio + dueBadge + '</div></div>'
@@ -4228,7 +4571,7 @@ async function tasksTitleSave(v) {
 }
 function tasksAddMessages() {
   const t = _task.detail; if (!t) return;
-  tasksOpenSend(t.id, t.channel_id);  // open the send modal in add-to-task mode
+  tasksOpenSend(t.id, t.channel_id, t.chat_id);  // open the send modal in add-to-task mode
 }
 
 // ---- tags on a task (detail drawer) ----
@@ -4445,29 +4788,43 @@ function tasksArchiveItemHtml(a) {
 }
 
 // ---- send-from-topic modal ----
-// taskId set → "add messages to this task" mode (topic locked to that task's channel).
-async function tasksOpenSend(taskId, channelId, preselectId) {
-  _task.send = { taskId: taskId || null, channelId: null, channels: [], msgs: [], sel: {}, fromTopic: !!preselectId };
+// taskId set → "add messages to this task" mode (topic + chat locked to the task's own).
+async function tasksOpenSend(taskId, channelId, chatId, preselectId) {
+  _task.send = { taskId: taskId || null, channelId: null, channels: [], chatId: null, chats: [], msgs: [], sel: {}, fromTopic: !!preselectId };
   try { _task.send.channels = await api('GET', '/api/channels') || []; }
   catch (e) { _task.send.channels = []; }
   if (channelId) _task.send.channelId = channelId;
   else if (_task.send.channels.length) _task.send.channelId = _task.send.channels[0].id;
-  if (_task.send.channelId) await tasksSendLoadMsgs();
+  if (_task.send.channelId) await tasksSendLoadChats();
+  if (chatId) _task.send.chatId = chatId;
+  else if (_task.send.chats.length) _task.send.chatId = _task.send.chats[0].id;
+  if (_task.send.chatId) await tasksSendLoadMsgs();
   if (preselectId) _task.send.sel = { [preselectId]: true };  // after loadMsgs (which clears sel)
   $('task-send-overlay').style.display = 'flex';
   tasksRenderSend();
 }
 // Send one topic message straight to the board (create-new-task mode, pre-selected).
-function tasksSendFromMessage(channelId, msgId) { tasksOpenSend(null, channelId, msgId); }
+function tasksSendFromMessage(channelId, chatId, msgId) { tasksOpenSend(null, channelId, chatId, msgId); }
 function tasksCloseSend() { const o = $('task-send-overlay'); if (o) o.style.display = 'none'; }
+async function tasksSendLoadChats() {
+  _task.send.chatId = null; _task.send.chats = []; _task.send.msgs = []; _task.send.sel = {};
+  try { _task.send.chats = await api('GET', '/api/channels/' + _task.send.channelId + '/chats') || []; }
+  catch (e) { _task.send.chats = []; }
+}
 async function tasksSendLoadMsgs() {
   _task.send.sel = {};
-  const id = _task.send.channelId;
-  try { _task.send.msgs = await api('GET', '/api/channels/' + id + '/messages') || []; }
+  const id = _task.send.chatId;
+  try { _task.send.msgs = await api('GET', '/api/chats/' + id + '/messages') || []; }
   catch (e) { _task.send.msgs = []; }
 }
 function tasksSendPickTopic(id) {
   _task.send.channelId = id;
+  tasksSendLoadChats().then(() => {
+    if (_task.send.chats.length) { _task.send.chatId = _task.send.chats[0].id; return tasksSendLoadMsgs(); }
+  }).then(tasksRenderSend);
+}
+function tasksSendPickChat(id) {
+  _task.send.chatId = id;
   tasksSendLoadMsgs().then(tasksRenderSend);
 }
 function tasksSendToggle(mid) {
@@ -4529,7 +4886,7 @@ async function tasksSendAdd() {
     _task.view = 'board';
     toast(ids.length + (ids.length === 1 ? ' message' : ' messages') + ' added to To do', 'success');
     tasksLoad();
-    if (fromTopic && state.screen === 'topic') topicLoadMessages(true);
+    if (fromTopic && state.screen === 'topic') { topicLoadMessages(true); topicRefreshChatMeta(); }
   }
 }
 function tasksRenderSend() {
@@ -4549,17 +4906,35 @@ function tasksRenderSend() {
         }).join('')
       : '<span style="font-size:12px;color:#9B9B9B;">No topics yet.</span>';
   }
+  let chatArea;
+  if (addMode) {
+    const chat = s.chats.find(c => c.id === s.chatId);
+    chatArea = '<span style="padding:5px 11px;border-radius:7px;font-size:12px;font-weight:600;border:1px solid #CC0000;background:#FCE9E9;color:#B0202E;">' + esc(chat ? (chat.title || 'New chat') : '') + '</span>';
+  } else {
+    chatArea = s.chats.length
+      ? s.chats.map(c => {
+          const on = c.id === s.chatId;
+          return '<button onclick="tasksSendPickChat(\'' + c.id + '\')" style="padding:5px 11px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid '
+            + (on ? '#CC0000;background:#FCE9E9;color:#B0202E;' : 'rgba(0,0,0,0.1);background:#fff;color:#6B6B6B;') + '">' + esc(c.title || 'New chat') + '</button>';
+        }).join('')
+      : (s.channels.length ? '<span style="font-size:12px;color:#9B9B9B;">No chats in this topic yet.</span>' : '');
+  }
   let msgList;
   if (!s.channels.length) msgList = '<div style="text-align:center;padding:40px 20px;color:#9B9B9B;font-size:13px;">Create a topic first, then send its messages here.</div>';
-  else if (!s.msgs.length) msgList = '<div style="text-align:center;padding:40px 20px;color:#9B9B9B;font-size:13px;">No messages in this topic yet.</div>';
+  else if (!s.chats.length) msgList = '<div style="text-align:center;padding:40px 20px;color:#9B9B9B;font-size:13px;">No chats in this topic yet.</div>';
+  else if (!s.msgs.length) msgList = '<div style="text-align:center;padding:40px 20px;color:#9B9B9B;font-size:13px;">No messages in this chat yet.</div>';
   else msgList = s.msgs.map(tasksSendMsgHtml).join('');
   const { selCount, selLabel, addLabel } = tasksSendBtnState();
   const addStyle = 'padding:9px 16px;border-radius:9px;font-size:13px;font-weight:700;cursor:' + (selCount ? 'pointer' : 'default')
     + ';background:' + (selCount ? '#CC0000' : '#E4E0D9') + ';color:' + (selCount ? '#fff' : '#A8A39A') + ';';
   const title = addMode ? 'Add messages' : 'Send to board';
   const subtitle = addMode
-    ? 'Pick more messages from this topic to add to the task.'
+    ? 'Pick more messages from this chat to add to the task.'
     : 'Tap each message you want — pick several to group them into one card.';
+  const chatRow = s.channels.length
+    ? '<div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;"><span style="font-size:11px;font-weight:600;color:#9B9B9B;">Chat</span>'
+      + '<div style="display:flex;gap:5px;flex-wrap:wrap;">' + chatArea + '</div></div>'
+    : '';
   body.innerHTML =
     '<div style="padding:18px 22px 15px;border-bottom:1px solid rgba(0,0,0,0.07);flex-shrink:0;">'
     + '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">'
@@ -4567,7 +4942,8 @@ function tasksRenderSend() {
     + '<div style="font-size:12.5px;color:#8A8A8A;margin-top:2px;">' + subtitle + '</div></div>'
     + '<button onclick="tasksCloseSend()" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,0,0,0.08);background:#fff;color:#6B6B6B;font-size:17px;line-height:1;flex-shrink:0;">✕</button></div>'
     + '<div style="display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap;"><span style="font-size:11px;font-weight:600;color:#9B9B9B;">Topic</span>'
-    + '<div style="display:flex;gap:5px;flex-wrap:wrap;">' + topicArea + '</div></div></div>'
+    + '<div style="display:flex;gap:5px;flex-wrap:wrap;">' + topicArea + '</div></div>'
+    + chatRow
     + '<div style="flex:1;min-height:0;overflow-y:auto;padding:14px 20px;background:#F5F4F1;"><div style="display:flex;flex-direction:column;gap:9px;">' + msgList + '</div></div>'
     + '<div style="flex-shrink:0;padding:14px 22px;border-top:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;gap:12px;">'
     + '<span id="tsend-sellabel" style="font-size:12.5px;color:#8A8A8A;">' + selLabel + '</span>'
