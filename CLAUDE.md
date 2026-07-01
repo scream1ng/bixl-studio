@@ -8,13 +8,14 @@ The core problem the SOP module solves: today, photos are taken on a phone and n
 
 | Module | What it does | Status |
 |---|---|---|
-| **Topics** | Team discussion channels — text/photo posts per thread. | live |
-| **Tasks** | Kanban board fed from Topics — send messages onto To do / In progress / Done cards, drag to move, archive history. | live |
+| **Topics** | Team discussion channels, each split into Slack-style **Chats** (threads) — text/photo posts per chat, "Send to ▾" a chat's messages onto a Task. | live |
+| **Tasks** | Kanban board fed from Topics — send messages onto To do / In progress / Done cards, drag to move, archive history. Cards show a sequential `TSK-nnn` id. | live |
 | **Look Up** | FG ↔ WIP part-number finder (`Mapping` model). | live |
 | **SOP** | Photos + notes → formatted IXL Word `.docx` (1–8 steps/page, multi-page). | live |
 | **Label** | Three.js STEP viewer → wireframe label JPG at exact angle; history list. | live |
 | **ICL** (Inspection Checklist) | Balloon dimensions off a STEP model → real IXL inspection `.xlsx`; history. | live |
 | **PFC** (Process Flow Chart) | BOM transaction export → process flow chart (SVG); history. | live |
+| Incident, Action Request | Nav stubs only — greyed "Coming soon" entries in the Topics/Tasks workspace group. | soon |
 | MLB | Material label batch. | soon |
 
 ICL/Label/PFC geometry runs in a **separate `cad-service/`** (FastAPI + OpenCASCADE `ocp`, own Docker deploy). The web app proxies it via `CAD_API_URL`. See README.md for per-module detail and the cad-service OCC gotcha below.
@@ -178,6 +179,8 @@ GET    /healthz                Railway health check
 | Dark grey | `#2C2C2C` |
 | Grey | `#6B6B6B` |
 | Light grey | `#F2F2F2` |
+| Page background | `#F5F4F1` |
+| Recessed panel background | `#E7E5E0` |
 | White | `#FFFFFF` |
 
 - Logo lockup: **IXL** bold + red vertical divider bar + module name in regular weight (e.g. `IXL | Studio`, `IXL | SOP`, `IXL | ICL`). "since 1858" sits under the IXL mark.
@@ -253,6 +256,7 @@ The CAD service (`cad-service/`) runs OpenCASCADE via the `ocp` conda package in
 - [x] ICL module — STEP balloon dimensioning, smart dimension type, `.xlsx` export, history (cad-service backed)
 - [x] PFC module — BOM transaction parse → SVG flow chart, `.xlsx` export, history
 - [x] cad-service — FastAPI + OpenCASCADE STEP mesh/measure, separate Docker deploy, binding-agnostic OCC
+- [x] Chats — `Topic → Chats → Messages` (`Chat` model), chat-scoped messages API (hard cutover from channel-scoped), topic-home screen (search/filter/archive), expandable topic-tree, "Send to ▾" dropdown (Task wired, Incident/Action Request disabled stubs), Tasks board `TSK-nnn` display id + chat provenance, nav rail split into WORKSPACE/TOOLS groups
 - [ ] Empty-cell heading removal (blank "STEP N" for unused steps, ≤8)
 - [ ] Multi-page support (>8 steps → duplicate table on new page, STEP 9+)
 - [ ] Label: Take Photo mode (mobile capture → label, currently greyed out)

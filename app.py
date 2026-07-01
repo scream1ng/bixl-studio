@@ -305,6 +305,9 @@ class Channel(db.Model):
         "Message", backref="channel", lazy=True,
         order_by="Message.created_at", cascade="all, delete-orphan",
     )
+    chats = db.relationship(
+        "Chat", backref="channel", lazy=True, cascade="all, delete-orphan",
+    )
 
     def to_dict(self) -> dict:
         last = self.messages[-1] if self.messages else None
@@ -319,12 +322,44 @@ class Channel(db.Model):
         }
 
 
+class Chat(db.Model):
+    """A thread within a Topic (Slack-style sub-conversation)."""
+    __tablename__ = "chats"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    channel_id = db.Column(db.String(36), db.ForeignKey("channels.id"), nullable=False)
+    title = db.Column(db.Text, nullable=False, default="")
+    fresh = db.Column(db.Boolean, nullable=False, default=True)  # true until first message sent
+    archived_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    messages = db.relationship(
+        "Message", backref="chat", lazy=True,
+        order_by="Message.created_at", cascade="all, delete-orphan",
+    )
+
+    def to_dict(self) -> dict:
+        last = self.messages[-1] if self.messages else None
+        return {
+            "id": self.id,
+            "channel_id": self.channel_id,
+            "title": self.title,
+            "fresh": self.fresh,
+            "archived": self.archived_at is not None,
+            "archived_at": self.archived_at.isoformat() if self.archived_at else None,
+            "message_count": len(self.messages),
+            "last_text": (last.text if last else ""),
+            "last_at": (last.created_at.isoformat() if last else None),
+            "created_at": self.created_at.isoformat(),
+        }
+
+
 class Message(db.Model):
     """One post in a topic — text and/or photo, with a timestamp."""
     __tablename__ = "messages"
 
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     channel_id = db.Column(db.String(36), db.ForeignKey("channels.id"), nullable=False)
+    chat_id = db.Column(db.String(36), db.ForeignKey("chats.id"), nullable=True)
     text = db.Column(db.Text, nullable=False, default="")
     image_hash = db.Column(db.String(64), db.ForeignKey("image_blobs.hash"), nullable=True)
     image_hashes = db.Column(db.Text, nullable=True)  # JSON list of blob hashes (multi-photo)
@@ -347,6 +382,7 @@ class Message(db.Model):
         return {
             "id": self.id,
             "channel_id": self.channel_id,
+            "chat_id": self.chat_id,
             "text": self.text or "",
             "has_image": bool(hs),
             "image_count": len(hs),
@@ -367,9 +403,11 @@ class Task(db.Model):
     __tablename__ = "tasks"
 
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    number = db.Column(db.Integer, nullable=True)  # sequential display id, e.g. "TSK-014"
     title = db.Column(db.Text, nullable=False, default="")
     channel_id = db.Column(db.String(36), db.ForeignKey("channels.id"), nullable=True)
     channel_slug = db.Column(db.String(64), nullable=False, default="")  # snapshot for display
+    chat_id = db.Column(db.String(36), db.ForeignKey("chats.id"), nullable=True)  # provenance only
     message_ids = db.Column(db.Text, nullable=False, default="[]")        # JSON list of Message ids
     tag_ids = db.Column(db.Text, nullable=False, default="[]")            # JSON list of Tag ids
     priority = db.Column(db.String(8), nullable=False, default="")        # '', 'Low', 'Medium', 'High'
@@ -418,9 +456,11 @@ class Task(db.Model):
         tags = resolve_tags(self.tag_id_list())
         d = {
             "id": self.id,
+            "number": self.number,
             "title": self.title,
             "channel_id": self.channel_id,
             "channel_slug": self.channel_slug,
+            "chat_id": self.chat_id,
             "priority": self.priority,
             "due": self.due,
             "status": self.status,
@@ -480,6 +520,48 @@ def resolve_tags(tag_ids) -> list:
     return [tg.to_dict() for tg in (db.session.get(Tag, ti) for ti in tag_ids) if tg]
 
 
+class ActionRequest(db.Model):
+    """A formal 8D / root-cause document raised from a Topics chat.
+
+    Unlike Task (which references a hand-picked subset of a chat's messages),
+    an Action Request always covers the whole chat it was raised from — one
+    click on "Send to > Action Request" creates it, no message picking.
+    """
+    __tablename__ = "action_requests"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    number = db.Column(db.Integer, nullable=True)  # sequential display id, e.g. "A0125"
+    title = db.Column(db.Text, nullable=False, default="")
+    chat_id = db.Column(db.String(36), db.ForeignKey("chats.id"), nullable=True)
+    status = db.Column(db.String(8), nullable=False, default="Draft")  # 'Draft' | 'Open' | 'Closed'
+    steps = db.Column(db.Text, nullable=False, default="{}")  # JSON {"d1": "…", … "d8": "…"}
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def step_dict(self) -> dict:
+        try:
+            vals = json.loads(self.steps or "{}")
+            return vals if isinstance(vals, dict) else {}
+        except (ValueError, TypeError):
+            return {}
+
+    def to_dict(self) -> dict:
+        chat = db.session.get(Chat, self.chat_id) if self.chat_id else None
+        channel = db.session.get(Channel, chat.channel_id) if chat else None
+        return {
+            "id": self.id,
+            "number": self.number,
+            "title": self.title,
+            "chat_id": self.chat_id,
+            "chat_title": chat.title if chat else "",
+            "channel_slug": channel.slug if channel else "",
+            "status": self.status,
+            "steps": self.step_dict(),
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
+
+
 def _migrate():
     """Migrate steps.image → image_blobs + steps.image_hash if needed."""
     is_sqlite = db.engine.dialect.name == "sqlite"
@@ -533,6 +615,9 @@ with app.app_context():
             "ALTER TABLE messages ADD COLUMN image_hashes TEXT",
             "ALTER TABLE messages ADD COLUMN edited_at TIMESTAMP",
             "ALTER TABLE tasks ADD COLUMN tag_ids TEXT NOT NULL DEFAULT '[]'",
+            "ALTER TABLE messages ADD COLUMN chat_id VARCHAR(36)",
+            "ALTER TABLE tasks ADD COLUMN chat_id VARCHAR(36)",
+            "ALTER TABLE tasks ADD COLUMN number INTEGER",
         ):
             try:
                 _conn.execute(text(_stmt))
@@ -568,22 +653,59 @@ with app.app_context():
             db.session.add(Channel(slug=_slug, description=_desc))
         db.session.commit()
 
-    # Seed a manufacturing-oriented tag preset on an empty table (editable later).
-    if Tag.query.count() == 0:
-        for _n, _c in (
-            ("Quality", "#CC0000"),
-            ("Safety", "#E8590C"),
-            ("Improvement", "#2E9E4F"),
-            ("Document", "#7048E8"),
-        ):
-            db.session.add(Tag(name=_n, color=_c))
+    # Backfill Chats: every pre-existing message needs a chat to belong to.
+    # One "General" chat per channel, created lazily as chat-less messages are found.
+    _chatless_msgs = Message.query.filter(Message.chat_id.is_(None)).all()
+    if _chatless_msgs:
+        _chat_by_channel = {}
+        for _m in _chatless_msgs:
+            _chat = _chat_by_channel.get(_m.channel_id)
+            if _chat is None:
+                _chat = Chat(channel_id=_m.channel_id, title="General", fresh=False)
+                db.session.add(_chat)
+                db.session.flush()  # assign _chat.id before messages reference it
+                _chat_by_channel[_m.channel_id] = _chat
+            _m.chat_id = _chat.id
         db.session.commit()
 
-    # One-time cleanup: drop the de-scoped default tags from DBs seeded with the
-    # original 8 — but only when still untouched (default name+colour) and unused,
-    # so renamed / recoloured / applied tags are left alone.
+    # Backfill Task.number — sequential display id ("TSK-014"), oldest tasks first.
+    _numberless_tasks = Task.query.filter(Task.number.is_(None)).order_by(Task.created_at).all()
+    if _numberless_tasks:
+        _next_num = (db.session.query(db.func.max(Task.number)).scalar() or 0) + 1
+        for _t in _numberless_tasks:
+            _t.number = _next_num
+            _next_num += 1
+        db.session.commit()
+
+    # Backfill Task.chat_id (provenance) from each task's live messages, now that
+    # every message has a chat_id — lets pre-existing tasks show the "on board" badge too.
+    _chatless_tasks = Task.query.filter(Task.chat_id.is_(None)).all()
+    if _chatless_tasks:
+        for _t in _chatless_tasks:
+            _cid = next((m.chat_id for m in _t._live_messages() if m.chat_id), None)
+            if _cid:
+                _t.chat_id = _cid
+        db.session.commit()
+
+    # Current manufacturing tag preset (editable later). Seeded on an empty table
+    # and topped up on existing DBs so upgrades pick up any tags added since.
+    _TAG_PRESET = (
+        ("OH&S", "#B0202E"),
+        ("Environment", "#2E7D46"),
+        ("Quality", "#2F62A8"),
+        ("Supplier", "#8A5A12"),
+        ("Customer", "#6D3FA6"),
+        ("Improvement", "#0E7C86"),
+    )
+
+    # One-time cleanup: drop de-scoped default tags from earlier presets — but only
+    # when still untouched (default name+colour) and unused, so renamed / recoloured
+    # / applied tags are left alone. Runs before the preset top-up below so a stale
+    # default (e.g. the old red "Quality") doesn't block seeding the current one.
     _dropped = (("Maintenance", "#1C7ED6"), ("Tooling", "#0CA678"),
-                ("Material", "#D9982A"), ("Rework", "#C2255C"))
+                ("Material", "#D9982A"), ("Rework", "#C2255C"),
+                ("Quality", "#CC0000"), ("Safety", "#E8590C"),
+                ("Improvement", "#2E9E4F"), ("Document", "#7048E8"))
     _all_tasks = None  # loaded lazily only if a dropped tag is actually present
     _changed = False
     for _n, _c in _dropped:
@@ -596,6 +718,15 @@ with app.app_context():
             db.session.delete(tg)
             _changed = True
     if _changed:
+        db.session.commit()
+
+    _existing_tag_names = {t.name.lower() for t in Tag.query.all()}
+    _added = False
+    for _n, _c in _TAG_PRESET:
+        if _n.lower() not in _existing_tag_names:
+            db.session.add(Tag(name=_n, color=_c))
+            _added = True
+    if _added:
         db.session.commit()
 
 
@@ -1517,11 +1648,105 @@ def delete_channel(channel_id):
     return "", 204
 
 
-@app.route("/api/channels/<channel_id>/messages", methods=["GET"])
-def list_messages(channel_id):
+def _task_status_info(*, archived, t):
+    labels = {"todo": "To do", "doing": "In progress", "done": "Done"}
+    return {
+        "id": t.id,
+        "number": t.number,
+        "status": "archived" if archived else t.status,
+        "status_label": "Archived" if archived else labels.get(t.status, t.status),
+    }
+
+
+@app.route("/api/channels/<channel_id>/chats", methods=["GET"])
+def list_chats(channel_id):
     if not db.session.get(Channel, channel_id):
         return jsonify({"error": "not found"}), 404
-    q = Message.query.filter_by(channel_id=channel_id)
+    rows = Chat.query.filter_by(channel_id=channel_id).order_by(Chat.created_at).all()
+    # Map each chat → the task it's linked to (if any), same active-wins-over-archived
+    # precedence as the message → task mapping below.
+    task_by_chat = {}
+
+    def _index(tasks, *, archived):
+        for t in tasks:
+            if t.chat_id:
+                task_by_chat.setdefault(t.chat_id, _task_status_info(archived=archived, t=t))
+
+    _index(Task.query.filter(Task.archived_at.is_(None)).all(), archived=False)
+    _index(Task.query.filter(Task.archived_at.isnot(None)).all(), archived=True)
+    # Map each chat → the Action Request raised from it (if any) — at most one,
+    # since sending a chat to Action Request always covers the whole chat.
+    action_by_chat = {
+        ar.chat_id: {"id": ar.id, "number": ar.number}
+        for ar in ActionRequest.query.all() if ar.chat_id
+    }
+    out = []
+    for c in rows:
+        d = c.to_dict()
+        if c.id in task_by_chat:
+            d["task"] = task_by_chat[c.id]
+        if c.id in action_by_chat:
+            d["action"] = action_by_chat[c.id]
+        out.append(d)
+    return jsonify(out)
+
+
+@app.route("/api/channels/<channel_id>/chats", methods=["POST"])
+def create_chat(channel_id):
+    if not db.session.get(Channel, channel_id):
+        return jsonify({"error": "not found"}), 404
+    d = request.get_json(silent=True) or {}
+    title = (d.get("title") or "").strip()
+    chat = Chat(channel_id=channel_id, title=title, fresh=not title)
+    db.session.add(chat)
+    db.session.commit()
+    return jsonify(chat.to_dict()), 201
+
+
+@app.route("/api/chats/<chat_id>", methods=["PATCH"])
+def update_chat(chat_id):
+    chat = db.session.get(Chat, chat_id)
+    if not chat:
+        return jsonify({"error": "not found"}), 404
+    d = request.get_json(silent=True) or {}
+    if "title" in d:
+        title = (d.get("title") or "").strip()
+        if title:
+            chat.title = title
+            chat.fresh = False
+    if "archived" in d:
+        chat.archived_at = datetime.utcnow() if d.get("archived") else None
+    if "channel_id" in d:
+        dest = db.session.get(Channel, d.get("channel_id"))
+        if not dest:
+            return jsonify({"error": "target topic not found"}), 404
+        if dest.id != chat.channel_id:
+            chat.channel_id = dest.id
+            # channel_id on Message is a denormalized snapshot (used for GC scans and
+            # the channel's own message_count/last_text) — keep it in lockstep with the
+            # chat's new topic so the old topic stops counting these messages.
+            Message.query.filter_by(chat_id=chat.id).update({"channel_id": dest.id})
+    db.session.commit()
+    return jsonify(chat.to_dict())
+
+
+@app.route("/api/chats/<chat_id>", methods=["DELETE"])
+def delete_chat(chat_id):
+    chat = db.session.get(Chat, chat_id)
+    if chat:
+        hashes = {h for m in chat.messages for h in m.hashes()}
+        db.session.delete(chat)  # cascades to its messages
+        db.session.flush()
+        _gc_blobs(hashes)
+        db.session.commit()
+    return "", 204
+
+
+@app.route("/api/chats/<chat_id>/messages", methods=["GET"])
+def list_messages(chat_id):
+    if not db.session.get(Chat, chat_id):
+        return jsonify({"error": "not found"}), 404
+    q = Message.query.filter_by(chat_id=chat_id)
     after = request.args.get("after")
     if after:
         q = q.filter(Message.created_at > datetime.fromisoformat(after))
@@ -1533,17 +1758,13 @@ def list_messages(channel_id):
     # highlight their messages (marked "archived") so the topic keeps showing
     # that a message was actioned; active tasks take precedence for a message
     # that lives on both.
-    labels = {"todo": "To do", "doing": "In progress", "done": "Done"}
     tag_map = {tg.id: tg.to_dict() for tg in Tag.query.all()}
     task_by_msg = {}
 
     def _index(tasks, *, archived):
         for t in tasks:
-            info = {
-                "status": "archived" if archived else t.status,
-                "status_label": "Archived" if archived else labels.get(t.status, t.status),
-                "tags": [tag_map[ti] for ti in t.tag_id_list() if ti in tag_map],
-            }
+            info = _task_status_info(archived=archived, t=t)
+            info["tags"] = [tag_map[ti] for ti in t.tag_id_list() if ti in tag_map]
             for mid in t.msg_id_list():
                 task_by_msg.setdefault(mid, info)
 
@@ -1559,9 +1780,10 @@ def list_messages(channel_id):
     return jsonify(out)
 
 
-@app.route("/api/channels/<channel_id>/messages", methods=["POST"])
-def create_message(channel_id):
-    if not db.session.get(Channel, channel_id):
+@app.route("/api/chats/<chat_id>/messages", methods=["POST"])
+def create_message(chat_id):
+    chat = db.session.get(Chat, chat_id)
+    if not chat:
         return jsonify({"error": "not found"}), 404
     d = request.get_json(silent=True) or {}
     text_val = (d.get("text") or "").strip()
@@ -1579,12 +1801,17 @@ def create_message(channel_id):
             db.session.add(ImageBlob(hash=h, data=im))
         hashes.append(h)
     msg = Message(
-        channel_id=channel_id,
+        channel_id=chat.channel_id,  # denormalized snapshot, resolved from the chat
+        chat_id=chat_id,
         text=text_val,
         image_hash=hashes[0] if hashes else None,  # keep legacy column populated
         image_hashes=json.dumps(hashes) if hashes else None,
     )
     db.session.add(msg)
+    if chat.fresh:
+        title = text_val or "Photo"
+        chat.title = title if len(title) <= 64 else title[:61] + "…"
+        chat.fresh = False
     db.session.commit()
     return jsonify(msg.to_dict()), 201
 
@@ -1647,6 +1874,11 @@ def _task_pos_bottom() -> float:
     return (hi + 1.0) if hi is not None else 0.0
 
 
+def _task_num_next() -> int:
+    hi = db.session.query(db.func.max(Task.number)).scalar()
+    return (hi + 1) if hi is not None else 1
+
+
 @app.route("/api/tasks", methods=["GET"])
 def list_tasks():
     rows = Task.query.order_by(Task.position).all()
@@ -1667,9 +1899,11 @@ def create_task():
     first_text = (msgs[0].text or "").strip() or "Photo"
     title = first_text if len(first_text) <= 64 else first_text[:61] + "…"
     t = Task(
+        number=_task_num_next(),
         title=title,
         channel_id=ch.id if ch else None,
         channel_slug=("# " + ch.slug) if ch else (d.get("channel_slug") or ""),
+        chat_id=msgs[0].chat_id,  # provenance, derived server-side — not a client-supplied field
         message_ids=json.dumps([m.id for m in msgs]),
         status="todo",
         position=_task_pos_top(),  # new cards land at the top of To do
@@ -1828,6 +2062,86 @@ def delete_tag(tag_id):
             ids = t.tag_id_list()
             if tag_id in ids:
                 t.tag_ids = json.dumps([i for i in ids if i != tag_id])
+        db.session.commit()
+    return "", 204
+
+
+# ── Action Requests (formal 8D / root-cause docs raised from Topics) ──────────
+
+_AR_STATUSES = {"Draft", "Open", "Closed"}
+_AR_STEP_KEYS = {"d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8"}
+
+
+def _ar_num_next() -> int:
+    hi = db.session.query(db.func.max(ActionRequest.number)).scalar()
+    return (hi or 0) + 1
+
+
+def _ar_title(raw: str) -> str:
+    title = (raw or "").strip() or "Untitled chat"
+    return title if len(title) <= 64 else title[:61] + "…"
+
+
+def _ar_merge_steps(current: dict, patch: dict) -> dict:
+    for k, v in patch.items():
+        if k in _AR_STEP_KEYS:
+            current[k] = (v or "").strip()
+    return current
+
+
+@app.route("/api/action-requests", methods=["GET"])
+def list_action_requests():
+    rows = ActionRequest.query.order_by(ActionRequest.created_at).all()
+    return jsonify([a.to_dict() for a in rows])
+
+
+@app.route("/api/action-requests", methods=["POST"])
+def create_action_request():
+    d = request.get_json(silent=True) or {}
+    chat_id = d.get("chat_id")
+    chat = db.session.get(Chat, chat_id) if chat_id else None
+    if not chat:
+        return jsonify({"error": "chat not found"}), 404
+    ar = ActionRequest(
+        number=_ar_num_next(),
+        title=_ar_title(chat.title),
+        chat_id=chat.id,
+        status="Draft",
+    )
+    db.session.add(ar)
+    db.session.commit()
+    return jsonify(ar.to_dict()), 201
+
+
+@app.route("/api/action-requests/<ar_id>", methods=["GET"])
+def get_action_request(ar_id):
+    ar = db.session.get(ActionRequest, ar_id)
+    if not ar:
+        return jsonify({"error": "not found"}), 404
+    return jsonify(ar.to_dict())
+
+
+@app.route("/api/action-requests/<ar_id>", methods=["PATCH"])
+def update_action_request(ar_id):
+    ar = db.session.get(ActionRequest, ar_id)
+    if not ar:
+        return jsonify({"error": "not found"}), 404
+    d = request.get_json(silent=True) or {}
+    if (d.get("title") or "").strip():
+        ar.title = _ar_title(d["title"])
+    if d.get("status") in _AR_STATUSES:
+        ar.status = d["status"]
+    if isinstance(d.get("steps"), dict):
+        ar.steps = json.dumps(_ar_merge_steps(ar.step_dict(), d["steps"]))
+    db.session.commit()
+    return jsonify(ar.to_dict())
+
+
+@app.route("/api/action-requests/<ar_id>", methods=["DELETE"])
+def delete_action_request(ar_id):
+    ar = db.session.get(ActionRequest, ar_id)
+    if ar:
+        db.session.delete(ar)
         db.session.commit()
     return "", 204
 
