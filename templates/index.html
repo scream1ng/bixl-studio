@@ -1074,6 +1074,15 @@
       </div>
     </div>
   </main>
+
+  <!-- topic tree (3rd card, desktop): every topic, expandable to its chats -->
+  <aside class="dt-only" style="width:300px;flex-shrink:0;background:#fff;border-radius:18px;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:18px 20px 15px;border-bottom:1px solid rgba(0,0,0,0.06);flex-shrink:0;">
+      <div style="font-size:15px;font-weight:800;letter-spacing:-0.2px;">Topics</div>
+      <div class="topic-tree-sub-el" style="font-size:11.5px;color:#8A8A8A;margin-top:1px;">&mdash;</div>
+    </div>
+    <div class="topic-tree-el" style="flex:1;min-height:0;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:3px;"></div>
+  </aside>
 </div>
 
 <!-- ═══════════════════ TOPICS (chat) ═══════════════════ -->
@@ -1086,7 +1095,8 @@
       <button onclick="topicBackToHome()" style="color:#CC0000;font-size:22px;font-weight:400;flex-shrink:0;padding:0 4px;">&#8249;</button>
       <div style="flex:1;min-width:0;">
         <div id="topic-crumb-mb" style="font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:0.6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">general</div>
-        <span id="topic-title-mb" style="font-size:16px;font-weight:800;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;">Chat</span>
+        <span id="topic-title-mb" onclick="topicTitleEdit()" title="Tap to rename" style="font-size:16px;font-weight:800;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;cursor:text;">Chat</span>
+        <input id="topic-title-input-mb" onkeydown="if(event.key==='Enter'){this.blur();}else if(event.key==='Escape'){this.dataset.cancel='1';this.blur();}" onblur="topicTitleSave(this)" style="display:none;width:100%;font-size:16px;font-weight:800;color:#1A1A1A;border:1px solid #CC0000;border-radius:6px;padding:1px 6px;">
       </div>
       <button id="topic-select-btn-mb" onclick="topicSelectStart()" style="flex-shrink:0;padding:7px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);background:#fff;font-size:12.5px;font-weight:600;color:#1A1A1A;">Send</button>
     </header>
@@ -1096,8 +1106,10 @@
       <div style="max-width:1100px;margin:0 auto;width:100%;">
         <button onclick="topicBackToHome()" id="topic-crumb" style="color:#9B9B9B;font-size:12.5px;font-weight:600;margin-bottom:8px;display:inline-flex;align-items:center;gap:4px;">&#8249; general</button>
         <div style="display:flex;align-items:center;gap:8px;">
-          <h1 id="topic-title" style="font-size:19px;font-weight:800;letter-spacing:-0.3px;">Chat</h1>
+          <h1 id="topic-title" onclick="topicTitleEdit()" title="Click to rename" style="font-size:19px;font-weight:800;letter-spacing:-0.3px;cursor:text;">Chat</h1>
+          <input id="topic-title-input" onkeydown="if(event.key==='Enter'){this.blur();}else if(event.key==='Escape'){this.dataset.cancel='1';this.blur();}" onblur="topicTitleSave(this)" style="display:none;font-size:19px;font-weight:800;letter-spacing:-0.3px;border:1px solid #CC0000;border-radius:8px;padding:2px 8px;margin-left:-9px;background:#fff;min-width:160px;">
           <span id="topic-task-badge" style="display:none;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#FBF1F1;color:#CC0000;border:1px solid rgba(204,0,0,0.18);"></span>
+          <span id="topic-action-badge" onclick="enterAction();actionOpenRecord(_topic.chats.find(c=>c.id===_topic.chatId).action.id);" style="display:none;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#F6EDDC;color:#8A5A12;border:1px solid rgba(138,90,18,0.22);cursor:pointer;"></span>
           <div style="margin-left:auto;display:flex;align-items:center;gap:8px;position:relative;">
             <button onclick="topicArchiveChat()" id="topic-archive-btn" title="Archive chat" style="width:36px;height:36px;border-radius:9px;border:1px solid rgba(0,0,0,0.12);background:#fff;display:flex;align-items:center;justify-content:center;color:#6B6B6B;cursor:pointer;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"></rect><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"></path><path d="M10 12h4"></path></svg>
@@ -1139,12 +1151,12 @@
   </main>
 
   <!-- topic tree (3rd card, desktop): every topic, expandable to its chats -->
-  <aside class="dt-only" style="width:300px;flex-shrink:0;background:#E7E5E0;border-radius:18px;display:flex;flex-direction:column;overflow:hidden;">
+  <aside class="dt-only" style="width:300px;flex-shrink:0;background:#fff;border-radius:18px;display:flex;flex-direction:column;overflow:hidden;">
     <div style="padding:18px 20px 15px;border-bottom:1px solid rgba(0,0,0,0.06);flex-shrink:0;">
       <div style="font-size:15px;font-weight:800;letter-spacing:-0.2px;">Topics</div>
-      <div id="topic-tree-sub" style="font-size:11.5px;color:#8A8A8A;margin-top:1px;">&mdash;</div>
+      <div class="topic-tree-sub-el" style="font-size:11.5px;color:#8A8A8A;margin-top:1px;">&mdash;</div>
     </div>
-    <div id="topic-tree" style="flex:1;min-height:0;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:3px;"></div>
+    <div class="topic-tree-el" style="flex:1;min-height:0;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:3px;"></div>
   </aside>
 </div>
 
@@ -1165,6 +1177,46 @@
     </header>
     <!-- desktop header + board/archive (rendered by JS) -->
     <div id="tasks-content" style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;"></div>
+  </main>
+</div>
+
+<!-- ═══════════════════ ACTION REQUEST (8D / root-cause, sent from Topics) ═══════════════════ -->
+<div id="screen-action" class="screen">
+  <aside class="shell-rail"></aside>
+
+  <main class="shell-panel">
+    <!-- list view -->
+    <div id="action-list-view" style="display:flex;flex-direction:column;height:100%;min-height:0;">
+      <div style="padding:20px 30px 16px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);">
+        <div style="max-width:880px;width:100%;margin:0 auto;">
+          <h1 style="font-size:21px;font-weight:800;letter-spacing:-0.4px;color:#1A1A1A;">Action Requests</h1>
+          <div id="action-count" style="font-size:12.5px;color:#9A9A9A;margin-top:2px;">&mdash;</div>
+          <div style="margin-top:15px;display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #E7E3DC;border-radius:11px;padding:9px 13px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A39E95" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            <input id="action-search" oninput="actionListRender()" placeholder="Search action requests&hellip;" style="flex:1;border:none;background:transparent;font-size:14px;color:#1A1A1A;min-width:0;outline:none;">
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;min-height:0;overflow-y:auto;padding:20px 30px 28px;">
+        <div style="max-width:880px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:10px;">
+          <div id="action-empty" style="display:none;text-align:center;padding:48px 20px;color:#A8A39A;font-size:13.5px;">No action requests raised from topics yet.</div>
+          <div id="action-items"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8D record view -->
+    <div id="action-record-view" style="display:none;flex-direction:column;height:100%;min-height:0;">
+      <div style="padding:14px 30px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);">
+        <button onclick="actionCloseRecord()" style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#5E5A53;background:transparent;border:none;cursor:pointer;padding:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+          Action Requests
+        </button>
+      </div>
+      <div style="flex:1;min-height:0;overflow-y:auto;padding:24px 30px 36px;">
+        <div id="action-record-body" style="max-width:720px;width:100%;margin:0 auto;"></div>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -1422,8 +1474,8 @@ async function api(method, path, body) {
 const RAIL_PRODUCTS = [
   { key: 'topic',    abbr: 'TP',  label: 'Topics',               sub: 'Team discussion',       fn: 'enterTopics', group: 'workspace' },
   { key: 'task',     abbr: 'TSK', label: 'Tasks',                sub: 'From topics',           fn: 'enterTasks', group: 'workspace' },
+  { key: 'action',   abbr: 'AR',  label: 'Action Request',       sub: 'Corrective actions',    fn: 'enterAction', group: 'workspace' },
   { key: 'incident', abbr: 'INC', label: 'Incident',             sub: 'Coming soon',           fn: null, group: 'workspace', disabled: true },
-  { key: 'action',   abbr: 'AR',  label: 'Action Request',       sub: 'Coming soon',           fn: null, group: 'workspace', disabled: true },
   { key: 'lookup',   abbr: 'LU',  label: 'Look Up',              sub: 'FG &#8596; WIP finder',  fn: 'enterLookup', group: 'tools' },
   { key: 'sop',      abbr: 'SOP', label: 'SOP',                  sub: 'Operating procedures',  fn: 'enterSop', group: 'tools' },
   { key: 'label',    abbr: 'LB',  label: 'Label',                sub: 'Part labels',           fn: 'enterLabel', group: 'tools' },
@@ -3369,6 +3421,7 @@ const _topic = {
   channelId: null, channels: [], chatId: null, chats: [],
   homeFilter: 'active', archivedOpen: false, treeExpanded: {},
   lastAt: null, lastDay: null, poll: null, images: [], msgs: {}, selecting: false, sel: {},
+  treeMenuChat: null, treeMenuMove: false, treeRenameChat: null,
 };
 
 // Composer draft persistence. Mobile (esp. iOS standalone PWA) often evicts and
@@ -3480,6 +3533,7 @@ async function openTopic(id) {
   showScreen('topic-home');
   await topicHomeLoadChats();
   topicHomeRender();
+  topicTreeRender();
 }
 
 async function topicHomeLoadChats() {
@@ -3502,10 +3556,23 @@ function topicHomeChips() {
   }).join('');
 }
 
+// "Last active <date>" (or "Started <date>" for a chat with no messages yet) —
+// the only activity signal we can show per chat, since this app has no
+// per-user login (shared PIN auth) and so no message author to build avatars from.
+function topicHomeMetaLine(c) {
+  const iso = c.last_at || c.created_at;
+  if (!iso) return '';
+  const d = new Date(/[Z+]/.test(iso) ? iso : iso + 'Z');
+  if (isNaN(d)) return '';
+  const label = d.toLocaleDateString([], { day: 'numeric', month: 'short' });
+  return c.last_at ? ('Last active ' + label) : ('Started ' + label);
+}
+
 function topicHomeChatCard(c) {
   const id = esc(c.id);
   const title = esc(c.title || 'New chat');
   const sub = chatSub(c);
+  const meta = topicHomeMetaLine(c);
   const count = c.message_count || 0;
   const badge = count
     ? '<span style="min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:#F2F0EC;color:#7A7A7A;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + count + '</span>'
@@ -3516,7 +3583,9 @@ function topicHomeChatCard(c) {
   return '<div class="doc-card" onclick="chatOpen(\'' + id + '\')" style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s;' + (c.archived ? 'opacity:0.7;' : '') + '">'
     + '<span style="width:38px;height:38px;border-radius:9px;background:#F2F0EC;color:#9B9B9B;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">&#128172;</span>'
     + '<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1A1A1A;">' + title + '</div>'
-    + '<div style="color:#9B9B9B;font-size:12px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + sub + '</div></div>'
+    + '<div style="color:#9B9B9B;font-size:12px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + sub + '</div>'
+    + (meta ? '<div style="color:#A8A39A;font-size:11px;margin-top:2px;">' + meta + '</div>' : '')
+    + '</div>'
     + taskBadge + badge
     + window.btnIco('delete', "event.stopPropagation();chatDelete('" + id + "')", 'Delete chat')
     + '</div>';
@@ -3574,25 +3643,52 @@ function topicBackToHome() {
 function topicStopPoll() { if (_topic.poll) { clearInterval(_topic.poll); _topic.poll = null; } }
 
 // ---- topic tree (3rd column in the chat screen): every topic, expandable to its chats ----
+// Each chat row reveals a "⋯" button on hover (Claude-Code-style project/chat list) that
+// opens a small menu: Rename (inline edit) and Move to topic (submenu of other topics).
+function topicTreeMenuHtml(channelId, chatId) {
+  if (_topic.treeMenuMove) {
+    const targets = _topic.channels.filter(ch => ch.id !== channelId);
+    const items = targets.length
+      ? targets.map(ch => '<button onclick="event.stopPropagation();topicTreeMoveChat(\'' + channelId + '\',\'' + ch.id + '\',\'' + chatId + '\')" style="display:block;width:100%;text-align:left;padding:7px 10px;font-size:12px;color:#1A1A1A;background:transparent;border:none;cursor:pointer;border-radius:7px;">#' + esc(ch.slug) + '</button>').join('')
+      : '<div style="padding:8px 10px;font-size:11.5px;color:#9B9B9B;">No other topics</div>';
+    return '<div onclick="event.stopPropagation();" style="position:absolute;top:26px;right:6px;z-index:20;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.12);min-width:170px;padding:4px;">'
+      + '<button onclick="_topic.treeMenuMove=false;topicTreeRender();" style="display:flex;align-items:center;gap:4px;width:100%;text-align:left;padding:6px 10px;font-size:11px;font-weight:700;color:#9B9B9B;background:transparent;border:none;cursor:pointer;">&#8249; Back</button>'
+      + '<div style="max-height:180px;overflow-y:auto;">' + items + '</div>'
+      + '</div>';
+  }
+  return '<div onclick="event.stopPropagation();" style="position:absolute;top:26px;right:6px;z-index:20;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.12);min-width:150px;padding:4px;">'
+    + '<button onclick="topicTreeRenameStart(\'' + chatId + '\')" style="display:block;width:100%;text-align:left;padding:7px 10px;font-size:12.5px;color:#1A1A1A;background:transparent;border:none;cursor:pointer;border-radius:7px;">Rename</button>'
+    + '<button onclick="_topic.treeMenuMove=true;topicTreeRender();" style="display:block;width:100%;text-align:left;padding:7px 10px;font-size:12.5px;color:#1A1A1A;background:transparent;border:none;cursor:pointer;border-radius:7px;">Move to topic &#8250;</button>'
+    + '</div>';
+}
+
 function topicTreeChatsHtml(channelId, chats, expanded) {
   const SHOW = 3;
   const shown = expanded ? chats : chats.slice(0, SHOW);
   const rows = shown.map(c => {
     const active = c.id === _topic.chatId;
-    return '<button onclick="event.stopPropagation();topicTreeSelectChat(\'' + channelId + '\',\'' + c.id + '\')" style="display:flex;align-items:center;gap:8px;padding:7px 9px 7px 30px;border-radius:9px;text-align:left;width:100%;font-size:12.5px;' + (active ? 'background:#FBF1F1;color:#CC0000;font-weight:700;' : 'color:#5A5A5A;') + '">'
-      + '<span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(c.title || 'New chat') + '</span>'
-      + '</button>';
+    const renaming = _topic.treeRenameChat === c.id;
+    const menuOpen = _topic.treeMenuChat === c.id;
+    const titleHtml = renaming
+      ? '<input value="' + esc(c.title || 'New chat') + '" onclick="event.stopPropagation();" onkeydown="if(event.key===\'Enter\'){this.blur();}else if(event.key===\'Escape\'){this.dataset.cancel=\'1\';this.blur();}" onblur="topicTreeRenameSave(\'' + c.id + '\',this)" style="width:100%;font-size:12.5px;border:1px solid #CC0000;border-radius:6px;padding:3px 6px;font-family:inherit;">'
+      : '<span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(c.title || 'New chat') + '</span>';
+    return '<div class="topic-tree-row" onmouseover="var b=this.querySelector(\'.tt-menu-btn\');if(b)b.style.opacity=1;" onmouseout="var b=this.querySelector(\'.tt-menu-btn\');if(b)b.style.opacity=0;" style="position:relative;display:flex;align-items:center;gap:2px;">'
+      + '<div onclick="topicTreeSelectChat(\'' + channelId + '\',\'' + c.id + '\')" style="flex:1;min-width:0;display:flex;align-items:center;padding:7px 4px;border-radius:9px;cursor:pointer;font-size:12.5px;' + (active ? 'background:#FBF1F1;color:#CC0000;font-weight:700;' : 'color:#5A5A5A;') + '">' + titleHtml + '</div>'
+      + (renaming ? '' : '<button class="tt-menu-btn" onclick="event.stopPropagation();topicTreeMenuToggle(\'' + channelId + '\',\'' + c.id + '\')" title="More" style="opacity:' + (menuOpen ? 1 : 0) + ';flex-shrink:0;width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:#9B9B9B;cursor:pointer;font-size:14px;line-height:1;">&#8942;</button>')
+      + (menuOpen ? topicTreeMenuHtml(channelId, c.id) : '')
+      + '</div>';
   }).join('');
   const more = chats.length > SHOW && !expanded
-    ? '<button onclick="event.stopPropagation();topicTreeExpand(\'' + channelId + '\')" style="padding:6px 9px 6px 30px;font-size:11.5px;font-weight:600;color:#9B9B9B;text-align:left;width:100%;">Show all ' + chats.length + '&hellip;</button>'
+    ? '<button onclick="event.stopPropagation();topicTreeExpand(\'' + channelId + '\')" style="padding:6px 9px;border-radius:9px;font-size:11.5px;font-weight:600;color:#9B9B9B;text-align:left;width:100%;">Show all ' + chats.length + '&hellip;</button>'
     : '';
-  const add = '<button onclick="event.stopPropagation();topicNewChatFor(\'' + channelId + '\')" style="padding:6px 9px 6px 30px;font-size:11.5px;font-weight:600;color:#CC0000;text-align:left;width:100%;">+ New chat</button>';
+  const add = '<button onclick="event.stopPropagation();topicNewChatFor(\'' + channelId + '\')" style="padding:6px 9px;border-radius:9px;font-size:11.5px;font-weight:600;color:#CC0000;text-align:left;width:100%;">+ New chat</button>';
   return rows + more + add;
 }
 
 function topicTreeRender() {
-  const sub = $('topic-tree-sub');
-  if (sub) sub.textContent = _topic.channels.length + ' topic' + (_topic.channels.length === 1 ? '' : 's');
+  document.querySelectorAll('.topic-tree-sub-el').forEach(sub => {
+    sub.textContent = _topic.channels.length + ' topic' + (_topic.channels.length === 1 ? '' : 's');
+  });
   const html = _topic.channels.map(c => {
     const isCurrent = c.id === _topic.channelId;
     const expandedState = _topic.treeExpanded[c.id];
@@ -3609,11 +3705,11 @@ function topicTreeRender() {
       + '<span style="font-size:11px;color:#9B9B9B;flex-shrink:0;">' + (open ? '&#9652;' : '&#9662;') + '</span>'
       + '</button>';
     const body = open
-      ? '<div style="display:flex;flex-direction:column;gap:2px;">' + (loading ? '<div style="padding:6px 9px 6px 30px;font-size:11.5px;color:#9B9B9B;">Loading&hellip;</div>' : topicTreeChatsHtml(c.id, chats, !!(expandedState && expandedState.showAll))) + '</div>'
+      ? '<div style="display:flex;flex-direction:column;gap:2px;padding:4px 0 6px 12px;margin:1px 0 2px 27px;border-left:1.5px solid rgba(0,0,0,0.12);">' + (loading ? '<div style="padding:6px 9px;font-size:11.5px;color:#9B9B9B;">Loading&hellip;</div>' : topicTreeChatsHtml(c.id, chats, !!(expandedState && expandedState.showAll))) + '</div>'
       : '';
     return header + body;
   }).join('');
-  const el = $('topic-tree'); if (el) el.innerHTML = html;
+  document.querySelectorAll('.topic-tree-el').forEach(el => { el.innerHTML = html; });
 }
 
 async function topicTreeToggle(channelId) {
@@ -3641,6 +3737,87 @@ function topicTreeSelectChat(channelId, chatId) {
   delete _topic.treeExpanded[channelId];
   chatOpen(chatId);
 }
+
+// Find a chat object wherever it currently lives in the tree's client state
+// (the open topic's list, or a collapsed-but-loaded topic's cached list).
+function topicFindTreeChat(chatId) {
+  let hit = _topic.chats.find(c => c.id === chatId);
+  if (hit) return hit;
+  for (const k in _topic.treeExpanded) {
+    hit = (_topic.treeExpanded[k].chats || []).find(c => c.id === chatId);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+function topicTreeMenuToggle(channelId, chatId) {
+  _topic.treeMenuMove = false;
+  _topic.treeMenuChat = _topic.treeMenuChat === chatId ? null : chatId;
+  topicTreeRender();
+}
+
+function topicTreeRenameStart(chatId) {
+  _topic.treeMenuChat = null;
+  _topic.treeRenameChat = chatId;
+  topicTreeRender();
+  const el = document.querySelector('.topic-tree-row input');
+  if (el) { el.focus(); el.select(); }
+}
+
+async function topicTreeRenameSave(chatId, input) {
+  const cancel = input.dataset.cancel === '1';
+  _topic.treeRenameChat = null;
+  if (cancel) { topicTreeRender(); return; }
+  const value = (input.value || '').trim();
+  const chat = topicFindTreeChat(chatId);
+  if (!chat || !value || value === chat.title) { topicTreeRender(); return; }
+  chat.title = value;
+  chat.fresh = false;
+  topicTreeRender();
+  if (_topic.chatId === chatId) {
+    if ($('topic-title')) $('topic-title').textContent = value;
+    if ($('topic-title-mb')) $('topic-title-mb').textContent = value;
+  }
+  try { await api('PATCH', '/api/chats/' + chatId, { title: value }); }
+  catch (_) { toast('Rename failed'); }
+}
+
+// Move a chat to a different topic. Follows it if it's the chat currently open.
+async function topicTreeMoveChat(fromChannelId, toChannelId, chatId) {
+  _topic.treeMenuChat = null;
+  _topic.treeMenuMove = false;
+  if (fromChannelId === toChannelId) { topicTreeRender(); return; }
+  let updated;
+  try { updated = await api('PATCH', '/api/chats/' + chatId, { channel_id: toChannelId }); }
+  catch (_) { toast('Move failed'); topicTreeRender(); return; }
+
+  const followed = _topic.chatId === chatId;
+  if (fromChannelId === _topic.channelId) _topic.chats = _topic.chats.filter(c => c.id !== chatId);
+  const fromExp = _topic.treeExpanded[fromChannelId];
+  if (fromExp) fromExp.chats = (fromExp.chats || []).filter(c => c.id !== chatId);
+
+  if (followed) {
+    _topic.channelId = toChannelId;
+    const carried = (_topic.treeExpanded[toChannelId] && _topic.treeExpanded[toChannelId].chats) || [];
+    _topic.chats = [updated, ...carried];
+    delete _topic.treeExpanded[toChannelId];
+    const dest = _topic.channels.find(c => c.id === toChannelId);
+    if ($('topic-crumb')) $('topic-crumb').innerHTML = '&#8249; ' + esc(dest ? dest.slug : '');
+    if ($('topic-crumb-mb')) $('topic-crumb-mb').textContent = dest ? dest.slug : '';
+  } else if (toChannelId === _topic.channelId) {
+    _topic.chats.unshift(updated);
+  } else {
+    const toExp = _topic.treeExpanded[toChannelId];
+    if (toExp) toExp.chats.unshift(updated);
+  }
+  topicTreeRender();
+  const dest = _topic.channels.find(c => c.id === toChannelId);
+  toast('Moved to #' + (dest ? dest.slug : 'topic'));
+}
+document.addEventListener('click', () => {
+  if (_topic.treeMenuChat) { _topic.treeMenuChat = null; _topic.treeMenuMove = false; topicTreeRender(); }
+});
+
 async function topicNewChatFor(channelId) {
   let chat;
   try { chat = await api('POST', '/api/channels/' + channelId + '/chats', {}); }
@@ -3655,6 +3832,11 @@ async function topicNewChatFor(channelId) {
 function topicRenderTaskBadge(chat) {
   const el = $('topic-task-badge'); if (!el) return;
   if (chat && chat.task) { el.style.display = 'inline-flex'; el.textContent = 'Task · ' + chatTaskBadgeText(chat.task); }
+  else { el.style.display = 'none'; el.textContent = ''; }
+}
+function topicRenderActionBadge(chat) {
+  const el = $('topic-action-badge'); if (!el) return;
+  if (chat && chat.action) { el.style.display = 'inline-flex'; el.textContent = 'Action · A' + String(chat.action.number || 0).padStart(4, '0'); }
   else { el.style.display = 'none'; el.textContent = ''; }
 }
 function topicRenderArchiveBtn(chat) {
@@ -3678,25 +3860,28 @@ async function topicArchiveChat() {
 }
 
 // "Send to ▾" dropdown on the chat header — Task wired to the existing multi-select
-// flow; Incident / Action Request are permanently disabled stub entries.
+// flow, Action Request wired to actionSendFromChat (whole-chat, one click); Incident
+// remains a permanently disabled stub entry (no backend module built for it yet).
 function topicToggleSendMenu(ev) {
   ev.stopPropagation();
   const menu = $('topic-send-menu'); if (!menu) return;
   if (menu.style.display === 'block') { menu.style.display = 'none'; return; }
   const chat = _topic.chats.find(c => c.id === _topic.chatId);
-  const linked = !!(chat && chat.task);
+  const taskLinked = !!(chat && chat.task);
+  const actionLinked = !!(chat && chat.action);
   const item = (label, extra, onClick, disabled, checked) =>
     '<button ' + (disabled ? 'disabled' : ('onclick="' + onClick + '"'))
     + ' style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:10px 14px;font-size:13px;font-weight:600;background:transparent;border:none;color:'
     + (disabled ? '#BBBBBB' : '#1A1A1A') + ';cursor:' + (disabled ? 'not-allowed' : 'pointer') + ';">'
     + '<span>' + label + (extra ? ' <span style="font-size:10px;font-weight:700;color:#9B9B9B;">' + extra + '</span>' : '') + '</span>'
     + (checked ? '<span style="color:#2E9E4F;">&#10003;</span>' : '') + '</button>';
-  menu.innerHTML = item('Task', '', 'topicSendMenuTask()', linked, linked)
+  menu.innerHTML = item('Task', '', 'topicSendMenuTask()', taskLinked, taskLinked)
     + item('Incident', 'Soon', '', true, false)
-    + item('Action Request', 'Soon', '', true, false);
+    + item('Action Request', '', 'topicSendMenuAction()', actionLinked, actionLinked);
   menu.style.display = 'block';
 }
 function topicSendMenuTask() { $('topic-send-menu').style.display = 'none'; topicSelectStart(); }
+function topicSendMenuAction() { $('topic-send-menu').style.display = 'none'; actionSendFromChat(_topic.chatId); }
 document.addEventListener('click', () => { const m = $('topic-send-menu'); if (m) m.style.display = 'none'; });
 
 function chatOpen(chatId) {
@@ -3713,6 +3898,7 @@ function chatOpen(chatId) {
   if ($('topic-title')) $('topic-title').textContent = title;
   if ($('topic-title-mb')) $('topic-title-mb').textContent = title;
   topicRenderTaskBadge(chat);
+  topicRenderActionBadge(chat);
   topicRenderArchiveBtn(chat);
   $('topic-messages').innerHTML = '';
   _topic.msgs = {};
@@ -3734,8 +3920,47 @@ async function topicRefreshChatMeta() {
   if ($('topic-title')) $('topic-title').textContent = title;
   if ($('topic-title-mb')) $('topic-title-mb').textContent = title;
   topicRenderTaskBadge(chat);
+  topicRenderActionBadge(chat);
   topicRenderArchiveBtn(chat);
   topicTreeRender();
+}
+
+function topicTitleEdit() {
+  const chat = _topic.chats.find(c => c.id === _topic.chatId);
+  if (!chat) return;
+  const title = chat.title || 'New chat';
+  [['topic-title', 'topic-title-input'], ['topic-title-mb', 'topic-title-input-mb']].forEach(([labelId, inputId]) => {
+    const label = $(labelId), input = $(inputId);
+    if (!label || !input) return;
+    label.style.display = 'none';
+    input.style.display = 'block';
+    input.value = title;
+    delete input.dataset.cancel;
+  });
+  const first = $('topic-title-input');
+  if (first) { first.focus(); first.select(); }
+}
+
+async function topicTitleSave(input) {
+  const cancel = input.dataset.cancel === '1';
+  delete input.dataset.cancel;
+  const chatId = _topic.chatId;
+  const chat = _topic.chats.find(c => c.id === chatId);
+  const value = (input.value || '').trim();
+  const restore = (title) => {
+    [['topic-title', 'topic-title-input'], ['topic-title-mb', 'topic-title-input-mb']].forEach(([labelId, inputId]) => {
+      const label = $(labelId), inp = $(inputId);
+      if (label) { label.textContent = title; label.style.display = ''; }
+      if (inp) inp.style.display = 'none';
+    });
+  };
+  if (cancel || !chat || !value || value === chat.title) { restore(chat ? (chat.title || 'New chat') : 'Chat'); return; }
+  chat.title = value;
+  chat.fresh = false;
+  restore(value);
+  topicTreeRender();
+  try { await api('PATCH', '/api/chats/' + chatId, { title: value }); }
+  catch (_) { toast('Rename failed'); }
 }
 
 function topicTime(iso) {
@@ -5081,6 +5306,131 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('load', () => navigator.serviceWorker.register('/static/sw.js').catch(() => {}));
   }
 });
+
+// ── Action Requests (formal 8D / root-cause docs sent from Topics) ──────────
+const _AR_STEPS = [
+  { code: 'd1', label: 'Team', ph: 'Who is working this — names and roles' },
+  { code: 'd2', label: 'Problem description', ph: 'What, where, how many — quantified' },
+  { code: 'd3', label: 'Containment', ph: 'Interim action to protect the customer now' },
+  { code: 'd4', label: 'Root cause', ph: 'Why it happened — verified, not assumed' },
+  { code: 'd5', label: 'Corrective action', ph: 'The permanent fix' },
+  { code: 'd6', label: 'Verify', ph: 'Evidence the fix works' },
+  { code: 'd7', label: 'Prevent recurrence', ph: 'System / SOP change so it can’t return' },
+  { code: 'd8', label: 'Close & recognise', ph: 'Sign-off and lessons learned' },
+];
+const _AR_STATUSES = ['Draft', 'Open', 'Closed'];
+const _ar = { all: [], detail: null };
+
+function enterAction() { showScreen('action'); actionLoad(); }
+
+async function actionLoad() {
+  try { _ar.all = await api('GET', '/api/action-requests') || []; } catch (_) { _ar.all = []; }
+  $('action-list-view').style.display = 'flex';
+  $('action-record-view').style.display = 'none';
+  actionListRender();
+}
+
+function actionRowHtml(a) {
+  const idLabel = 'A' + String(a.number || 0).padStart(4, '0');
+  const topicLine = a.channel_slug ? 'From topic · #' + esc(a.channel_slug) : '';
+  return '<div style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:15px 18px;display:flex;align-items:center;gap:16px;">'
+    + '<span style="width:84px;flex-shrink:0;font-family:\'JetBrains Mono\',monospace;font-size:12.5px;font-weight:600;color:#8A5A12;">' + idLabel + '</span>'
+    + '<div onclick="actionOpenRecord(\'' + a.id + '\')" style="flex:1;min-width:0;cursor:pointer;">'
+    + '<div style="font-size:14px;font-weight:600;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(a.title) + '</div>'
+    + '<div style="font-size:11.5px;color:#9A9A9A;margin-top:2px;">' + topicLine + '</div></div>'
+    + '<span style="width:90px;text-align:center;font-size:10.5px;font-weight:700;color:#8A5A12;background:#F6EDDC;padding:3px 10px;border-radius:20px;flex-shrink:0;">' + esc(a.status) + '</span>'
+    + '<button onclick="actionOpenRecord(\'' + a.id + '\')" style="width:64px;flex-shrink:0;font-size:12px;font-weight:600;color:#1A1A1A;background:#fff;border:1px solid rgba(0,0,0,0.12);border-radius:8px;padding:6px 0;cursor:pointer;">Open</button>'
+    + '</div>';
+}
+
+function actionListRender() {
+  const q = (($('action-search') && $('action-search').value) || '').trim().toLowerCase();
+  const rows = _ar.all.filter(a => !q || (a.title || '').toLowerCase().includes(q) || (a.channel_slug || '').toLowerCase().includes(q));
+  $('action-count').textContent = _ar.all.length + ' raised from topics · formal 8D / root-cause';
+  $('action-empty').style.display = rows.length ? 'none' : 'block';
+  $('action-empty').textContent = q ? 'No action requests match your search.' : 'No action requests raised from topics yet.';
+  $('action-items').innerHTML = rows.map(actionRowHtml).join('');
+}
+
+async function actionOpenRecord(id) {
+  try { _ar.detail = await api('GET', '/api/action-requests/' + id); }
+  catch (e) { toast('Load failed: ' + e.message); return; }
+  $('action-list-view').style.display = 'none';
+  $('action-record-view').style.display = 'flex';
+  actionRecordRender();
+}
+
+function actionCloseRecord() {
+  const i = _ar.detail ? _ar.all.findIndex(a => a.id === _ar.detail.id) : -1;
+  if (i >= 0) _ar.all[i] = _ar.detail;
+  $('action-record-view').style.display = 'none';
+  $('action-list-view').style.display = 'flex';
+  actionListRender();
+}
+
+function actionRecordRender() {
+  const a = _ar.detail; if (!a) return;
+  const steps = a.steps || {};
+  const statusTabs = _AR_STATUSES.map(s => {
+    const on = a.status === s;
+    return '<button onclick="actionSetStatus(\'' + s + '\')" style="flex:1;padding:9px;border-radius:8px;font-size:12.5px;font-weight:600;border:none;cursor:pointer;background:' + (on ? '#fff' : 'transparent') + ';color:' + (on ? '#1A1A1A' : '#8A867E') + ';' + (on ? 'box-shadow:0 1px 3px rgba(0,0,0,0.12);' : '') + '">' + s + '</button>';
+  }).join('');
+  const stepsHtml = _AR_STEPS.map(s => (
+    '<div style="display:flex;gap:12px;">'
+    + '<span style="width:36px;height:36px;border-radius:9px;background:#8A5A12;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;">' + s.code.toUpperCase() + '</span>'
+    + '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;color:#1A1A1A;margin-bottom:6px;">' + s.label + '</div>'
+    + '<textarea id="ar-step-' + s.code + '" placeholder="' + esc(s.ph) + '" style="width:100%;min-height:56px;padding:11px 13px;background:#fff;border:1px solid rgba(0,0,0,0.14);border-radius:10px;font-size:14px;color:#1A1A1A;outline:none;font-family:inherit;resize:vertical;line-height:1.5;">' + esc(steps[s.code] || '') + '</textarea></div>'
+    + '</div>'
+  )).join('');
+  const idLabel = 'A' + String(a.number || 0).padStart(4, '0');
+  const topicLine = a.channel_slug ? 'From topic · #' + esc(a.channel_slug) : '';
+  $('action-record-body').innerHTML =
+    '<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">'
+    + '<span style="font-family:\'JetBrains Mono\',monospace;font-size:13px;font-weight:700;color:#8A5A12;">' + idLabel + '</span>'
+    + '<span style="font-size:11px;font-weight:700;color:#5E5A53;background:#EDEAE4;padding:4px 11px;border-radius:20px;">8D · Root cause</span>'
+    + '</div>'
+    + '<h1 style="font-size:24px;font-weight:800;letter-spacing:-0.5px;margin-top:11px;line-height:1.25;color:#1A1A1A;">' + esc(a.title) + '</h1>'
+    + '<div style="font-size:12.5px;color:#9A9A9A;margin-top:6px;">' + topicLine + '</div>'
+    + '<div style="margin-top:20px;">'
+    + '<div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Status</div>'
+    + '<div style="display:flex;gap:6px;background:#EAE7E2;border-radius:11px;padding:4px;max-width:360px;">' + statusTabs + '</div>'
+    + '</div>'
+    + '<div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;margin:22px 0 13px;">8D investigation — complete as it progresses</div>'
+    + '<div style="display:flex;flex-direction:column;gap:16px;">' + stepsHtml + '</div>'
+    + '<div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:20px;">'
+    + '<button onclick="actionSaveSteps()" style="background:#8A5A12;color:#fff;padding:11px 22px;border-radius:10px;font-size:14px;font-weight:700;border:none;cursor:pointer;">Save Action Request</button>'
+    + '</div>';
+}
+
+async function actionSetStatus(status) {
+  const a = _ar.detail; if (!a) return;
+  a.status = status;
+  actionRecordRender();
+  try { await api('PATCH', '/api/action-requests/' + a.id, { status }); }
+  catch (e) { toast('Update failed: ' + e.message); }
+}
+
+async function actionSaveSteps() {
+  const a = _ar.detail; if (!a) return;
+  const steps = {};
+  _AR_STEPS.forEach(s => { const el = $('ar-step-' + s.code); if (el) steps[s.code] = el.value; });
+  try {
+    _ar.detail = await api('PATCH', '/api/action-requests/' + a.id, { steps });
+    toast('Action Request saved', 'success');
+  } catch (e) { toast('Save failed: ' + e.message); }
+}
+
+// Create an Action Request for the whole chat currently open in Topics, then jump to it.
+async function actionSendFromChat(chatId) {
+  let ar;
+  try { ar = await api('POST', '/api/action-requests', { chat_id: chatId }); }
+  catch (e) { toast('Send failed: ' + e.message); return; }
+  const i = _topic.chats.findIndex(c => c.id === chatId);
+  if (i >= 0) _topic.chats[i] = { ..._topic.chats[i], action: { id: ar.id, number: ar.number } };
+  toast('Sent to Action Request · ' + ('A' + String(ar.number || 0).padStart(4, '0')), 'success');
+  enterAction();
+  await actionOpenRecord(ar.id);
+}
 </script>
 
 <script type="module">

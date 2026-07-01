@@ -520,6 +520,48 @@ def resolve_tags(tag_ids) -> list:
     return [tg.to_dict() for tg in (db.session.get(Tag, ti) for ti in tag_ids) if tg]
 
 
+class ActionRequest(db.Model):
+    """A formal 8D / root-cause document raised from a Topics chat.
+
+    Unlike Task (which references a hand-picked subset of a chat's messages),
+    an Action Request always covers the whole chat it was raised from — one
+    click on "Send to > Action Request" creates it, no message picking.
+    """
+    __tablename__ = "action_requests"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    number = db.Column(db.Integer, nullable=True)  # sequential display id, e.g. "A0125"
+    title = db.Column(db.Text, nullable=False, default="")
+    chat_id = db.Column(db.String(36), db.ForeignKey("chats.id"), nullable=True)
+    status = db.Column(db.String(8), nullable=False, default="Draft")  # 'Draft' | 'Open' | 'Closed'
+    steps = db.Column(db.Text, nullable=False, default="{}")  # JSON {"d1": "…", … "d8": "…"}
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def step_dict(self) -> dict:
+        try:
+            vals = json.loads(self.steps or "{}")
+            return vals if isinstance(vals, dict) else {}
+        except (ValueError, TypeError):
+            return {}
+
+    def to_dict(self) -> dict:
+        chat = db.session.get(Chat, self.chat_id) if self.chat_id else None
+        channel = db.session.get(Channel, chat.channel_id) if chat else None
+        return {
+            "id": self.id,
+            "number": self.number,
+            "title": self.title,
+            "chat_id": self.chat_id,
+            "chat_title": chat.title if chat else "",
+            "channel_slug": channel.slug if channel else "",
+            "status": self.status,
+            "steps": self.step_dict(),
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
+
+
 def _migrate():
     """Migrate steps.image → image_blobs + steps.image_hash if needed."""
     is_sqlite = db.engine.dialect.name == "sqlite"
@@ -645,22 +687,25 @@ with app.app_context():
                 _t.chat_id = _cid
         db.session.commit()
 
-    # Seed a manufacturing-oriented tag preset on an empty table (editable later).
-    if Tag.query.count() == 0:
-        for _n, _c in (
-            ("Quality", "#CC0000"),
-            ("Safety", "#E8590C"),
-            ("Improvement", "#2E9E4F"),
-            ("Document", "#7048E8"),
-        ):
-            db.session.add(Tag(name=_n, color=_c))
-        db.session.commit()
+    # Current manufacturing tag preset (editable later). Seeded on an empty table
+    # and topped up on existing DBs so upgrades pick up any tags added since.
+    _TAG_PRESET = (
+        ("OH&S", "#B0202E"),
+        ("Environment", "#2E7D46"),
+        ("Quality", "#2F62A8"),
+        ("Supplier", "#8A5A12"),
+        ("Customer", "#6D3FA6"),
+        ("Improvement", "#0E7C86"),
+    )
 
-    # One-time cleanup: drop the de-scoped default tags from DBs seeded with the
-    # original 8 — but only when still untouched (default name+colour) and unused,
-    # so renamed / recoloured / applied tags are left alone.
+    # One-time cleanup: drop de-scoped default tags from earlier presets — but only
+    # when still untouched (default name+colour) and unused, so renamed / recoloured
+    # / applied tags are left alone. Runs before the preset top-up below so a stale
+    # default (e.g. the old red "Quality") doesn't block seeding the current one.
     _dropped = (("Maintenance", "#1C7ED6"), ("Tooling", "#0CA678"),
-                ("Material", "#D9982A"), ("Rework", "#C2255C"))
+                ("Material", "#D9982A"), ("Rework", "#C2255C"),
+                ("Quality", "#CC0000"), ("Safety", "#E8590C"),
+                ("Improvement", "#2E9E4F"), ("Document", "#7048E8"))
     _all_tasks = None  # loaded lazily only if a dropped tag is actually present
     _changed = False
     for _n, _c in _dropped:
@@ -673,6 +718,15 @@ with app.app_context():
             db.session.delete(tg)
             _changed = True
     if _changed:
+        db.session.commit()
+
+    _existing_tag_names = {t.name.lower() for t in Tag.query.all()}
+    _added = False
+    for _n, _c in _TAG_PRESET:
+        if _n.lower() not in _existing_tag_names:
+            db.session.add(Tag(name=_n, color=_c))
+            _added = True
+    if _added:
         db.session.commit()
 
 
@@ -1620,11 +1674,19 @@ def list_chats(channel_id):
 
     _index(Task.query.filter(Task.archived_at.is_(None)).all(), archived=False)
     _index(Task.query.filter(Task.archived_at.isnot(None)).all(), archived=True)
+    # Map each chat → the Action Request raised from it (if any) — at most one,
+    # since sending a chat to Action Request always covers the whole chat.
+    action_by_chat = {
+        ar.chat_id: {"id": ar.id, "number": ar.number}
+        for ar in ActionRequest.query.all() if ar.chat_id
+    }
     out = []
     for c in rows:
         d = c.to_dict()
         if c.id in task_by_chat:
             d["task"] = task_by_chat[c.id]
+        if c.id in action_by_chat:
+            d["action"] = action_by_chat[c.id]
         out.append(d)
     return jsonify(out)
 
@@ -1654,6 +1716,16 @@ def update_chat(chat_id):
             chat.fresh = False
     if "archived" in d:
         chat.archived_at = datetime.utcnow() if d.get("archived") else None
+    if "channel_id" in d:
+        dest = db.session.get(Channel, d.get("channel_id"))
+        if not dest:
+            return jsonify({"error": "target topic not found"}), 404
+        if dest.id != chat.channel_id:
+            chat.channel_id = dest.id
+            # channel_id on Message is a denormalized snapshot (used for GC scans and
+            # the channel's own message_count/last_text) — keep it in lockstep with the
+            # chat's new topic so the old topic stops counting these messages.
+            Message.query.filter_by(chat_id=chat.id).update({"channel_id": dest.id})
     db.session.commit()
     return jsonify(chat.to_dict())
 
@@ -1990,6 +2062,86 @@ def delete_tag(tag_id):
             ids = t.tag_id_list()
             if tag_id in ids:
                 t.tag_ids = json.dumps([i for i in ids if i != tag_id])
+        db.session.commit()
+    return "", 204
+
+
+# ── Action Requests (formal 8D / root-cause docs raised from Topics) ──────────
+
+_AR_STATUSES = {"Draft", "Open", "Closed"}
+_AR_STEP_KEYS = {"d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8"}
+
+
+def _ar_num_next() -> int:
+    hi = db.session.query(db.func.max(ActionRequest.number)).scalar()
+    return (hi or 0) + 1
+
+
+def _ar_title(raw: str) -> str:
+    title = (raw or "").strip() or "Untitled chat"
+    return title if len(title) <= 64 else title[:61] + "…"
+
+
+def _ar_merge_steps(current: dict, patch: dict) -> dict:
+    for k, v in patch.items():
+        if k in _AR_STEP_KEYS:
+            current[k] = (v or "").strip()
+    return current
+
+
+@app.route("/api/action-requests", methods=["GET"])
+def list_action_requests():
+    rows = ActionRequest.query.order_by(ActionRequest.created_at).all()
+    return jsonify([a.to_dict() for a in rows])
+
+
+@app.route("/api/action-requests", methods=["POST"])
+def create_action_request():
+    d = request.get_json(silent=True) or {}
+    chat_id = d.get("chat_id")
+    chat = db.session.get(Chat, chat_id) if chat_id else None
+    if not chat:
+        return jsonify({"error": "chat not found"}), 404
+    ar = ActionRequest(
+        number=_ar_num_next(),
+        title=_ar_title(chat.title),
+        chat_id=chat.id,
+        status="Draft",
+    )
+    db.session.add(ar)
+    db.session.commit()
+    return jsonify(ar.to_dict()), 201
+
+
+@app.route("/api/action-requests/<ar_id>", methods=["GET"])
+def get_action_request(ar_id):
+    ar = db.session.get(ActionRequest, ar_id)
+    if not ar:
+        return jsonify({"error": "not found"}), 404
+    return jsonify(ar.to_dict())
+
+
+@app.route("/api/action-requests/<ar_id>", methods=["PATCH"])
+def update_action_request(ar_id):
+    ar = db.session.get(ActionRequest, ar_id)
+    if not ar:
+        return jsonify({"error": "not found"}), 404
+    d = request.get_json(silent=True) or {}
+    if (d.get("title") or "").strip():
+        ar.title = _ar_title(d["title"])
+    if d.get("status") in _AR_STATUSES:
+        ar.status = d["status"]
+    if isinstance(d.get("steps"), dict):
+        ar.steps = json.dumps(_ar_merge_steps(ar.step_dict(), d["steps"]))
+    db.session.commit()
+    return jsonify(ar.to_dict())
+
+
+@app.route("/api/action-requests/<ar_id>", methods=["DELETE"])
+def delete_action_request(ar_id):
+    ar = db.session.get(ActionRequest, ar_id)
+    if ar:
+        db.session.delete(ar)
         db.session.commit()
     return "", 204
 
