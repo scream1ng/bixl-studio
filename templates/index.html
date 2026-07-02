@@ -261,7 +261,7 @@
         <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
       </button>
       <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Label</span>
-      <button disabled title="Create labels on desktop" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;cursor:not-allowed;">+</button>
+      <button onclick="toast('Create labels on desktop')" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
     </header>
     <!-- desktop header -->
     <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;">
@@ -456,7 +456,7 @@
         <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
       </button>
       <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Inspection</span>
-      <button disabled title="Create checklists on desktop" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;cursor:not-allowed;">+</button>
+      <button onclick="toast('Create checklists on desktop')" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
     </header>
     <!-- desktop header -->
     <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;">
@@ -651,7 +651,7 @@
         <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
       </button>
       <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Look Up</span>
-      <button disabled title="Create mappings on desktop" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;cursor:not-allowed;">+</button>
+      <button onclick="toast('Create mappings on desktop')" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
     </header>
     <!-- desktop header -->
     <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;">
@@ -701,7 +701,7 @@
       <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
     </button>
     <span id="lu-m-title" style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Look Up</span>
-    <button disabled title="Create mappings on desktop" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;cursor:not-allowed;">+</button>
+    <button onclick="toast('Create mappings on desktop')" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
   </header>
 
   <!-- entry -->
@@ -814,7 +814,7 @@
         <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
       </button>
       <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Process Flow</span>
-      <button disabled title="Create on desktop" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;cursor:not-allowed;">+</button>
+      <button onclick="toast('Create on desktop')" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
     </header>
     <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;">
       <div style="max-width:1100px;margin:0 auto;width:100%;">
@@ -1304,7 +1304,18 @@
   <main class="shell-panel">
     <!-- list view -->
     <div id="action-list-view" style="display:flex;flex-direction:column;height:100%;min-height:0;">
-      <div style="padding:20px 30px 16px;flex-shrink:0;">
+      <!-- mobile header -->
+      <header class="mb-only" style="height:58px;display:flex;align-items:center;padding:0 18px;flex-shrink:0;">
+        <button onclick="openDrawer()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex-shrink:0;">
+          <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+          <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+          <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        </button>
+        <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Action Requests</span>
+        <span style="width:42px;flex-shrink:0;"></span>
+      </header>
+      <!-- desktop header -->
+      <div class="dt-only" style="padding:20px 30px 16px;flex-shrink:0;">
         <div style="max-width:1100px;width:100%;margin:0 auto;">
           <h1 style="font-size:21px;font-weight:800;letter-spacing:-0.4px;color:#1A1A1A;">Action Requests</h1>
           <div id="action-count" style="font-size:12.5px;color:#9A9A9A;margin-top:2px;">&mdash;</div>
@@ -1406,7 +1417,6 @@
       </div>
       <button id="drawer-close" style="width:28px;height:28px;border-radius:50%;background:#2C2C2C;color:#9A9A9A;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">&#10005;</button>
     </div>
-    <div style="font-size:10px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:0 9px 9px;">PRODUCTS</div>
     <div id="drawer-items" style="display:flex;flex-direction:column;gap:4px;"></div>
   </aside>
 </div>
@@ -1652,16 +1662,16 @@ function railIconSvg(key, color, size) {
     + parts.map(d => '<path d="' + d + '"></path>').join('') + '</svg>';
 }
 const RAIL_PRODUCTS = [
-  { key: 'messages', abbr: 'MSG', icon: 'messages', label: 'Messages',           sub: 'Not yet filed',         fn: 'enterMessages', group: 'workspace' },
-  { key: 'topic',    abbr: 'TP',  icon: 'topics', label: 'Topics',               sub: 'Team discussion',       fn: 'enterTopics', group: 'workspace' },
-  { key: 'task',     abbr: 'TSK', icon: 'tasks',  label: 'Tasks',                sub: 'From topics',           fn: 'enterTasks', group: 'workspace' },
-  { key: 'action',   abbr: 'AR',  icon: 'action', label: 'Action Request',       sub: 'Corrective actions',    fn: 'enterAction', group: 'workspace' },
-  { key: 'lookup',   abbr: 'LU',  icon: 'lookup', label: 'Look Up',              sub: 'FG &#8596; WIP finder',  fn: 'enterLookup', group: 'tools' },
-  { key: 'sop',      abbr: 'SOP', icon: 'sop',    label: 'SOP',                  sub: 'Operating procedures',  fn: 'enterSop', group: 'tools' },
-  { key: 'label',    abbr: 'LB',  icon: 'label',  label: 'Label',                sub: 'Part labels',           fn: 'enterLabel', group: 'tools' },
-  { key: 'icl',      abbr: 'ICL', icon: 'icl',    label: 'Inspection Checklist', sub: 'Quality checks',        fn: 'enterIcl', group: 'tools' },
-  { key: 'pfc',      abbr: 'PFC', icon: 'pfc',    label: 'Process Flow Chart',   sub: 'BOM &#8594; flow',       fn: 'enterPfc', group: 'tools' },
-  { key: 'exp',      abbr: 'EXP', icon: 'exp',    label: 'Expiry',               sub: 'BOM runway',            fn: 'enterExp', group: 'tools' },
+  { key: 'messages', icon: 'messages', label: 'Messages',           sub: 'Not yet filed',         fn: 'enterMessages', group: 'workspace' },
+  { key: 'topic',    icon: 'topics', label: 'Topics',               sub: 'Team discussion',       fn: 'enterTopics', group: 'workspace' },
+  { key: 'task',     icon: 'tasks',  label: 'Tasks',                sub: 'From topics',           fn: 'enterTasks', group: 'workspace' },
+  { key: 'action',   icon: 'action', label: 'Action Request',       sub: 'Corrective actions',    fn: 'enterAction', group: 'workspace' },
+  { key: 'lookup',   icon: 'lookup', label: 'Look Up',              sub: 'FG &#8596; WIP finder',  fn: 'enterLookup', group: 'tools' },
+  { key: 'sop',      icon: 'sop',    label: 'SOP',                  sub: 'Operating procedures',  fn: 'enterSop', group: 'tools' },
+  { key: 'label',    icon: 'label',  label: 'Label',                sub: 'Part labels',           fn: 'enterLabel', group: 'tools' },
+  { key: 'icl',      icon: 'icl',    label: 'Inspection Checklist', sub: 'Quality checks',        fn: 'enterIcl', group: 'tools' },
+  { key: 'pfc',      icon: 'pfc',    label: 'Process Flow Chart',   sub: 'BOM &#8594; flow',       fn: 'enterPfc', group: 'tools' },
+  { key: 'exp',      icon: 'exp',    label: 'Expiry',               sub: 'BOM runway',            fn: 'enterExp', group: 'tools' },
 ];
 const RAIL_GROUPS = [{ key: 'workspace', label: 'WORKSPACE' }, { key: 'tools', label: 'TOOLS' }];
 
@@ -1746,7 +1756,7 @@ function showScreen(name) {
 // Mobile drawer items — same source/order/grouping as the rail.
 function drawerBtnHtml(p) {
   return '<button id="drawer-' + p.key + '" onclick="' + p.fn + '();closeDrawer();" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;text-align:left;width:100%;transition:background 0.1s;">'
-    + '<div class="dw-tile" style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
+    + '<div class="dw-tile" style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + railIconSvg(p.icon, 'currentColor', 15) + '</div>'
     + '<div style="flex:1;min-width:0;"><div class="dw-lbl" style="font-size:13px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div></div>'
     + '<span class="dw-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span>'
     + '</button>';
@@ -2530,7 +2540,8 @@ function expDropzoneHtml() {
     + '<div style="border:2px dashed #C4C0B8;border-radius:18px;background:#F1EFEA;padding:64px 30px;text-align:center;">'
     + '<div style="width:62px;height:62px;margin:0 auto;border-radius:16px;background:#fff;border:1px solid #E0DCD3;display:flex;align-items:center;justify-content:center;font-size:24px;color:#CC0000;">&#10515;</div>'
     + '<div style="font-size:18px;font-weight:700;margin-top:18px;">Drop your Product Detail Report</div>'
-    + '<div style="font-size:13.5px;color:#8A8A8A;margin-top:6px;">Drag an <span style="font-family:\'JetBrains Mono\',monospace;color:#1A1A1A;">.xlsx</span> file anywhere on this page, or click to browse.</div>'
+    + '<div class="dt-only" style="font-size:13.5px;color:#8A8A8A;margin-top:6px;">Drag an <span style="font-family:\'JetBrains Mono\',monospace;color:#1A1A1A;">.xlsx</span> file anywhere on this page, or click to browse.</div>'
+    + '<div class="mb-only" style="font-size:13.5px;color:#8A8A8A;margin-top:6px;">Tap to choose an <span style="font-family:\'JetBrains Mono\',monospace;color:#1A1A1A;">.xlsx</span> file.</div>'
     + '<div style="display:inline-block;margin-top:18px;background:#CC0000;color:#fff;padding:10px 20px;border-radius:9px;font-size:14px;font-weight:600;">Choose file</div>'
     + '</div></div>' + err;
 }
@@ -4837,7 +4848,7 @@ function tasksCardHtml(t) {
     + '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:9px;">' + prio
     + '<div style="flex:1;min-width:0;font-size:14px;font-weight:600;color:#1A1A1A;line-height:1.35;">' + esc(t.title) + '</div>'
     + numBadge
-    + '<span style="flex-shrink:0;margin-top:1px;font-size:11px;font-weight:600;color:#7A7A7A;background:#F2F0EC;padding:2px 8px;border-radius:6px;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(t.channel_slug) + '</span></div>'
+    + (t.channel_slug ? '<span style="flex-shrink:0;margin-top:1px;font-size:11px;font-weight:600;color:#7A7A7A;background:#F2F0EC;padding:2px 8px;border-radius:6px;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(t.channel_slug) + '</span>' : '') + '</div>'
     + tasksTagChips(t) + photo
     + '<div style="display:flex;align-items:center;gap:12px;margin-top:12px;">'
     + '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;color:#8A8A8A;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>' + t.msg_count + (t.msg_count === 1 ? ' message' : ' messages') + '</span>'
@@ -4938,7 +4949,7 @@ function tasksRenderDetail() {
     + '<div style="display:flex;align-items:center;gap:12px;">'
     + '<div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">'
     + titleBlock
-    + '<span style="flex-shrink:0;font-size:11px;font-weight:600;color:#7A7A7A;background:#F2F0EC;padding:3px 10px;border-radius:7px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(t.channel_slug) + '</span>'
+    + (t.channel_slug ? '<span style="flex-shrink:0;font-size:11px;font-weight:600;color:#7A7A7A;background:#F2F0EC;padding:3px 10px;border-radius:7px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(t.channel_slug) + '</span>' : '')
     + (taskNumLabel(t) ? '<span style="flex-shrink:0;font-size:11px;font-weight:700;color:#9B9B9B;font-family:\'JetBrains Mono\',monospace;">' + taskNumLabel(t) + '</span>' : '')
     + '</div>'
     + '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' + delBtn
