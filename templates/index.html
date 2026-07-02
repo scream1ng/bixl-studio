@@ -92,6 +92,7 @@
     }
     .ico-btn:hover { border-color: rgba(0,0,0,0.28); color: #1A1A1A; background: #FAFAF8; }
     .ico-btn.ico-del:hover { color: #CC0000; border-color: rgba(204,0,0,0.4); background: #FFF6F6; }
+    .ico-btn-corner { position: absolute; top: 12px; right: 12px; }
     .step-photo:hover { opacity: 0.85; }
     .module-card:hover { border-color: rgba(0,0,0,0.16) !important; box-shadow: 0 4px 14px rgba(0,0,0,0.07) !important; }
 
@@ -120,6 +121,15 @@
     .card { background: #fff; border: 1px solid rgba(0,0,0,0.06); border-radius: var(--r-md); }
     .section-label { font-size: 10.5px; font-weight: 700; color: #9B9B9B; letter-spacing: 1px; text-transform: uppercase; }
     .empty-state { text-align: center; padding: 64px 20px; background: #fff; border: 1px dashed rgba(0,0,0,0.1); border-radius: var(--r-md); }
+    /* Shared card-modal shell (New SOP / New topic / confirm). Overlay keeps inline display:none so JS can toggle .style.display='flex'. */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 500; padding: 20px; animation: fadeIn 0.15s ease; }
+    .modal-card { background: #fff; border-radius: 20px; width: 100%; max-width: 420px; padding: 28px 24px; box-shadow: 0 24px 60px rgba(0,0,0,0.22); }
+    .topic-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 767px) { .topic-grid { grid-template-columns: 1fr; } }
+    /* SOP editor step grid — responsive so 4 fixed columns don't crush on phones */
+    #editor-steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    @media (max-width: 900px) { #editor-steps-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 520px) { #editor-steps-grid { grid-template-columns: 1fr; } }
     /* Tasks board */
     .task-cols { display: flex; gap: 18px; align-items: stretch; max-width: 1100px; margin: 0 auto; height: 100%; }
     .task-col { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
@@ -128,7 +138,7 @@
     .task-title-row:hover { background: rgba(0,0,0,0.04); }
     .task-title-row:hover svg { stroke: #CC0000; }
     /* Tasks header — base styles live here so the mobile rules below override without !important */
-    .tasks-header { padding: 24px 30px 18px; }
+    .tasks-header { padding: 20px 30px 16px; }
     .tasks-head-text { display: flex; align-items: center; gap: 11px; }
     .tasks-actions { display: flex; gap: 9px; flex-shrink: 0; align-items: center; margin-left: auto; }
     @media (max-width: 767px) {
@@ -138,7 +148,7 @@
       .tasks-header { padding: 12px 14px; }
       .tasks-head-text { display: none; }       /* top bar already shows "Tasks" */
       .tasks-actions { margin-left: 0; width: 100%; }
-      .tasks-actions .btn { flex: 1; }          /* Archive + Manage fill the row evenly */
+      .tasks-actions .btn { flex: 1; }          /* Archive + Send from a topic fill the row evenly */
     }
     input:focus, textarea:focus { border-color: #CC0000 !important; outline: none; }
     textarea:focus { background: #FFFCF5 !important; }
@@ -195,28 +205,6 @@
   </div>
 </div>
 
-<!-- ═══════════════════ LANDING ═══════════════════ -->
-<div id="screen-landing" class="screen">
-
-  <aside class="shell-rail"></aside>
-
-  <main class="shell-panel" style="overflow-y:auto;padding:40px 40px 60px;">
-    <!-- mobile header -->
-    <div class="mb-only" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px;">
-      <img src="/static/IXL.png" style="height:24px;width:auto;" alt="IXL">
-      <div style="width:2px;height:16px;background:#CC0000;border-radius:1px;"></div>
-      <span style="font-size:17px;font-weight:700;color:#1A1A1A;">Studio</span>
-    </div>
-    <div style="max-width:1100px;margin:0 auto;width:100%;">
-
-      <h1 style="font-size:26px;font-weight:800;letter-spacing:-0.4px;color:#1A1A1A;line-height:1.22;text-align:center;">One workspace for the factory floor.</h1>
-      <p style="color:#6B6B6B;font-size:14px;margin-top:8px;text-align:center;">Choose a tool from the menu to get started.</p>
-      <!-- Module cards (desktop + mobile). Rendered from RAIL_PRODUCTS so order matches the menu. -->
-      <div id="landing-cards" style="display:flex;flex-direction:column;gap:10px;margin-top:28px;"></div>
-    </div>
-  </main>
-</div>
-
 <!-- ═══════════════════ HOME (SOP list) ═══════════════════ -->
 <div id="screen-home" class="screen">
 
@@ -234,18 +222,20 @@
       <button id="home-new-btn" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;color:#CC0000;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
     </header>
     <!-- desktop panel header -->
-    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
-      <div style="max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
-        <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Standard operating procedures</h1>
-        <button class="btn btn-primary" onclick="openModal()">+ New SOP</button>
+    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Standard operating procedures</h1>
+          <button class="btn btn-primary" onclick="openModal()">+ New SOP</button>
+        </div>
+        <div style="margin-top:15px;height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
+          <input id="home-search" oninput="renderHomeList()" placeholder="Search SOPs…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
+        </div>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
       <div style="max-width:1100px;margin:0 auto;">
-      <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
-        <input id="home-search" oninput="renderHomeList()" placeholder="Search SOPs…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
-      </div>
       <div id="home-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
         <div style="font-size:36px;margin-bottom:14px;opacity:0.2;line-height:1;">📄</div>
         <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No documents yet</div>
@@ -274,18 +264,20 @@
       <button disabled title="Create labels on desktop" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;cursor:not-allowed;">+</button>
     </header>
     <!-- desktop header -->
-    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
-      <div style="max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
-        <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Part labels</h1>
-        <button class="btn btn-primary" onclick="enterLabelNew()">+ New Label</button>
+    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Part labels</h1>
+          <button class="btn btn-primary" onclick="enterLabelNew()">+ New Label</button>
+        </div>
+        <div style="margin-top:15px;height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
+          <input id="lb-search" oninput="_lbListRender()" placeholder="Search labels…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
+        </div>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
       <div style="max-width:1100px;margin:0 auto;">
-        <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
-          <input id="lb-search" oninput="_lbListRender()" placeholder="Search labels…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
-        </div>
         <div id="lb-list-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
           <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No labels yet</div>
           <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New Label</strong> to generate your first label.</p>
@@ -330,7 +322,7 @@
         <div style="font-size:12px;color:#AAAAAA;background:#F8F8F8;padding:8px 12px;border-radius:6px;margin-bottom:18px;line-height:1.4;">
           This is the editor &#8212; the generated .docx is the formatted output and may differ slightly in layout.
         </div>
-        <div id="editor-steps-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;"></div>
+        <div id="editor-steps-grid"></div>
       </div>
     </div>
   </main>
@@ -467,18 +459,20 @@
       <button disabled title="Create checklists on desktop" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;cursor:not-allowed;">+</button>
     </header>
     <!-- desktop header -->
-    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
-      <div style="max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
-        <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Inspection checklists</h1>
-        <button class="btn btn-primary" onclick="enterIclNew()">+ New ICL</button>
+    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Inspection checklists</h1>
+          <button class="btn btn-primary" onclick="enterIclNew()">+ New ICL</button>
+        </div>
+        <div style="margin-top:15px;height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
+          <input id="icl-search" oninput="_iclListRender()" placeholder="Search checklists…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
+        </div>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
       <div style="max-width:1100px;margin:0 auto;">
-        <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
-          <input id="icl-search" oninput="_iclListRender()" placeholder="Search checklists…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
-        </div>
         <div id="icl-list-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
           <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No checklists yet</div>
           <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New ICL</strong> to measure a part and export your first sheet.</p>
@@ -489,7 +483,7 @@
   </main>
 
   <!-- view modal (read-only, re-export) -->
-  <div id="icl-view-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(20,20,20,0.6);align-items:center;justify-content:center;padding:24px;">
+  <div id="icl-view-modal" onclick="if(event.target===this)window._iclCloseViewModal&&window._iclCloseViewModal()" style="display:none;position:fixed;inset:0;z-index:700;background:rgba(20,20,20,0.6);align-items:center;justify-content:center;padding:24px;">
     <div style="background:#fff;border-radius:18px;max-width:900px;width:100%;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid #EEEAE4;">
         <div style="min-width:0;"><div id="icl-view-title" style="font-size:15px;font-weight:800;">Checklist</div><div id="icl-view-sub" style="font-size:12px;color:#9B9B9B;margin-top:2px;"></div></div>
@@ -629,7 +623,7 @@
   <input type="file" id="icl-file-input" accept=".step,.stp" style="display:none;">
 
   <!-- capture review modal -->
-  <div id="icl-cap-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(20,20,20,0.6);align-items:center;justify-content:center;padding:24px;">
+  <div id="icl-cap-modal" onclick="if(event.target===this)window._iclCloseCapModal&&window._iclCloseCapModal()" style="display:none;position:fixed;inset:0;z-index:700;background:rgba(20,20,20,0.6);align-items:center;justify-content:center;padding:24px;">
     <div style="background:#fff;border-radius:18px;max-width:900px;width:100%;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid #EEEAE4;">
         <span style="font-size:15px;font-weight:800;">Captured pictures</span>
@@ -660,21 +654,23 @@
       <button disabled title="Create mappings on desktop" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;cursor:not-allowed;">+</button>
     </header>
     <!-- desktop header -->
-    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
-      <div style="max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;">
-        <div style="min-width:0;">
-          <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">WIP &#8594; Finish Good mappings</h1>
-          <p id="lu-count-sub" style="color:#6B6B6B;font-size:13.5px;margin-top:5px;"></p>
+    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;">
+          <div style="min-width:0;">
+            <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">WIP &#8594; Finish Good mappings</h1>
+            <p id="lu-count-sub" style="color:#6B6B6B;font-size:13.5px;margin-top:5px;"></p>
+          </div>
+          <button class="btn btn-primary" style="flex-shrink:0;" onclick="lookupNew()">+ New Look Up</button>
         </div>
-        <button class="btn btn-primary" style="flex-shrink:0;" onclick="lookupNew()">+ New Look Up</button>
+        <div style="margin-top:15px;height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
+          <input id="lu-search" oninput="lookupFilter()" placeholder="Search by WIP or Finish Good number…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
+        </div>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
       <div style="max-width:1100px;margin:0 auto;">
-        <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
-          <input id="lu-search" oninput="lookupFilter()" placeholder="Search by WIP or Finish Good number…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
-        </div>
         <div class="dt-only" style="display:flex;align-items:center;gap:24px;padding:14px 4px 11px;font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:1.2px;">
           <span style="width:340px;">WIP part</span>
           <span style="flex:1;">Rolls up into</span>
@@ -820,18 +816,20 @@
       <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Process Flow</span>
       <button disabled title="Create on desktop" style="width:42px;height:42px;border-radius:50%;background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#BBBBBB;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;cursor:not-allowed;">+</button>
     </header>
-    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
-      <div style="max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
-        <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Process flow charts</h1>
-        <button class="btn btn-primary" onclick="enterPfcNew()">+ New PFC</button>
+    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Process flow charts</h1>
+          <button class="btn btn-primary" onclick="enterPfcNew()">+ New PFC</button>
+        </div>
+        <div style="margin-top:15px;height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
+          <input id="pfc-search" oninput="pfcListRender()" placeholder="Search flow charts…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
+        </div>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
       <div style="max-width:1100px;margin:0 auto;">
-        <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
-          <input id="pfc-search" oninput="pfcListRender()" placeholder="Search flow charts…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
-        </div>
         <div id="pfc-list-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
           <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No flow charts yet</div>
           <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New PFC</strong> to turn a BOM into a flow chart.</p>
@@ -842,7 +840,7 @@
   </main>
 
   <!-- view modal (chart + re-export) -->
-  <div id="pfc-view-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(20,20,20,0.6);align-items:center;justify-content:center;padding:24px;">
+  <div id="pfc-view-modal" onclick="if(event.target===this)pfcCloseView()" style="display:none;position:fixed;inset:0;z-index:700;background:rgba(20,20,20,0.6);align-items:center;justify-content:center;padding:24px;">
     <div style="background:#fff;border-radius:18px;max-width:760px;width:100%;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid #EEEAE4;">
         <div style="min-width:0;"><div id="pfc-view-title" style="font-size:15px;font-weight:800;">Flow chart</div><div id="pfc-view-sub" style="font-size:12px;color:#9B9B9B;margin-top:2px;"></div></div>
@@ -933,21 +931,23 @@
       <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Expiry</span>
       <button onclick="expNew()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;color:#CC0000;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
     </header>
-    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
-      <div style="max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;">
-        <div>
-          <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">BOM expiry reports</h1>
-          <p style="font-size:13px;color:#6B6B6B;margin-top:3px;">Saved runway snapshots — open one to review, or start a new analysis from a Product Detail Report.</p>
+    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+          <div>
+            <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">BOM expiry reports</h1>
+            <p style="font-size:13px;color:#6B6B6B;margin-top:3px;">Saved runway snapshots — open one to review, or start a new analysis from a Product Detail Report.</p>
+          </div>
+          <button class="btn btn-primary" style="flex-shrink:0;" onclick="expNew()">+ New EXP</button>
         </div>
-        <button class="btn btn-primary" style="flex-shrink:0;" onclick="expNew()">+ New EXP</button>
+        <div style="margin-top:15px;height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
+          <input id="exp-search" oninput="expListRender()" placeholder="Search saved reports…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
+        </div>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
       <div style="max-width:1100px;margin:0 auto;">
-        <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
-          <input id="exp-search" oninput="expListRender()" placeholder="Search saved reports…" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
-        </div>
         <div id="exp-list-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
           <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No reports yet</div>
           <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New EXP</strong> to turn a Product Detail Report into an expiry timeline.</p>
@@ -1000,6 +1000,51 @@
   <input id="exp-file" type="file" accept=".xlsx" style="display:none;">
 </div>
 
+<!-- ═══════════════════ NEW MESSAGE (composer — reachable from any screen) ═══════════════════ -->
+<div id="screen-topic-compose" class="screen">
+  <aside class="shell-rail"></aside>
+
+  <main class="shell-panel">
+    <header class="mb-only" style="height:58px;display:flex;align-items:center;padding:0 18px;flex-shrink:0;">
+      <button onclick="openDrawer()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex-shrink:0;">
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+      </button>
+      <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">New message</span>
+      <span style="width:42px;flex-shrink:0;"></span>
+    </header>
+    <div style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;">
+      <div style="max-width:720px;width:100%;margin:0 auto;padding:30px 24px 48px;display:flex;flex-direction:column;min-height:calc(100% - 0px);justify-content:center;">
+        <h1 style="font-size:26px;font-weight:800;letter-spacing:-0.5px;color:#1A1A1A;text-align:center;">What&rsquo;s happening on the floor?</h1>
+        <div style="font-size:13px;color:#9A9A9A;text-align:center;margin-top:6px;">Start a chat — file it under a topic now, or later.</div>
+
+        <input id="compose-file" type="file" accept="image/*" multiple style="display:none;" onchange="composerAttach(this.files)">
+        <input id="compose-camera" type="file" accept="image/*" capture="environment" style="display:none;" onchange="composerAttach(this.files)">
+
+        <div style="margin-top:22px;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:16px;padding:14px 14px 10px;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+          <div id="compose-tray" style="display:none;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
+          <textarea id="compose-input" rows="3" placeholder="Describe it — a note, a question, a problem&hellip;" onkeydown="composerKey(event)" style="width:100%;border:none;background:transparent !important;font-size:15px;color:#1A1A1A;outline:none;padding:14px 4px 8px;resize:none;font-family:inherit;"></textarea>
+          <div style="display:flex;align-items:center;gap:7px;">
+            <button onclick="$('compose-file').click()" title="Upload photo" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,0,0,0.08);background:#fff;flex-shrink:0;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"></rect><circle cx="8.5" cy="9" r="1.6"></circle><path d="m21 16-4.5-4.5L7 21"></path></svg></button>
+            <button onclick="$('compose-camera').click()" title="Take photo" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,0,0,0.08);background:#fff;flex-shrink:0;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5A1.5 1.5 0 0 1 5 7h2l1.2-2h7.6L17 7h2a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5z"></path><circle cx="12" cy="13" r="3.2"></circle></svg></button>
+            <div style="position:relative;margin-left:auto;">
+              <button onclick="composerToggleTopicMenu(event)" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#6E6A63;background:#F5F4F1;border:1px solid #E7E3DC;border-radius:8px;padding:7px 11px;cursor:pointer;">
+                <span id="compose-topic-label">No topic</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+              </button>
+              <div id="compose-topic-menu" style="display:none;position:absolute;bottom:40px;right:0;z-index:40;width:220px;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,0.16);padding:6px;max-height:280px;overflow-y:auto;overflow-x:hidden;"></div>
+            </div>
+            <button onclick="composerSend()" title="Start chat" style="width:36px;height:32px;border-radius:8px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;cursor:pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"></path><path d="M22 2 15 22l-4-9-9-4z"></path></svg></button>
+          </div>
+        </div>
+
+        <div id="compose-chips" style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:16px;"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
 <!-- ═══════════════════ TOPICS LIST (module landing) ═══════════════════ -->
 <div id="screen-topic-list" class="screen">
   <aside class="shell-rail"></aside>
@@ -1014,23 +1059,39 @@
       <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Topics</span>
       <button onclick="topicOpenModal()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;color:#CC0000;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
     </header>
-    <div class="dt-only" style="padding:28px 20px 22px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">
-      <div style="max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;">
-        <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Topics</h1>
-        <button class="btn btn-primary" onclick="topicOpenModal()">+ New topic</button>
+    <div class="dt-only" style="padding:20px 30px 16px;flex-shrink:0;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+          <div>
+            <h1 style="font-size:21px;font-weight:800;letter-spacing:-0.4px;color:#1A1A1A;">Topics</h1>
+            <div id="topic-list-sub" style="font-size:12.5px;color:#9A9A9A;margin-top:2px;">&mdash;</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;flex-shrink:0;">
+            <div style="position:relative;">
+              <button onclick="topicListToggleSort(event)" style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:#5E5A53;background:#fff;border:1px solid #E7E3DC;border-radius:9px;padding:9px 13px;cursor:pointer;">
+                <span style="color:#9A9A9A;">Sort by</span>
+                <span id="topic-list-sort-label" style="font-weight:700;color:#1A1A1A;">Last updated</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+              </button>
+              <div id="topic-list-sort-menu" style="display:none;position:absolute;top:42px;right:0;z-index:40;width:170px;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:11px;box-shadow:0 14px 40px rgba(0,0,0,0.16);padding:6px;"></div>
+            </div>
+            <button class="btn btn-ghost" onclick="tasksOpenTagMgr()">Manage tags</button>
+            <button class="btn btn-primary" onclick="topicOpenModal()">+ New topic</button>
+          </div>
+        </div>
+        <div style="margin-top:15px;display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #E7E3DC;border-radius:11px;padding:9px 13px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A39E95" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+          <input id="topic-list-search" oninput="topicListRender()" placeholder="Search topics&hellip;" style="flex:1;border:none;background:transparent;font-size:14px;color:#1A1A1A;min-width:0;outline:none;">
+        </div>
       </div>
     </div>
-    <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
+    <div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:16px 20px 24px;min-height:0;">
       <div style="max-width:1100px;margin:0 auto;">
-        <div style="height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;margin-bottom:12px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
-          <input id="topic-list-search" oninput="topicListRender()" placeholder="Search topics&hellip;" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
-        </div>
         <div id="topic-list-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
           <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No topics yet</div>
           <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New topic</strong> to start one.</p>
         </div>
-        <div id="topic-list-items"></div>
+        <div id="topic-list-items" class="topic-grid" style="gap:14px;"></div>
       </div>
     </div>
   </main>
@@ -1054,7 +1115,7 @@
         <button onclick="enterTopics()" style="color:#9B9B9B;font-size:12.5px;font-weight:600;margin-bottom:8px;display:inline-flex;align-items:center;gap:4px;">&#8249; All topics</button>
         <div style="display:flex;align-items:center;gap:8px;">
           <span style="font-size:19px;font-weight:800;color:#BCBCBC;">#</span><h1 id="thome-title" style="font-size:19px;font-weight:800;letter-spacing:-0.3px;">general</h1>
-          <button class="btn btn-primary" style="margin-left:auto;" onclick="topicNewChat()">+ New chat</button>
+          <button class="btn btn-primary" style="margin-left:auto;" onclick="topicNewChat()">+ New message</button>
         </div>
       </div>
     </div>
@@ -1068,7 +1129,7 @@
         <div id="thome-chips" style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:14px;"></div>
         <div id="thome-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
           <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">No chats yet</div>
-          <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New chat</strong> to start one.</p>
+          <p style="font-size:14px;color:#6B6B6B;">Tap <strong>+ New message</strong> to start one.</p>
         </div>
         <div id="thome-items"></div>
       </div>
@@ -1085,6 +1146,51 @@
   </aside>
 </div>
 
+<!-- ═══════════════════ MESSAGES (all unfiled chats) ═══════════════════ -->
+<div id="screen-messages" class="screen">
+  <aside class="shell-rail"></aside>
+
+  <main class="shell-panel">
+    <!-- mobile header -->
+    <header class="mb-only" style="height:58px;display:flex;align-items:center;padding:0 18px;flex-shrink:0;">
+      <button onclick="openDrawer()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex-shrink:0;">
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+        <span style="width:16px;height:2px;background:#CC0000;border-radius:1px;display:block;"></span>
+      </button>
+      <span style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1A1A1A;">Messages</span>
+      <button onclick="enterComposer()" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;color:#CC0000;font-size:26px;font-weight:300;flex-shrink:0;line-height:1;">+</button>
+    </header>
+
+    <!-- desktop header -->
+    <div class="dt-only" style="padding:20px 30px 16px;flex-shrink:0;">
+      <div style="max-width:1100px;margin:0 auto;width:100%;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+          <div>
+            <h1 style="font-size:21px;font-weight:800;letter-spacing:-0.4px;color:#1A1A1A;">Messages</h1>
+            <div style="font-size:12.5px;color:#9A9A9A;margin-top:2px;">Chats not yet filed under a topic.</div>
+          </div>
+          <button class="btn btn-primary" onclick="enterComposer()">+ New message</button>
+        </div>
+        <div style="margin-top:15px;height:40px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;display:flex;align-items:center;padding:0 13px;gap:9px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
+          <input id="msgs-search" oninput="messagesRender()" placeholder="Search messages&hellip;" style="flex:1;border:none;background:transparent;font-size:13px;color:#1A1A1A;">
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;padding:16px 20px 24px;min-height:0;">
+      <div style="max-width:1100px;margin:0 auto;">
+        <div id="msgs-empty" style="display:none;text-align:center;padding:64px 20px;background:#fff;border:1px dashed rgba(0,0,0,0.1);border-radius:12px;margin-top:8px;">
+          <div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:7px;">Nothing unfiled</div>
+          <p style="font-size:14px;color:#6B6B6B;">Every chat is filed under a topic.</p>
+        </div>
+        <div id="msgs-items"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
 <!-- ═══════════════════ TOPICS (chat) ═══════════════════ -->
 <div id="screen-topic" class="screen">
   <aside class="shell-rail"></aside>
@@ -1092,49 +1198,60 @@
   <main class="shell-panel">
     <!-- mobile header -->
     <header class="mb-only" style="height:58px;display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);background:#F5F4F1;">
-      <button onclick="topicBackToHome()" style="color:#CC0000;font-size:22px;font-weight:400;flex-shrink:0;padding:0 4px;">&#8249;</button>
-      <div style="flex:1;min-width:0;">
-        <div id="topic-crumb-mb" style="font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:0.6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">general</div>
+      <button onclick="topicBackFromChat()" style="color:#CC0000;font-size:22px;font-weight:400;flex-shrink:0;padding:0 4px;">&#8249;</button>
+      <div style="flex:1;min-width:0;position:relative;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button id="topic-crumb-mb" onclick="topicToggleFileMenu(event)" title="Tap to file under a topic" style="flex-shrink:0;font-size:10.5px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:0.6px;white-space:nowrap;background:transparent;border:none;padding:0;cursor:pointer;"><span id="topic-crumb-mb-label">No topic</span> &#9662;</button>
+          <div id="topic-tag-chips-mb" style="display:flex;align-items:center;gap:4px;flex-wrap:nowrap;overflow:hidden;min-width:0;"></div>
+          <button onclick="topicToggleTagMenu(event)" title="Tag this chat" style="flex-shrink:0;width:18px;height:18px;border-radius:5px;border:none;background:transparent;color:#9B9B9B;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><path d="M7 7h.01"></path></svg>
+          </button>
+        </div>
+        <div id="topic-file-menu-mb" class="topic-file-menu-el" style="display:none;position:absolute;top:20px;left:0;z-index:30;width:220px;max-width:80vw;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,0.16);padding:6px;max-height:280px;overflow-y:auto;"></div>
+        <div id="topic-tag-menu-mb" class="topic-file-menu-el" style="display:none;position:absolute;top:20px;left:0;z-index:30;width:200px;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,0.16);padding:6px;max-height:280px;overflow-y:auto;"></div>
         <span id="topic-title-mb" onclick="topicTitleEdit()" title="Tap to rename" style="font-size:16px;font-weight:800;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;cursor:text;">Chat</span>
         <input id="topic-title-input-mb" onkeydown="if(event.key==='Enter'){this.blur();}else if(event.key==='Escape'){this.dataset.cancel='1';this.blur();}" onblur="topicTitleSave(this)" style="display:none;width:100%;font-size:16px;font-weight:800;color:#1A1A1A;border:1px solid #CC0000;border-radius:6px;padding:1px 6px;">
       </div>
-      <button id="topic-select-btn-mb" onclick="topicSelectStart()" style="flex-shrink:0;padding:7px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);background:#fff;font-size:12.5px;font-weight:600;color:#1A1A1A;">Send</button>
+      <button onclick="taskSendFromChat(_topic.chatId)" style="flex-shrink:0;padding:7px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);background:#fff;font-size:12.5px;font-weight:600;color:#1A1A1A;">Send</button>
     </header>
 
     <!-- desktop header -->
     <div class="dt-only" style="padding:14px 26px 16px;border-bottom:1px solid rgba(0,0,0,0.07);flex-shrink:0;">
       <div style="max-width:1100px;margin:0 auto;width:100%;">
-        <button onclick="topicBackToHome()" id="topic-crumb" style="color:#9B9B9B;font-size:12.5px;font-weight:600;margin-bottom:8px;display:inline-flex;align-items:center;gap:4px;">&#8249; general</button>
-        <div style="display:flex;align-items:center;gap:8px;">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px;">
+          <button onclick="topicBackFromChat()" style="color:#9B9B9B;font-size:12px;font-weight:600;background:transparent;border:none;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:4px;">&#8249; Back</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <h1 id="topic-title" onclick="topicTitleEdit()" title="Click to rename" style="font-size:19px;font-weight:800;letter-spacing:-0.3px;cursor:text;">Chat</h1>
+          <button onclick="topicTitleEdit()" title="Rename" style="flex-shrink:0;width:26px;height:26px;border-radius:7px;border:none;background:transparent;color:#9B9B9B;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>
+          </button>
           <input id="topic-title-input" onkeydown="if(event.key==='Enter'){this.blur();}else if(event.key==='Escape'){this.dataset.cancel='1';this.blur();}" onblur="topicTitleSave(this)" style="display:none;font-size:19px;font-weight:800;letter-spacing:-0.3px;border:1px solid #CC0000;border-radius:8px;padding:2px 8px;margin-left:-9px;background:#fff;min-width:160px;">
-          <span id="topic-task-badge" style="display:none;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#FBF1F1;color:#CC0000;border:1px solid rgba(204,0,0,0.18);"></span>
-          <span id="topic-action-badge" onclick="enterAction();actionOpenRecord(_topic.chats.find(c=>c.id===_topic.chatId).action.id);" style="display:none;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#F6EDDC;color:#8A5A12;border:1px solid rgba(138,90,18,0.22);cursor:pointer;"></span>
+          <div style="position:relative;flex-shrink:0;">
+            <button id="topic-file-btn" onclick="topicToggleFileMenu(event)" title="File this chat under a topic" style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:#6E6A63;background:#F5F4F1;border:1px solid #E7E3DC;border-radius:8px;padding:5px 10px;cursor:pointer;"><span id="topic-file-btn-label">No topic</span> &#9662;</button>
+            <div id="topic-file-menu" class="topic-file-menu-el" style="display:none;position:absolute;top:34px;left:0;z-index:30;width:220px;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,0.16);padding:6px;max-height:280px;overflow-y:auto;"></div>
+          </div>
+          <div id="topic-tag-chips" style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;"></div>
+          <div style="position:relative;flex-shrink:0;">
+            <button onclick="topicToggleTagMenu(event)" title="Tag this chat" style="width:26px;height:26px;border-radius:7px;border:none;background:transparent;color:#9B9B9B;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><path d="M7 7h.01"></path></svg>
+            </button>
+            <div id="topic-tag-menu" class="topic-file-menu-el" style="display:none;position:absolute;top:34px;left:0;z-index:30;width:200px;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,0.16);padding:6px;max-height:280px;overflow-y:auto;"></div>
+          </div>
+          <div id="topic-dest-badges" style="display:flex;align-items:center;gap:6px;"></div>
           <div style="margin-left:auto;display:flex;align-items:center;gap:8px;position:relative;">
             <button onclick="topicArchiveChat()" id="topic-archive-btn" title="Archive chat" style="width:36px;height:36px;border-radius:9px;border:1px solid rgba(0,0,0,0.12);background:#fff;display:flex;align-items:center;justify-content:center;color:#6B6B6B;cursor:pointer;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"></rect><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"></path><path d="M10 12h4"></path></svg>
             </button>
-            <button onclick="topicToggleSendMenu(event)" style="padding:8px 15px;border-radius:9px;border:1px solid rgba(0,0,0,0.12);background:#fff;font-size:12.5px;font-weight:600;color:#1A1A1A;cursor:pointer;display:inline-flex;align-items:center;gap:7px;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>Send to &#9662;</button>
-            <div id="topic-send-menu" style="display:none;position:absolute;top:44px;right:0;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:11px;box-shadow:0 6px 20px rgba(0,0,0,0.1);min-width:190px;overflow:hidden;z-index:30;"></div>
+            <button onclick="topicToggleSendMenu(event)" style="padding:9px 16px;border-radius:9px;border:none;background:#CC0000;font-size:13px;font-weight:600;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:7px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>Send to &#9662;</button>
+            <div id="topic-send-menu" style="display:none;position:absolute;top:44px;right:0;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:13px;box-shadow:0 14px 40px rgba(0,0,0,0.16);width:300px;overflow:hidden;z-index:30;padding:7px;"></div>
           </div>
         </div>
-        <p style="color:#8A8A8A;font-size:12.5px;margin-top:2px;">Post updates, photos, and replies for the team.</p>
       </div>
     </div>
 
     <div id="topic-messages" style="flex:1;min-height:0;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:16px;max-width:1100px;width:100%;margin:0 auto;"></div>
-
-    <!-- selection action bar (shown while picking messages to send to the board) -->
-    <div id="topic-select-bar" style="display:none;padding:0 18px 16px;flex-shrink:0;max-width:1100px;width:100%;margin:0 auto;">
-      <div style="background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:15px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);">
-        <span id="topic-select-count" style="font-size:13px;color:#8A8A8A;font-weight:600;">Tap messages to add to a card</span>
-        <div style="display:flex;gap:9px;">
-          <button onclick="topicSelectCancel()" style="padding:9px 16px;border-radius:9px;background:#fff;border:1px solid rgba(0,0,0,0.12);font-size:13px;font-weight:600;color:#1A1A1A;cursor:pointer;">Cancel</button>
-          <button id="topic-select-add" onclick="topicSelectAdd()" style="padding:9px 16px;border-radius:9px;font-size:13px;font-weight:700;background:#E4E0D9;color:#A8A39A;cursor:default;">Add to board</button>
-        </div>
-      </div>
-    </div>
 
     <!-- composer -->
     <div id="topic-composer" style="padding:0 18px 16px;flex-shrink:0;max-width:1100px;width:100%;margin:0 auto;">
@@ -1187,8 +1304,8 @@
   <main class="shell-panel">
     <!-- list view -->
     <div id="action-list-view" style="display:flex;flex-direction:column;height:100%;min-height:0;">
-      <div style="padding:20px 30px 16px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);">
-        <div style="max-width:880px;width:100%;margin:0 auto;">
+      <div style="padding:20px 30px 16px;flex-shrink:0;">
+        <div style="max-width:1100px;width:100%;margin:0 auto;">
           <h1 style="font-size:21px;font-weight:800;letter-spacing:-0.4px;color:#1A1A1A;">Action Requests</h1>
           <div id="action-count" style="font-size:12.5px;color:#9A9A9A;margin-top:2px;">&mdash;</div>
           <div style="margin-top:15px;display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #E7E3DC;border-radius:11px;padding:9px 13px;">
@@ -1198,26 +1315,58 @@
         </div>
       </div>
       <div style="flex:1;min-height:0;overflow-y:auto;padding:20px 30px 28px;">
-        <div style="max-width:880px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:10px;">
+        <div style="max-width:1100px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:10px;">
           <div id="action-empty" style="display:none;text-align:center;padding:48px 20px;color:#A8A39A;font-size:13.5px;">No action requests raised from topics yet.</div>
-          <div id="action-items"></div>
+          <div id="action-items" style="display:flex;flex-direction:column;gap:10px;"></div>
         </div>
       </div>
     </div>
 
     <!-- 8D record view -->
     <div id="action-record-view" style="display:none;flex-direction:column;height:100%;min-height:0;">
-      <div style="padding:14px 30px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);">
+      <div style="padding:14px 30px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;gap:14px;">
         <button onclick="actionCloseRecord()" style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#5E5A53;background:transparent;border:none;cursor:pointer;padding:0;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
           Action Requests
         </button>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button id="ar-source-toggle" onclick="arToggleSourcePanel()" style="display:none;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:#5E5A53;background:#fff;border:1px solid rgba(0,0,0,0.12);border-radius:9px;padding:7px 12px;cursor:pointer;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            Source chat
+          </button>
+          <div id="ar-status-tabs" style="display:flex;align-items:center;gap:6px;background:#EAE7E2;border-radius:10px;padding:4px;max-width:280px;"></div>
+        </div>
       </div>
-      <div style="flex:1;min-height:0;overflow-y:auto;padding:24px 30px 36px;">
-        <div id="action-record-body" style="max-width:720px;width:100%;margin:0 auto;"></div>
+      <div style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:24px 30px 36px;">
+        <div id="action-record-body" style="max-width:1100px;width:100%;margin:0 auto;"></div>
       </div>
     </div>
   </main>
+
+  <!-- source-chat panel (record view only) -->
+  <aside id="ar-source-panel" class="dt-only" style="display:none;width:308px;flex-shrink:0;background:#fff;border-radius:18px;flex-direction:column;overflow:hidden;">
+    <div style="padding:16px 18px 13px;border-bottom:1px solid #EFEDEA;flex-shrink:0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;color:#B5B0A6;text-transform:uppercase;letter-spacing:0.8px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          Source chat
+        </div>
+        <button onclick="arToggleSourcePanel()" title="Hide source chat" style="width:26px;height:26px;border-radius:7px;border:none;background:#F2F0EC;color:#6B6B6B;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+        </button>
+      </div>
+      <div id="ar-source-title" style="font-size:14.5px;font-weight:800;letter-spacing:-0.2px;color:#1A1A1A;margin-top:7px;line-height:1.3;"></div>
+      <div id="ar-source-sub" style="font-size:11.5px;color:#9A9A9A;margin-top:3px;"></div>
+      <div id="ar-source-dests" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;margin-top:11px;">
+        <span style="font-size:10px;font-weight:700;color:#B5B0A6;text-transform:uppercase;letter-spacing:0.6px;">Linked</span>
+        <span id="ar-source-dests-items"></span>
+      </div>
+    </div>
+    <div id="ar-source-messages" style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:16px 16px 12px;display:flex;flex-direction:column;gap:14px;"></div>
+    <div style="flex-shrink:0;padding:12px 16px;border-top:1px solid #EFEDEA;">
+      <button id="ar-source-open" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:7px;background:#fff;color:#1A1A1A;padding:10px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid rgba(0,0,0,0.12);cursor:pointer;">Open full chat</button>
+    </div>
+  </aside>
 </div>
 
 <!-- TASKS card detail drawer -->
@@ -1283,8 +1432,8 @@
 </div>
 
 <!-- ═══════════════════ MODAL ═══════════════════ -->
-<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:500;padding:20px;animation:fadeIn 0.15s ease;">
-  <div style="background:#fff;border-radius:20px;width:100%;max-width:420px;padding:28px 24px;box-shadow:0 24px 60px rgba(0,0,0,0.22);">
+<div id="modal-overlay" class="modal-overlay" style="display:none;">
+  <div class="modal-card">
     <h3 style="font-size:18px;font-weight:800;letter-spacing:-0.2px;margin-bottom:20px;color:#1A1A1A;text-align:center;">New SOP</h3>
     <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:22px;">
       <div style="display:flex;flex-direction:column;gap:5px;">
@@ -1312,13 +1461,24 @@
 </div>
 
 <!-- New topic modal -->
-<div id="topic-modal" onclick="if(event.target===this)topicModalClose()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:500;padding:20px;animation:fadeIn 0.15s ease;">
-  <div style="background:#fff;border-radius:20px;width:100%;max-width:420px;padding:28px 24px;box-shadow:0 24px 60px rgba(0,0,0,0.22);">
+<div id="topic-modal" class="modal-overlay" onclick="if(event.target===this)topicModalClose()" style="display:none;">
+  <div class="modal-card">
     <h3 style="font-size:18px;font-weight:800;letter-spacing:-0.2px;margin-bottom:20px;color:#1A1A1A;text-align:center;">New topic</h3>
     <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:22px;">
       <label style="font-size:11px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">Topic name</label>
       <input id="topic-modal-name" placeholder="e.g. line-3, packing" onkeydown="if(event.key==='Enter')topicCreate();" style="padding:12px;border:1px solid #E0E0E0;border-radius:10px;font-size:14px;color:#1A1A1A;width:100%;transition:border-color 0.1s;">
       <div style="font-size:11.5px;color:#9B9B9B;">Lowercase letters, numbers and dashes. Shown as #name.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:22px;">
+      <label style="font-size:11px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.5px;">Area</label>
+      <select id="topic-modal-area" style="padding:12px;border:1px solid #E0E0E0;border-radius:10px;font-size:14px;color:#1A1A1A;width:100%;background:#fff;">
+        <option value="C">Press / Paint area</option>
+        <option value="A">Assembly</option>
+        <option value="B">Head Office &amp; R&amp;D</option>
+        <option value="F">Foundry</option>
+        <option value="S">IXL Solar</option>
+      </select>
+      <div style="font-size:11.5px;color:#9B9B9B;">Sets the Action Request number prefix for chats filed here (e.g. C123).</div>
     </div>
     <div style="display:flex;gap:10px;">
       <button onclick="topicModalClose()" class="btn btn-ghost" style="flex:1;">Cancel</button>
@@ -1328,13 +1488,13 @@
 </div>
 
 <!-- Shared delete-confirm modal (every delete routes through askDelete) -->
-<div id="confirm-modal" onclick="if(event.target===this)confirmResolve(false)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:1200;padding:20px;animation:fadeIn 0.15s ease;">
-  <div style="background:#fff;border-radius:20px;width:100%;max-width:380px;padding:26px 24px;box-shadow:0 24px 60px rgba(0,0,0,0.22);">
-    <h3 style="font-size:17px;font-weight:800;color:#1A1A1A;margin-bottom:8px;">Delete?</h3>
+<div id="confirm-modal" class="modal-overlay" onclick="if(event.target===this)confirmResolve(false)" style="display:none;z-index:1200;">
+  <div class="modal-card" style="max-width:380px;padding:26px 24px;">
+    <h3 id="confirm-title" style="font-size:17px;font-weight:800;color:#1A1A1A;margin-bottom:8px;">Delete?</h3>
     <p id="confirm-msg" style="font-size:13.5px;color:#6B6B6B;line-height:1.5;margin-bottom:22px;">This cannot be undone.</p>
     <div style="display:flex;gap:10px;">
       <button onclick="confirmResolve(false)" class="btn btn-ghost" style="flex:1;">Cancel</button>
-      <button onclick="confirmResolve(true)" class="btn btn-primary" style="flex:1;">Delete</button>
+      <button id="confirm-ok" onclick="confirmResolve(true)" class="btn btn-primary" style="flex:1;">Delete</button>
     </div>
   </div>
 </div>
@@ -1346,7 +1506,7 @@
 'use strict';
 
 const state = {
-  screen: 'landing',
+  screen: 'topic-compose',
   sops: [],
   currentSop: null,
   captureIndex: 0,
@@ -1418,9 +1578,12 @@ window.btnIco = function (kind, onclick, title, extraClass) {
 
 // Shared delete-confirm modal. `await askDelete('…')` → true if confirmed.
 let _confirmResolve = null;
-window.askDelete = function (message) {
+window.askDelete = function (message, opts) {
+  opts = opts || {};
   return new Promise(resolve => {
     _confirmResolve = resolve;
+    $('confirm-title').textContent = opts.title || 'Delete?';
+    $('confirm-ok').textContent = opts.confirmLabel || 'Delete';
     $('confirm-msg').textContent = message || 'This cannot be undone.';
     $('confirm-modal').style.display = 'flex';
   });
@@ -1469,19 +1632,36 @@ async function api(method, path, body) {
 // Single source of truth for the product rail (order + styling). Rendered into
 // each screen's .shell-rail on show, so all 13 rails stay identical. Grouped into
 // WORKSPACE (chat-style collaboration + work tracking) and TOOLS (single-purpose
-// document generators). Incident / Action Request are permanently disabled stubs —
-// no route/model/screen behind them yet.
+// document generators).
+const RAIL_ICON_PATHS = {
+  topics: 'M4 9h16|M4 15h16|M10 3 8 21|M16 3l-2 18',
+  tasks: 'M9 11l3 3L22 4|M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11',
+  action: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z',
+  messages: 'M22 12h-6l-2 3h-4l-2-3H2|M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z',
+  lookup: 'M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12z|M20 20l-4.3-4.3',
+  sop: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z|M14 2v6h6|M9 13h6|M9 17h4',
+  label: 'M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z|M7 7h.01',
+  icl: 'M9 11l3 3L20 6|M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9',
+  pfc: 'M3 4h7v6H3z|M14 14h7v6h-7z|M6.5 10v4a2 2 0 0 0 2 2h5',
+  exp: 'M12 8v4l3 3|M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z',
+};
+function railIconSvg(key, color, size) {
+  size = size || 15;
+  const parts = (RAIL_ICON_PATHS[key] || '').split('|');
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'
+    + parts.map(d => '<path d="' + d + '"></path>').join('') + '</svg>';
+}
 const RAIL_PRODUCTS = [
-  { key: 'topic',    abbr: 'TP',  label: 'Topics',               sub: 'Team discussion',       fn: 'enterTopics', group: 'workspace' },
-  { key: 'task',     abbr: 'TSK', label: 'Tasks',                sub: 'From topics',           fn: 'enterTasks', group: 'workspace' },
-  { key: 'action',   abbr: 'AR',  label: 'Action Request',       sub: 'Corrective actions',    fn: 'enterAction', group: 'workspace' },
-  { key: 'incident', abbr: 'INC', label: 'Incident',             sub: 'Coming soon',           fn: null, group: 'workspace', disabled: true },
-  { key: 'lookup',   abbr: 'LU',  label: 'Look Up',              sub: 'FG &#8596; WIP finder',  fn: 'enterLookup', group: 'tools' },
-  { key: 'sop',      abbr: 'SOP', label: 'SOP',                  sub: 'Operating procedures',  fn: 'enterSop', group: 'tools' },
-  { key: 'label',    abbr: 'LB',  label: 'Label',                sub: 'Part labels',           fn: 'enterLabel', group: 'tools' },
-  { key: 'icl',      abbr: 'ICL', label: 'Inspection Checklist', sub: 'Quality checks',        fn: 'enterIcl', group: 'tools' },
-  { key: 'pfc',      abbr: 'PFC', label: 'Process Flow Chart',   sub: 'BOM &#8594; flow',       fn: 'enterPfc', group: 'tools' },
-  { key: 'exp',      abbr: 'EXP', label: 'Expiry',               sub: 'BOM runway',            fn: 'enterExp', group: 'tools' },
+  { key: 'messages', abbr: 'MSG', icon: 'messages', label: 'Messages',           sub: 'Not yet filed',         fn: 'enterMessages', group: 'workspace' },
+  { key: 'topic',    abbr: 'TP',  icon: 'topics', label: 'Topics',               sub: 'Team discussion',       fn: 'enterTopics', group: 'workspace' },
+  { key: 'task',     abbr: 'TSK', icon: 'tasks',  label: 'Tasks',                sub: 'From topics',           fn: 'enterTasks', group: 'workspace' },
+  { key: 'action',   abbr: 'AR',  icon: 'action', label: 'Action Request',       sub: 'Corrective actions',    fn: 'enterAction', group: 'workspace' },
+  { key: 'lookup',   abbr: 'LU',  icon: 'lookup', label: 'Look Up',              sub: 'FG &#8596; WIP finder',  fn: 'enterLookup', group: 'tools' },
+  { key: 'sop',      abbr: 'SOP', icon: 'sop',    label: 'SOP',                  sub: 'Operating procedures',  fn: 'enterSop', group: 'tools' },
+  { key: 'label',    abbr: 'LB',  icon: 'label',  label: 'Label',                sub: 'Part labels',           fn: 'enterLabel', group: 'tools' },
+  { key: 'icl',      abbr: 'ICL', icon: 'icl',    label: 'Inspection Checklist', sub: 'Quality checks',        fn: 'enterIcl', group: 'tools' },
+  { key: 'pfc',      abbr: 'PFC', icon: 'pfc',    label: 'Process Flow Chart',   sub: 'BOM &#8594; flow',       fn: 'enterPfc', group: 'tools' },
+  { key: 'exp',      abbr: 'EXP', icon: 'exp',    label: 'Expiry',               sub: 'BOM runway',            fn: 'enterExp', group: 'tools' },
 ];
 const RAIL_GROUPS = [{ key: 'workspace', label: 'WORKSPACE' }, { key: 'tools', label: 'TOOLS' }];
 
@@ -1491,27 +1671,23 @@ function railKeyFor(s) {
   if (['icl', 'icl-list'].includes(s)) return 'icl';
   if (['pfc', 'pfc-list'].includes(s)) return 'pfc';
   if (['exp', 'exp-list'].includes(s)) return 'exp';
+  if (s === 'topic-compose') return 'compose';
   if (['topic', 'topic-list', 'topic-home'].includes(s)) return 'topic';
+  if (s === 'messages') return 'messages';
   if (s === 'tasks') return 'task';
+  if (s === 'action') return 'action';
   if (['home', 'editor', 'capture'].includes(s)) return 'sop';
   return '';
 }
 
+// Compact nav/tool row: 26x26 icon chip + single-line label. Active state (red chip,
+// #242424 row bg) applies to whichever key matches the current screen — tools rows
+// use the same mechanism as workspace rows so e.g. the SOP editor still highlights.
 function railTileHtml(p, active) {
-  if (p.disabled) {
-    return '<div title="Coming soon" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:not-allowed;opacity:0.5;">'
-      + '<div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#6E6E6E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
-      + '<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#8A8A8A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div><div style="font-size:11px;color:#6E6E6E;">' + p.sub + '</div></div></div>';
-  }
-  if (p.key === active) {
-    return '<div onclick="' + p.fn + '()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#242424;cursor:pointer;">'
-      + '<div style="width:36px;height:36px;border-radius:10px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
-      + '<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div><div style="font-size:11px;color:#9A9A9A;">' + p.sub + '</div></div>'
-      + '<span style="width:7px;height:7px;border-radius:50%;background:#3DBE63;flex-shrink:0;"></span></div>';
-  }
-  return '<div class="rail-item" onclick="' + p.fn + '()" style="display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;cursor:pointer;transition:background 0.1s;">'
-    + '<div style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
-    + '<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div><div style="font-size:11px;color:#6E6E6E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.sub + '</div></div></div>';
+  const on = p.key === active;
+  return '<button class="rail-item" onclick="' + p.fn + '()" style="display:flex;align-items:center;gap:10px;width:100%;padding:5px 10px;border-radius:10px;border:none;cursor:pointer;text-align:left;background:' + (on ? '#242424' : 'transparent') + ';">'
+    + '<span style="width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:' + (on ? '#CC0000' : '#2A2A2A') + ';">' + railIconSvg(p.icon, on ? '#fff' : '#9A9A9A') + '</span>'
+    + '<span style="flex:1;min-width:0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:' + (on ? '#fff' : '#B8B8B8') + ';">' + p.label + '</span></button>';
 }
 // Render RAIL_PRODUCTS split into its WORKSPACE / TOOLS groups, via a caller-supplied
 // per-item renderer (rail tiles, landing cards, and drawer buttons each style differently).
@@ -1520,18 +1696,25 @@ function railGroupsHtml(headerStyle, renderItem) {
     const items = RAIL_PRODUCTS.filter(p => p.group === g.key);
     if (!items.length) return '';
     return '<div style="' + headerStyle + '">' + g.label + '</div>'
-      + '<div style="display:flex;flex-direction:column;gap:5px;">' + items.map(renderItem).join('') + '</div>';
+      + '<div style="display:flex;flex-direction:column;gap:2px;">' + items.map(renderItem).join('') + '</div>';
   }).join('');
 }
+
 function railHtml(active) {
-  return '<div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:4px 8px 20px;cursor:pointer;">'
-    + '<img src="/static/IXL-white.png" style="height:27px;width:auto;" alt="IXL">'
-    + '<div style="width:2px;height:17px;background:#CC0000;border-radius:1px;"></div>'
-    + '<span style="font-size:16px;font-weight:700;color:#fff;">Studio</span></div>'
-    + railGroupsHtml('font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.6px;padding:10px 10px 8px;', p => railTileHtml(p, active))
-    + '<button onclick="logout()" title="Lock" class="rail-item" style="margin-top:auto;display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:transparent;color:#8A8A8A;cursor:pointer;width:100%;text-align:left;border:none;">'
-    + '<span style="width:36px;height:36px;border-radius:10px;background:#2A2A2A;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></span>'
-    + '<span style="font-size:13px;font-weight:600;color:#C8C8C8;">Lock</span></button>';
+  const composeOn = active === 'compose';
+  return '<div onclick="goLanding()" style="display:flex;align-items:center;gap:10px;padding:2px 8px 14px;cursor:pointer;flex-shrink:0;">'
+    + '<img src="/static/IXL-white.png" style="height:24px;width:auto;" alt="IXL">'
+    + '<div style="width:2px;height:15px;background:#CC0000;border-radius:1px;"></div>'
+    + '<span style="font-size:15px;font-weight:700;color:#fff;">Studio</span></div>'
+    + '<button onclick="enterComposer()" class="rail-item" style="display:flex;align-items:center;gap:10px;width:100%;padding:5px 10px;border-radius:10px;border:none;background:' + (composeOn ? '#242424' : 'transparent') + ';cursor:pointer;text-align:left;flex-shrink:0;">'
+    + '<span style="width:26px;height:26px;border-radius:50%;background:' + (composeOn ? '#CC0000' : '#2E2E2E') + ';color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;flex-shrink:0;font-weight:600;">+</span>'
+    + '<span style="font-size:13.5px;font-weight:700;color:#fff;">New Message</span></button>'
+    + '<div style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;margin-top:2px;display:flex;flex-direction:column;gap:2px;padding-bottom:8px;">'
+    + railGroupsHtml('font-size:10.5px;font-weight:700;color:#5E5E5E;letter-spacing:1.4px;padding:11px 10px 4px;', p => railTileHtml(p, active))
+    + '</div>'
+    + '<button onclick="logout()" title="Sign out" class="rail-item" style="flex-shrink:0;margin-top:auto;display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:transparent;color:#8A8A8A;cursor:pointer;width:100%;text-align:left;border:none;border-top:1px solid #242424;padding-top:12px;">'
+    + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>'
+    + '<span style="font-size:12.5px;font-weight:600;color:#9A9A9A;">Sign out</span></button>';
 }
 
 // Overlays owned by a screen — hidden when navigating to any other screen.
@@ -1560,31 +1743,8 @@ function showScreen(name) {
   }
 }
 
-// Mobile landing cards — same source/order/grouping as the rail.
-function landingCardHtml(p) {
-  if (p.disabled) {
-    return '<div class="module-card" title="Coming soon" style="background:#F0F0F0;border:1px solid rgba(0,0,0,0.06);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:not-allowed;">'
-      + '<div style="width:44px;height:44px;border-radius:12px;background:#BBBBBB;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
-      + '<div style="flex:1;min-width:0;"><div style="font-size:15px;font-weight:700;color:#8A8A8A;">' + p.label + '</div><div style="font-size:12px;color:#9B9B9B;margin-top:2px;">' + p.sub + '</div></div>'
-      + '</div>';
-  }
-  return '<div class="module-card" onclick="' + p.fn + '()" style="background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow 0.12s;">'
-    + '<div style="width:44px;height:44px;border-radius:12px;background:#1A1A1A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
-    + '<div style="flex:1;min-width:0;"><div style="font-size:15px;font-weight:700;color:#1A1A1A;">' + p.label + '</div><div style="font-size:12px;color:#7A7A7A;margin-top:2px;">' + p.sub + '</div></div>'
-    + '</div>';
-}
-function landingCardsHtml() {
-  return railGroupsHtml('font-size:11px;font-weight:700;color:#9B9B9B;letter-spacing:1.2px;margin:6px 2px 2px;', landingCardHtml);
-}
-
 // Mobile drawer items — same source/order/grouping as the rail.
 function drawerBtnHtml(p) {
-  if (p.disabled) {
-    return '<div title="Coming soon" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;width:100%;opacity:0.5;cursor:not-allowed;">'
-      + '<div style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#6E6E6E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
-      + '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:#8A8A8A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div></div>'
-      + '</div>';
-  }
   return '<button id="drawer-' + p.key + '" onclick="' + p.fn + '();closeDrawer();" style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:transparent;text-align:left;width:100%;transition:background 0.1s;">'
     + '<div class="dw-tile" style="width:32px;height:32px;border-radius:9px;background:#2A2A2A;color:#8A8A8A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + p.abbr + '</div>'
     + '<div style="flex:1;min-width:0;"><div class="dw-lbl" style="font-size:13px;font-weight:600;color:#C8C8C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.label + '</div></div>'
@@ -1596,7 +1756,7 @@ function drawerHtml() {
 }
 
 function setDrawerActive(key) {
-  ['sop', 'label', 'lookup', 'icl', 'pfc', 'exp', 'topic', 'task'].forEach(k => {
+  RAIL_PRODUCTS.map(p => p.key).forEach(k => {
     const btn = $('drawer-' + k);
     if (!btn) return;
     const active = k === key;
@@ -1742,7 +1902,7 @@ async function loadSops() {
 
 function goLanding() {
   state.currentSop = null;
-  showScreen('landing');
+  enterComposer();
 }
 
 // ── PIN gate ──────────────────────────────────────────────────────────────────
@@ -1801,7 +1961,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 function enterApp() {
-  showScreen('landing');
+  enterComposer();
   loadSops();
   // If a Topics message was interrupted (e.g. PWA reloaded when the camera
   // opened), drop the user straight back into that topic with their draft.
@@ -3326,9 +3486,9 @@ function persistAnnotations() {
 }
 
 function undoAnnotation() { if (!_annotations.length) return; _annotations.pop(); persistAnnotations(); redrawCanvas(); }
-function clearAnnotations() {
+async function clearAnnotations() {
   if (!_annotations.length) return;
-  if (!confirm('Clear all annotations on this photo?')) return;
+  if (!(await askDelete('Clear all annotations on this photo?', { title: 'Clear annotations?', confirmLabel: 'Clear' }))) return;
   _annotations = []; persistAnnotations(); redrawCanvas();
 }
 
@@ -3420,7 +3580,7 @@ function onPhotoSelected(file) {
 const _topic = {
   channelId: null, channels: [], chatId: null, chats: [],
   homeFilter: 'active', archivedOpen: false, treeExpanded: {},
-  lastAt: null, lastDay: null, poll: null, images: [], msgs: {}, selecting: false, sel: {},
+  lastAt: null, lastDay: null, poll: null, images: [], msgs: {},
   treeMenuChat: null, treeMenuMove: false, treeRenameChat: null,
 };
 
@@ -3473,10 +3633,123 @@ function chatTaskBadgeText(task) {
   return 'TSK-' + String((task && task.number) || 0).padStart(3, '0');
 }
 
+// ── New Message composer — global entry point, reachable from any screen via
+// the rail's "New Message" row. Creates a chat (filed or unfiled) + its first
+// message, then hands off into the normal chat view.
+const _composer = { images: [], topics: [], draftTopicId: null, sending: false };
+
+async function enterComposer() {
+  showScreen('topic-compose');
+  _composer.images = [];
+  _composer.draftTopicId = null;
+  if ($('compose-input')) $('compose-input').value = '';
+  composerRenderTray();
+  try { _composer.topics = await api('GET', '/api/channels') || []; } catch (_) { _composer.topics = []; }
+  composerRenderTopicMenu();
+  composerRenderChips();
+  setTimeout(() => { const el = $('compose-input'); if (el) el.focus(); }, 60);
+}
+
+function composerToggleTopicMenu(ev) {
+  ev.stopPropagation();
+  const m = $('compose-topic-menu'); if (!m) return;
+  m.style.display = m.style.display === 'block' ? 'none' : 'block';
+}
+document.addEventListener('click', () => { const m = $('compose-topic-menu'); if (m) m.style.display = 'none'; });
+
+function composerSetTopic(id) {
+  _composer.draftTopicId = id || null;
+  $('compose-topic-menu').style.display = 'none';
+  composerRenderTopicLabel();
+  composerRenderChips();
+}
+function composerRenderTopicLabel() {
+  const t = _composer.topics.find(x => x.id === _composer.draftTopicId);
+  $('compose-topic-label').textContent = t ? ('#' + t.slug) : 'No topic';
+}
+function composerRenderTopicMenu() {
+  const rows = [{ id: null, slug: 'No topic' }].concat(_composer.topics);
+  const row = (label, onClick) => '<button onclick="' + onClick + '" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:8px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:600;color:#1A1A1A;text-align:left;">' + label + '</button>';
+  $('compose-topic-menu').innerHTML = rows.map(t =>
+    row(t.id ? ('<span style="font-weight:700;color:#B5B0A6;">#</span>' + esc(t.slug)) : esc(t.slug), 'composerSetTopic(' + (t.id ? "'" + t.id + "'" : 'null') + ')')
+  ).join('');
+  composerRenderTopicLabel();
+}
+function composerRenderChips() {
+  const wrap = $('compose-chips'); if (!wrap) return;
+  wrap.innerHTML = _composer.topics.slice(0, 5).map(t => {
+    const on = _composer.draftTopicId === t.id;
+    return '<button onclick="composerSetTopic(\'' + t.id + '\')" style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:8px 13px;border-radius:20px;cursor:pointer;border:1px solid ' + (on ? '#CC0000' : '#E7E3DC') + ';background:' + (on ? '#FCE9E9' : '#fff') + ';color:' + (on ? '#B0202E' : '#5E5A53') + ';"><span style="font-weight:700;color:' + (on ? '#CC0000' : '#B5B0A6') + ';">#</span>' + esc(t.slug) + '</button>';
+  }).join('');
+}
+function composerAttach(files) {
+  if (!files || !files.length) return;
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = () => compressDataUrl(reader.result, 1400, 0.82, c => { _composer.images.push(c); composerRenderTray(); });
+    reader.readAsDataURL(file);
+  });
+  $('compose-file').value = '';
+  $('compose-camera').value = '';
+}
+function composerRenderTray() {
+  const tray = $('compose-tray'); if (!tray) return;
+  if (!_composer.images.length) { tray.style.display = 'none'; tray.innerHTML = ''; return; }
+  tray.innerHTML = _composer.images.map((src, i) =>
+    '<div style="position:relative;width:62px;height:62px;border-radius:11px;overflow:hidden;border:1px solid rgba(0,0,0,0.12);background:#fff;">'
+    + '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;" alt="">'
+    + '<button onclick="composerRemoveImage(' + i + ')" style="position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#1A1A1A;color:#fff;font-size:12px;line-height:20px;text-align:center;border:none;cursor:pointer;">&times;</button></div>'
+  ).join('');
+  tray.style.display = 'flex';
+}
+function composerRemoveImage(i) { _composer.images.splice(i, 1); composerRenderTray(); }
+
+function composerKey(e) { if (e.key === 'Enter') { e.preventDefault(); composerSend(); } }
+async function composerSend() {
+  const inp = $('compose-input');
+  const text = (inp.value || '').trim();
+  if ((!text && !_composer.images.length) || _composer.sending) return;
+  _composer.sending = true;
+  let chat;
+  try {
+    chat = await api('POST', '/api/chats', { channel_id: _composer.draftTopicId || null });
+    const body = { text };
+    if (_composer.images.length) body.images = _composer.images.slice();
+    await api('POST', '/api/chats/' + chat.id + '/messages', body);
+  } catch (e) { toast('Send failed: ' + e.message); _composer.sending = false; return; }
+  _composer.sending = false;
+  inp.value = '';
+  _composer.images = [];
+  chatOpen(chat.id);
+}
+
 // Module landing: list every topic. Click one to open its home (its chats).
 function enterTopics() {
   showScreen('topic-list');
   topicListLoad();
+}
+
+// All unfiled chats (not just the rail's capped preview) — search + open.
+let _msgsAll = [];
+function enterMessages() {
+  showScreen('messages');
+  messagesLoad();
+}
+async function messagesLoad() {
+  try { _msgsAll = await api('GET', '/api/chats/unfiled?limit=500') || []; }
+  catch (_) { _msgsAll = []; }
+  messagesRender();
+}
+function messagesRender() {
+  const list = $('msgs-items'), empty = $('msgs-empty');
+  if (!list) return;
+  if (!_msgsAll.length) { if (empty) empty.style.display = 'block'; list.innerHTML = ''; return; }
+  if (empty) empty.style.display = 'none';
+  const q = ($('msgs-search')?.value || '').trim().toLowerCase();
+  const src = _msgsAll.filter(c => !q || (c.title || '').toLowerCase().includes(q) || (c.last_text || '').toLowerCase().includes(q));
+  list.innerHTML = src.length
+    ? '<div style="display:flex;flex-direction:column;gap:7px;">' + src.map(topicHomeChatCard).join('') + '</div>'
+    : _histNoMatch;
 }
 
 async function topicListLoad() {
@@ -3485,32 +3758,70 @@ async function topicListLoad() {
   topicListRender();
 }
 
+const TOPIC_LIST_SORTS = [['updated', 'Last updated'], ['name', 'Name'], ['chats', 'Most chats']];
+function topicListToggleSort(ev) {
+  ev.stopPropagation();
+  const m = $('topic-list-sort-menu'); if (!m) return;
+  if (m.style.display === 'block') { m.style.display = 'none'; return; }
+  m.innerHTML = TOPIC_LIST_SORTS.map(([k, label]) => {
+    const on = (_topic.listSort || 'updated') === k;
+    return '<button onclick="topicListSetSort(\'' + k + '\')" style="display:flex;align-items:center;width:100%;padding:8px 10px;border-radius:8px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:600;color:#1A1A1A;text-align:left;">' + label + (on ? '<span style="margin-left:auto;color:#CC0000;">&#10003;</span>' : '') + '</button>';
+  }).join('');
+  m.style.display = 'block';
+}
+document.addEventListener('click', () => { const m = $('topic-list-sort-menu'); if (m) m.style.display = 'none'; });
+function topicListSetSort(key) {
+  _topic.listSort = key;
+  $('topic-list-sort-menu').style.display = 'none';
+  const found = TOPIC_LIST_SORTS.find(s => s[0] === key);
+  $('topic-list-sort-label').textContent = found ? found[1] : 'Last updated';
+  topicListRender();
+}
+// Shared short-date formatter ("2 Jul") — used by the topic list, the topic-home
+// meta line, and the AR record form, each with its own empty/invalid fallback.
+function shortDateLabel(iso, fallback) {
+  fallback = fallback === undefined ? '—' : fallback;
+  if (!iso) return fallback;
+  const d = new Date(/[Z+]/.test(iso) ? iso : iso + 'Z');
+  return isNaN(d) ? fallback : d.toLocaleDateString([], { day: 'numeric', month: 'short' });
+}
+
 function topicListRender() {
-  const list = $('topic-list-items'), empty = $('topic-list-empty');
-  if (!list) return;
-  if (!_topic.channels.length) { if (empty) empty.style.display = 'block'; list.innerHTML = ''; return; }
-  if (empty) empty.style.display = 'none';
+  const grid = $('topic-list-items'), empty = $('topic-list-empty');
+  if (!grid) return;
   const q = ($('topic-list-search')?.value || '').trim().toLowerCase();
-  const src = _topic.channels.filter(c => !q
+  let src = _topic.channels.filter(c => !q
     || c.slug.toLowerCase().includes(q)
     || (c.description || '').toLowerCase().includes(q)
     || (c.last_text || '').toLowerCase().includes(q));
-  if (!src.length) { list.innerHTML = _histNoMatch; return; }
-  list.innerHTML = '<div style="display:flex;flex-direction:column;gap:7px;">' + src.map(c => {
+  const sort = _topic.listSort || 'updated';
+  if (sort === 'name') src = src.slice().sort((a, b) => a.slug.localeCompare(b.slug));
+  else if (sort === 'chats') src = src.slice().sort((a, b) => (b.chat_count || 0) - (a.chat_count || 0));
+  else src = src.slice().sort((a, b) => new Date(b.last_at || b.created_at) - new Date(a.last_at || a.created_at));
+
+  const total = _topic.channels.length;
+  if ($('topic-list-sub')) $('topic-list-sub').textContent = total + (total === 1 ? ' topic' : ' topics');
+
+  if (!total) { if (empty) empty.style.display = 'block'; grid.innerHTML = ''; return; }
+  if (empty) empty.style.display = 'none';
+  if (!src.length) { grid.innerHTML = '<div style="grid-column:1 / -1;">' + _histNoMatch + '</div>'; return; }
+
+  grid.innerHTML = src.map(c => {
     const id = esc(c.id);
-    const sub = topicSub(c);
-    const count = c.message_count || 0;
-    const badge = count
-      ? '<span style="min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:#F2F0EC;color:#7A7A7A;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + count + '</span>'
-      : '';
-    return '<div class="doc-card" onclick="openTopic(\'' + id + '\')" style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s;">'
-      + '<span style="width:38px;height:38px;border-radius:9px;background:#F2F0EC;color:#9B9B9B;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0;">#</span>'
-      + '<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1A1A1A;">' + esc(c.slug) + '</div>'
-      + '<div style="color:#9B9B9B;font-size:12px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + sub + '</div></div>'
-      + badge
-      + window.btnIco('delete', "event.stopPropagation();topicDelete('" + id + "','" + esc(c.slug) + "')", 'Delete topic')
+    const count = c.chat_count || 0;
+    const badge = '<span style="min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:#F2F0EC;color:#7A7A7A;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + count + '</span>';
+    return '<div style="position:relative;">'
+      + '<button onclick="openTopic(\'' + id + '\')" style="display:flex;flex-direction:column;gap:16px;min-height:118px;padding:16px 18px;background:#fff;border:1px solid #ECE9E3;border-radius:14px;cursor:pointer;text-align:left;width:100%;">'
+      + '<div style="display:flex;align-items:flex-start;gap:9px;min-width:0;">'
+      + '<span style="font-size:15px;font-weight:800;color:#C9C4BB;line-height:1.35;flex-shrink:0;">#</span>'
+      + '<span style="flex:1;min-width:0;font-size:15px;font-weight:700;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(c.slug) + '</span>' + badge + '</div>'
+      + '<span style="margin-top:auto;display:flex;flex-direction:column;gap:5px;min-width:0;">'
+      + '<span style="font-size:12.5px;color:#8A867E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + topicSub(c) + '</span>'
+      + '<span style="font-size:11.5px;color:#B0ABA2;">Created ' + shortDateLabel(c.created_at) + '  &middot;  Updated ' + shortDateLabel(c.last_at || c.created_at) + '</span>'
+      + '</span></button>'
+      + window.btnIco('delete', "event.stopPropagation();topicDelete('" + id + "','" + esc(c.slug) + "')", 'Delete topic', 'ico-btn-corner')
       + '</div>';
-  }).join('') + '</div>';
+  }).join('');
 }
 
 async function topicDelete(id, slug) {
@@ -3548,7 +3859,7 @@ async function topicHomeLoadChats() {
 function topicHomeSetFilter(key) { _topic.homeFilter = key; topicHomeRender(); }
 
 function topicHomeChips() {
-  const chips = [['active', 'Active'], ['promoted', 'Promoted'], ['archived', 'Archived'], ['all', 'All']];
+  const chips = [['active', 'Active'], ['escalated', 'Escalated'], ['archived', 'Archived'], ['all', 'All']];
   return chips.map(([key, label]) => {
     const on = _topic.homeFilter === key;
     return '<button onclick="topicHomeSetFilter(\'' + key + '\')" style="font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid '
@@ -3560,12 +3871,10 @@ function topicHomeChips() {
 // the only activity signal we can show per chat, since this app has no
 // per-user login (shared PIN auth) and so no message author to build avatars from.
 function topicHomeMetaLine(c) {
-  const iso = c.last_at || c.created_at;
-  if (!iso) return '';
-  const d = new Date(/[Z+]/.test(iso) ? iso : iso + 'Z');
-  if (isNaN(d)) return '';
-  const label = d.toLocaleDateString([], { day: 'numeric', month: 'short' });
-  return c.last_at ? ('Last active ' + label) : ('Started ' + label);
+  const created = shortDateLabel(c.created_at, '');
+  if (!created) return '';
+  const active = shortDateLabel(c.last_at, '');
+  return active ? ('Created ' + created + ' &middot; Last active ' + active) : ('Created ' + created);
 }
 
 function topicHomeChatCard(c) {
@@ -3578,15 +3887,19 @@ function topicHomeChatCard(c) {
     ? '<span style="min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:#F2F0EC;color:#7A7A7A;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + count + '</span>'
     : '';
   const taskBadge = c.task
-    ? '<span style="font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:20px;background:#FBF1F1;color:#CC0000;border:1px solid rgba(204,0,0,0.18);flex-shrink:0;white-space:nowrap;">' + chatTaskBadgeText(c.task) + '</span>'
+    ? '<span style="font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:20px;background:#E9EEF4;color:#3A5573;border:1px solid rgba(58,85,115,0.18);flex-shrink:0;white-space:nowrap;">' + chatTaskBadgeText(c.task) + '</span>'
     : '';
-  return '<div class="doc-card" onclick="chatOpen(\'' + id + '\')" style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s;' + (c.archived ? 'opacity:0.7;' : '') + '">'
-    + '<span style="width:38px;height:38px;border-radius:9px;background:#F2F0EC;color:#9B9B9B;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">&#128172;</span>'
+  const actionBadge = c.action
+    ? '<span style="font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:20px;background:#FBF1F1;color:#CC0000;border:1px solid rgba(204,0,0,0.18);flex-shrink:0;white-space:nowrap;">' + chatActionBadgeText(c.action) + '</span>'
+    : '';
+  const tagChips = tagChipsHtml(c.tags);
+  return '<div class="doc-card" onclick="chatOpen(\'' + id + '\')" style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:12px 14px 12px 28px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s;' + (c.archived ? 'opacity:0.7;' : '') + '">'
     + '<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1A1A1A;">' + title + '</div>'
     + '<div style="color:#9B9B9B;font-size:12px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + sub + '</div>'
     + (meta ? '<div style="color:#A8A39A;font-size:11px;margin-top:2px;">' + meta + '</div>' : '')
+    + (tagChips ? '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;">' + tagChips + '</div>' : '')
     + '</div>'
-    + taskBadge + badge
+    + taskBadge + actionBadge + badge
     + window.btnIco('delete', "event.stopPropagation();chatDelete('" + id + "')", 'Delete chat')
     + '</div>';
 }
@@ -3600,7 +3913,7 @@ function topicHomeRender() {
   const q = ($('thome-search')?.value || '').trim().toLowerCase();
   let src = _topic.chats.filter(c => !q || (c.title || '').toLowerCase().includes(q) || (c.last_text || '').toLowerCase().includes(q));
   if (_topic.homeFilter === 'active') src = src.filter(c => !c.archived);
-  else if (_topic.homeFilter === 'promoted') src = src.filter(c => !c.archived && c.task);
+  else if (_topic.homeFilter === 'escalated') src = src.filter(c => !c.archived && (c.task || c.action));
   else if (_topic.homeFilter === 'archived') src = src.filter(c => c.archived);
   if (!src.length) { list.innerHTML = _histNoMatch; return; }
   if (_topic.homeFilter !== 'all') {
@@ -3635,11 +3948,6 @@ async function topicNewChat() {
   chatOpen(chat.id);
 }
 
-function topicBackToHome() {
-  showScreen('topic-home');
-  topicHomeRender();
-}
-
 function topicStopPoll() { if (_topic.poll) { clearInterval(_topic.poll); _topic.poll = null; } }
 
 // ---- topic tree (3rd column in the chat screen): every topic, expandable to its chats ----
@@ -3672,16 +3980,18 @@ function topicTreeChatsHtml(channelId, chats, expanded) {
     const titleHtml = renaming
       ? '<input value="' + esc(c.title || 'New chat') + '" onclick="event.stopPropagation();" onkeydown="if(event.key===\'Enter\'){this.blur();}else if(event.key===\'Escape\'){this.dataset.cancel=\'1\';this.blur();}" onblur="topicTreeRenameSave(\'' + c.id + '\',this)" style="width:100%;font-size:12.5px;border:1px solid #CC0000;border-radius:6px;padding:3px 6px;font-family:inherit;">'
       : '<span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(c.title || 'New chat') + '</span>';
-    return '<div class="topic-tree-row" onmouseover="var b=this.querySelector(\'.tt-menu-btn\');if(b)b.style.opacity=1;" onmouseout="var b=this.querySelector(\'.tt-menu-btn\');if(b)b.style.opacity=0;" style="position:relative;display:flex;align-items:center;gap:2px;">'
+    return '<div class="topic-tree-row" onmouseover="var b=this.querySelector(\'.tt-menu-btn\');if(b)b.style.opacity=1;" onmouseout="var b=this.querySelector(\'.tt-menu-btn\');if(b)b.style.opacity=0.55;" style="position:relative;display:flex;align-items:center;gap:2px;">'
       + '<div onclick="topicTreeSelectChat(\'' + channelId + '\',\'' + c.id + '\')" style="flex:1;min-width:0;display:flex;align-items:center;padding:7px 4px;border-radius:9px;cursor:pointer;font-size:12.5px;' + (active ? 'background:#FBF1F1;color:#CC0000;font-weight:700;' : 'color:#5A5A5A;') + '">' + titleHtml + '</div>'
-      + (renaming ? '' : '<button class="tt-menu-btn" onclick="event.stopPropagation();topicTreeMenuToggle(\'' + channelId + '\',\'' + c.id + '\')" title="More" style="opacity:' + (menuOpen ? 1 : 0) + ';flex-shrink:0;width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:#9B9B9B;cursor:pointer;font-size:14px;line-height:1;">&#8942;</button>')
+      + (renaming ? '' : '<button class="tt-menu-btn" onclick="event.stopPropagation();topicTreeMenuToggle(\'' + channelId + '\',\'' + c.id + '\')" title="More" style="opacity:' + (menuOpen ? 1 : 0.55) + ';flex-shrink:0;width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:#6B6B6B;cursor:pointer;font-size:14px;line-height:1;">&#8942;</button>')
       + (menuOpen ? topicTreeMenuHtml(channelId, c.id) : '')
       + '</div>';
   }).join('');
   const more = chats.length > SHOW && !expanded
     ? '<button onclick="event.stopPropagation();topicTreeExpand(\'' + channelId + '\')" style="padding:6px 9px;border-radius:9px;font-size:11.5px;font-weight:600;color:#9B9B9B;text-align:left;width:100%;">Show all ' + chats.length + '&hellip;</button>'
     : '';
-  const add = '<button onclick="event.stopPropagation();topicNewChatFor(\'' + channelId + '\')" style="padding:6px 9px;border-radius:9px;font-size:11.5px;font-weight:600;color:#CC0000;text-align:left;width:100%;">+ New chat</button>';
+  // No "+ New message" here — redundant with the header/rail entry points already
+  // available on every screen that renders this tree.
+  const add = '';
   return rows + more + add;
 }
 
@@ -3693,10 +4003,10 @@ function topicTreeRender() {
     const isCurrent = c.id === _topic.channelId;
     const expandedState = _topic.treeExpanded[c.id];
     const open = isCurrent || !!expandedState;
-    const chats = isCurrent ? _topic.chats : ((expandedState && expandedState.chats) || []);
+    const chats = (isCurrent ? _topic.chats : ((expandedState && expandedState.chats) || [])).filter(c2 => !c2.archived);
     const loading = open && !isCurrent && expandedState && !expandedState.loaded;
     const sub2 = isCurrent
-      ? (_topic.chats.length || 0) + ' chat' + (_topic.chats.length === 1 ? '' : 's')
+      ? chats.length + ' chat' + (chats.length === 1 ? '' : 's')
       : topicSub(c);
     const header = '<button onclick="topicTreeToggle(\'' + c.id + '\')" style="display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:11px;text-align:left;width:100%;' + (isCurrent ? 'background:#fff;' : '') + '">'
       + '<span style="width:34px;height:34px;border-radius:9px;background:' + (isCurrent ? '#CC0000' : '#F2F0EC') + ';color:' + (isCurrent ? '#fff' : '#9B9B9B') + ';display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">#</span>'
@@ -3712,18 +4022,10 @@ function topicTreeRender() {
   document.querySelectorAll('.topic-tree-el').forEach(el => { el.innerHTML = html; });
 }
 
-async function topicTreeToggle(channelId) {
-  if (channelId === _topic.channelId) return;  // current topic is always open
-  if (_topic.treeExpanded[channelId]) { delete _topic.treeExpanded[channelId]; topicTreeRender(); return; }
-  _topic.treeExpanded[channelId] = { chats: [], showAll: false, loaded: false };
-  topicTreeRender();
-  let chats = [];
-  try { chats = await api('GET', '/api/channels/' + channelId + '/chats') || []; } catch (_) {}
-  if (_topic.treeExpanded[channelId]) {
-    _topic.treeExpanded[channelId].chats = chats;
-    _topic.treeExpanded[channelId].loaded = true;
-    topicTreeRender();
-  }
+// Clicking a topic's header in the tree jumps the middle panel straight to that
+// topic's home — not just an in-place expand/collapse.
+function topicTreeToggle(channelId) {
+  openTopic(channelId);
 }
 function topicTreeExpand(channelId) {
   if (_topic.treeExpanded[channelId]) _topic.treeExpanded[channelId].showAll = true;
@@ -3802,8 +4104,8 @@ async function topicTreeMoveChat(fromChannelId, toChannelId, chatId) {
     _topic.chats = [updated, ...carried];
     delete _topic.treeExpanded[toChannelId];
     const dest = _topic.channels.find(c => c.id === toChannelId);
-    if ($('topic-crumb')) $('topic-crumb').innerHTML = '&#8249; ' + esc(dest ? dest.slug : '');
-    if ($('topic-crumb-mb')) $('topic-crumb-mb').textContent = dest ? dest.slug : '';
+    if ($('topic-crumb-mb-label')) $('topic-crumb-mb-label').textContent = dest ? ('#' + dest.slug) : 'No topic';
+    if ($('topic-file-btn-label')) $('topic-file-btn-label').textContent = dest ? ('#' + dest.slug) : 'No topic';
   } else if (toChannelId === _topic.channelId) {
     _topic.chats.unshift(updated);
   } else {
@@ -3818,26 +4120,121 @@ document.addEventListener('click', () => {
   if (_topic.treeMenuChat) { _topic.treeMenuChat = null; _topic.treeMenuMove = false; topicTreeRender(); }
 });
 
-async function topicNewChatFor(channelId) {
-  let chat;
-  try { chat = await api('POST', '/api/channels/' + channelId + '/chats', {}); }
-  catch (e) { toast('Create failed: ' + e.message); return; }
-  if (channelId === _topic.channelId) { _topic.chats.unshift(chat); chatOpen(chat.id); return; }
-  _topic.channelId = channelId;
-  _topic.chats = [chat];
-  delete _topic.treeExpanded[channelId];
-  chatOpen(chat.id);
+function chatActionBadgeText(action) {
+  return action.id_label || ((action.area || 'C') + String(action.number || 0));
+}
+// Combined Task / Action Request destination badges on the chat header — both show
+// together when a chat has been sent to more than one place.
+function topicRenderDestBadges(chat) {
+  const el = $('topic-dest-badges'); if (!el) return;
+  let html = '';
+  if (chat && chat.task) {
+    html += '<span onclick="tasksOpenDetail(\'' + chat.task.id + '\')" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#3A5573;background:#E9EEF4;padding:3px 10px;border-radius:20px;white-space:nowrap;">' + chatTaskBadgeText(chat.task) + '</span>';
+  }
+  if (chat && chat.action) {
+    html += '<span onclick="enterAction();actionOpenRecord(\'' + chat.action.id + '\')" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#CC0000;background:#FCE9E9;padding:3px 10px;border-radius:20px;white-space:nowrap;">' + chatActionBadgeText(chat.action) + '</span>';
+  }
+  el.innerHTML = html;
+}
+// File-to-topic picker on the chat header — lets any chat (filed or unfiled,
+// reached from Topics or from Messages) be moved to a different topic, or
+// back out to unfiled. Mirrors the composer's topic-picker dropdown pattern.
+function topicToggleFileMenu(ev) {
+  ev.stopPropagation();
+  document.querySelectorAll('.topic-file-menu-el').forEach(el => {
+    if (el.id !== (isMobile() ? 'topic-file-menu-mb' : 'topic-file-menu')) el.style.display = 'none';
+  });
+  const m = $(isMobile() ? 'topic-file-menu-mb' : 'topic-file-menu'); if (!m) return;
+  const opening = m.style.display !== 'block';
+  m.style.display = 'none';
+  if (!opening) return;
+  m.innerHTML = topicFileMenuRows();
+  m.style.display = 'block';
+}
+document.addEventListener('click', () => { document.querySelectorAll('.topic-file-menu-el').forEach(el => el.style.display = 'none'); });
+
+function topicFileMenuRows() {
+  const rows = [{ id: null, slug: 'No topic' }].concat(_topic.channels);
+  const row = (label, onClick) => '<button onclick="' + onClick + '" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:8px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:600;color:#1A1A1A;text-align:left;">' + label + '</button>';
+  return rows.map(t =>
+    row(t.id ? ('<span style="font-weight:700;color:#B5B0A6;">#</span>' + esc(t.slug)) : esc(t.slug), 'topicFileTo(' + (t.id ? "'" + t.id + "'" : 'null') + ')')
+  ).join('');
 }
 
-function topicRenderTaskBadge(chat) {
-  const el = $('topic-task-badge'); if (!el) return;
-  if (chat && chat.task) { el.style.display = 'inline-flex'; el.textContent = 'Task · ' + chatTaskBadgeText(chat.task); }
-  else { el.style.display = 'none'; el.textContent = ''; }
+async function topicFileTo(channelId) {
+  document.querySelectorAll('.topic-file-menu-el').forEach(el => el.style.display = 'none');
+  if (!_topic.chatId) return;
+  let updated;
+  try { updated = await api('PATCH', '/api/chats/' + _topic.chatId, { channel_id: channelId }); }
+  catch (e) { toast('Move failed: ' + e.message); return; }
+  const idx = _topic.chats.findIndex(c => c.id === _topic.chatId);
+  if (idx >= 0) _topic.chats[idx] = updated; else _topic.chats.push(updated);
+  _topic.channelId = channelId;
+  const ch = _topic.channels.find(c => c.id === channelId);
+  const label = ch ? ('#' + ch.slug) : 'No topic';
+  if ($('topic-crumb-mb-label')) $('topic-crumb-mb-label').textContent = label;
+  if ($('topic-file-btn-label')) $('topic-file-btn-label').textContent = label;
+  document.querySelectorAll('.shell-rail').forEach(r => { r.innerHTML = railHtml(channelId ? 'topic' : 'messages'); });
+  toast(channelId ? ('Filed under #' + ch.slug) : 'Moved to Messages', 'success');
 }
-function topicRenderActionBadge(chat) {
-  const el = $('topic-action-badge'); if (!el) return;
-  if (chat && chat.action) { el.style.display = 'inline-flex'; el.textContent = 'Action · A' + String(chat.action.number || 0).padStart(4, '0'); }
-  else { el.style.display = 'none'; el.textContent = ''; }
+
+// Tag picker on the chat header — same Tag list/colors as the Tasks board
+// (_task.tags), multi-select via checkbox rows since a chat can carry several tags.
+async function topicToggleTagMenu(ev) {
+  ev.stopPropagation();
+  const id = isMobile() ? 'topic-tag-menu-mb' : 'topic-tag-menu';
+  document.querySelectorAll('.topic-file-menu-el').forEach(el => { if (el.id !== id) el.style.display = 'none'; });
+  const m = $(id); if (!m) return;
+  const opening = m.style.display !== 'block';
+  m.style.display = 'none';
+  if (!opening) return;
+  if (!_task.tags.length) { try { _task.tags = await api('GET', '/api/tags') || []; } catch (_) {} }
+  m.innerHTML = topicTagMenuRows();
+  m.style.display = 'block';
+}
+
+function topicTagMenuRows() {
+  if (!_task.tags.length) return '<div style="padding:8px 10px;font-size:12.5px;color:#9B9B9B;">No tags yet.</div>';
+  const chat = _topic.chats.find(c => c.id === _topic.chatId);
+  const sel = new Set((chat && chat.tag_ids) || []);
+  return _task.tags.map(g => {
+    const on = sel.has(g.id);
+    return '<button onclick="event.stopPropagation();topicToggleTag(\'' + g.id + '\')" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:8px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:600;color:#1A1A1A;text-align:left;">'
+      + '<span style="width:14px;height:14px;border-radius:4px;flex-shrink:0;border:1.5px solid ' + (on ? g.color : 'rgba(0,0,0,0.2)') + ';background:' + (on ? g.color : 'transparent') + ';"></span>'
+      + esc(g.name) + '</button>';
+  }).join('');
+}
+
+async function topicToggleTag(tagId) {
+  const chat = _topic.chats.find(c => c.id === _topic.chatId);
+  if (!chat) return;
+  const ids = new Set(chat.tag_ids || []);
+  if (ids.has(tagId)) ids.delete(tagId); else ids.add(tagId);
+  let updated;
+  try { updated = await api('PATCH', '/api/chats/' + _topic.chatId, { tag_ids: [...ids] }); }
+  catch (e) { toast('Tag update failed: ' + e.message); return; }
+  const idx = _topic.chats.findIndex(c => c.id === _topic.chatId);
+  if (idx >= 0) _topic.chats[idx] = updated;
+  topicRenderTagChips(updated);
+  const menuId = isMobile() ? 'topic-tag-menu-mb' : 'topic-tag-menu';
+  const m = $(menuId); if (m && m.style.display === 'block') m.innerHTML = topicTagMenuRows();
+}
+
+function tagChipsHtml(tags) {
+  if (!tags || !tags.length) return '';
+  return tags.map(g => '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:' + hexA(g.color, 0.14) + ';color:' + g.color + ';white-space:nowrap;">' + esc(g.name) + '</span>').join('');
+}
+
+function topicRenderTagChips(chat) {
+  const html = tagChipsHtml(chat && chat.tags);
+  const d = $('topic-tag-chips'); if (d) d.innerHTML = html;
+  const dm = $('topic-tag-chips-mb'); if (dm) dm.innerHTML = html;
+}
+
+// Back button on the chat header — its filed topic's home, or Messages if unfiled.
+function topicBackFromChat() {
+  const chat = _topic.chats.find(c => c.id === _topic.chatId);
+  if (chat && chat.channel_id) openTopic(chat.channel_id); else enterMessages();
 }
 function topicRenderArchiveBtn(chat) {
   const btn = $('topic-archive-btn'); if (!btn) return;
@@ -3860,8 +4257,8 @@ async function topicArchiveChat() {
 }
 
 // "Send to ▾" dropdown on the chat header — Task wired to the existing multi-select
-// flow, Action Request wired to actionSendFromChat (whole-chat, one click); Incident
-// remains a permanently disabled stub entry (no backend module built for it yet).
+// flow, Action Request wired to actionSendFromChat (whole-chat, one click). Incident
+// was explicitly dropped from this menu per the v2 design (nav rail stub is separate).
 function topicToggleSendMenu(ev) {
   ev.stopPropagation();
   const menu = $('topic-send-menu'); if (!menu) return;
@@ -3869,36 +4266,66 @@ function topicToggleSendMenu(ev) {
   const chat = _topic.chats.find(c => c.id === _topic.chatId);
   const taskLinked = !!(chat && chat.task);
   const actionLinked = !!(chat && chat.action);
-  const item = (label, extra, onClick, disabled, checked) =>
-    '<button ' + (disabled ? 'disabled' : ('onclick="' + onClick + '"'))
-    + ' style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:10px 14px;font-size:13px;font-weight:600;background:transparent;border:none;color:'
-    + (disabled ? '#BBBBBB' : '#1A1A1A') + ';cursor:' + (disabled ? 'not-allowed' : 'pointer') + ';">'
-    + '<span>' + label + (extra ? ' <span style="font-size:10px;font-weight:700;color:#9B9B9B;">' + extra + '</span>' : '') + '</span>'
-    + (checked ? '<span style="color:#2E9E4F;">&#10003;</span>' : '') + '</button>';
-  menu.innerHTML = item('Task', '', 'topicSendMenuTask()', taskLinked, taskLinked)
-    + item('Incident', 'Soon', '', true, false)
-    + item('Action Request', '', 'topicSendMenuAction()', actionLinked, actionLinked);
+  const item = (icon, iconBg, label, desc, onClick, linked) =>
+    '<button ' + (linked ? '' : ('onclick="' + onClick + '"')) + ' style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 10px;border-radius:9px;border:none;background:transparent;cursor:' + (linked ? 'default' : 'pointer') + ';">'
+    + '<span style="width:30px;height:30px;border-radius:9px;background:' + iconBg + ';color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + railIconSvg(icon, '#fff', 15) + '</span>'
+    + '<span style="flex:1;min-width:0;display:flex;flex-direction:column;">'
+    + '<span style="display:flex;align-items:center;gap:7px;"><span style="font-size:13px;font-weight:700;color:#1A1A1A;">' + label + '</span>'
+    + (linked ? '<span style="font-size:10px;font-weight:700;color:#2E7D46;">&#10003; Added</span>' : '') + '</span>'
+    + '<span style="font-size:11.5px;color:#8A867E;margin-top:2px;line-height:1.35;">' + desc + '</span></span></button>';
+  menu.innerHTML = item('tasks', '#3A5573', 'Task', 'Whole chat onto the Kanban board', 'topicSendMenuTask()', taskLinked)
+    + item('action', '#CC0000', 'Action Request', 'Root-cause & corrective action record', 'topicSendMenuAction()', actionLinked);
   menu.style.display = 'block';
 }
-function topicSendMenuTask() { $('topic-send-menu').style.display = 'none'; topicSelectStart(); }
+function topicSendMenuTask() { $('topic-send-menu').style.display = 'none'; taskSendFromChat(_topic.chatId); }
 function topicSendMenuAction() { $('topic-send-menu').style.display = 'none'; actionSendFromChat(_topic.chatId); }
+
+// Send the whole chat to the Tasks board (one click, whole-chat semantics — same
+// as "Send to > Action Request"), no message picking.
+async function taskSendFromChat(chatId) {
+  if (!chatId) return;
+  let t;
+  try { t = await api('POST', '/api/tasks', { chat_id: chatId }); }
+  catch (e) { toast('Send failed: ' + e.message); return; }
+  const i = _topic.chats.findIndex(c => c.id === chatId);
+  if (i >= 0) {
+    _topic.chats[i] = { ..._topic.chats[i], task: { id: t.id, number: t.number } };
+    if (chatId === _topic.chatId) topicRenderDestBadges(_topic.chats[i]);
+  }
+  toast('Sent to Tasks board · ' + chatTaskBadgeText(t), 'success');
+}
 document.addEventListener('click', () => { const m = $('topic-send-menu'); if (m) m.style.display = 'none'; });
 
-function chatOpen(chatId) {
-  if (_topic.selecting) topicSelectResetUI();   // leave selection mode when switching chats
+// Opens any chat by id regardless of what's currently cached in _topic (composer
+// result, an UNFILED rail row, a chat outside the currently-loaded topic) — fetches
+// it directly and upserts into _topic.chats so the rest of the chat screen's
+// lookups (archive, send-to, file menu) keep working unchanged.
+async function chatOpen(chatId) {
   _topic.chatId = chatId;
   _topic.lastAt = null;
   showScreen('topic');
+  if (!_topic.channels.length) {
+    try { _topic.channels = await api('GET', '/api/channels') || []; } catch (_) {}
+  }
+  let chat = _topic.chats.find(c => c.id === chatId);
+  try {
+    chat = await api('GET', '/api/chats/' + chatId);
+    if (_topic.chatId !== chatId) return;  // user navigated away while this was in flight
+    const idx = _topic.chats.findIndex(c => c.id === chatId);
+    if (idx >= 0) _topic.chats[idx] = chat; else _topic.chats.push(chat);
+  } catch (_) { /* fall back to whatever was already cached, if anything */ }
+  _topic.channelId = chat ? (chat.channel_id || null) : _topic.channelId;
+  // A chat's rail highlight depends on whether it's filed (Topics) or not (Messages) —
+  // showScreen('topic') alone can't know this, so re-render once the chat is fetched.
+  document.querySelectorAll('.shell-rail').forEach(r => { r.innerHTML = railHtml(_topic.channelId ? 'topic' : 'messages'); });
   const ch = _topic.channels.find(c => c.id === _topic.channelId);
-  const chat = _topic.chats.find(c => c.id === chatId);
-  const slug = ch ? ch.slug : '';
   const title = chat ? (chat.title || 'New chat') : 'Chat';
-  if ($('topic-crumb')) $('topic-crumb').innerHTML = '&#8249; ' + esc(slug);
-  if ($('topic-crumb-mb')) $('topic-crumb-mb').textContent = slug;
+  if ($('topic-crumb-mb-label')) $('topic-crumb-mb-label').textContent = ch ? ('#' + ch.slug) : 'No topic';
+  if ($('topic-file-btn-label')) $('topic-file-btn-label').textContent = ch ? ('#' + ch.slug) : 'No topic';
   if ($('topic-title')) $('topic-title').textContent = title;
   if ($('topic-title-mb')) $('topic-title-mb').textContent = title;
-  topicRenderTaskBadge(chat);
-  topicRenderActionBadge(chat);
+  topicRenderDestBadges(chat);
+  topicRenderTagChips(chat);
   topicRenderArchiveBtn(chat);
   $('topic-messages').innerHTML = '';
   _topic.msgs = {};
@@ -3909,18 +4336,18 @@ function chatOpen(chatId) {
   _topic.poll = setInterval(() => topicLoadMessages(false), 4000);
 }
 
-// Re-fetch this channel's chats (title/fresh may have just changed by the first
-// message) and refresh the breadcrumb/title/tree/home views that show it.
+// Re-fetch the open chat (title/fresh may have just changed by the first message)
+// and refresh the header/tree views that show it.
 async function topicRefreshChatMeta() {
-  let chats;
-  try { chats = await api('GET', '/api/channels/' + _topic.channelId + '/chats') || []; } catch (_) { return; }
-  _topic.chats = chats;
-  const chat = chats.find(c => c.id === _topic.chatId);
-  const title = chat ? (chat.title || 'New chat') : 'Chat';
+  let chat;
+  try { chat = await api('GET', '/api/chats/' + _topic.chatId); } catch (_) { return; }
+  const idx = _topic.chats.findIndex(c => c.id === _topic.chatId);
+  if (idx >= 0) _topic.chats[idx] = chat; else _topic.chats.push(chat);
+  const title = chat.title || 'New chat';
   if ($('topic-title')) $('topic-title').textContent = title;
   if ($('topic-title-mb')) $('topic-title-mb').textContent = title;
-  topicRenderTaskBadge(chat);
-  topicRenderActionBadge(chat);
+  topicRenderDestBadges(chat);
+  topicRenderTagChips(chat);
   topicRenderArchiveBtn(chat);
   topicTreeRender();
 }
@@ -4015,22 +4442,8 @@ function topicBubble(m) {
   const txt = m.text
     ? '<p style="font-size:14px;color:#2C2C2C;line-height:1.5;white-space:pre-wrap;word-break:break-word;">' + esc(m.text) + '</p>'
     : '';
-  // On-board styling: tint the bubble by task status + show status / tag name(s).
-  let bodyBg = '#fff', bodyBorder = 'rgba(0,0,0,0.07)', tkBadge = '';
-  if (m.task) {
-    const col = _TASK_DOT[m.task.status] || '#6B6B6B';
-    bodyBg = hexA(col, 0.10); bodyBorder = hexA(col, 0.45);
-    const tagChips = (m.task.tags || []).map(g =>
-      '<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;background:' + hexA(g.color, 0.16) + ';color:' + g.color + ';">' + esc(g.name) + '</span>').join('');
-    tkBadge = '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:9px;">'
-      + '<span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:0.3px;color:' + col + ';">'
-      + '<span style="width:7px;height:7px;border-radius:50%;background:' + col + ';"></span>ON BOARD · ' + esc(m.task.status_label) + '</span>' + tagChips + '</div>';
-  }
   const edited = m.edited ? ' <span style="color:#B8B2AA;">(edited)</span>' : '';
-  // In selection mode the whole message is a tap target — render it full-size with a checkbox.
-  if (_topic.selecting) return topicBubbleSelect(m, { gal, txt, tkBadge, bodyBg, bodyBorder, edited });
   const ico = {
-    task: '<span style="font-size:9px;font-weight:800;letter-spacing:0.3px;line-height:1;">TSK</span>',
     copy: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h8"></path></svg>',
     edit: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>',
     del: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>'
@@ -4041,7 +4454,6 @@ function topicBubble(m) {
     + ' onmouseout="this.style.background=\'transparent\';this.style.color=\'#6B6B6B\';"'
     + ' style="width:28px;height:28px;border-radius:7px;border:none;background:transparent;color:#6B6B6B;display:flex;align-items:center;justify-content:center;cursor:pointer;">' + svg + '</button>';
   const actions = '<div class="topic-actions" style="position:absolute;top:-15px;right:10px;z-index:5;display:flex;gap:2px;opacity:0;transition:opacity 0.12s;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:9px;padding:2px;box-shadow:0 2px 8px rgba(0,0,0,0.10);">'
-    + (m.task ? '' : actBtn("tasksSendFromMessage('" + _topic.channelId + "','" + _topic.chatId + "','" + m.id + "')", 'Send to task', ico.task, false))
     + actBtn("topicCopy('" + m.id + "')", 'Copy', ico.copy, false)
     + actBtn("topicEditStart('" + m.id + "')", 'Edit', ico.edit, false)
     + actBtn("topicDeleteMsg('" + m.id + "')", 'Delete', ico.del, true)
@@ -4050,108 +4462,10 @@ function topicBubble(m) {
     + ' onmouseover="var a=this.querySelector(\'.topic-actions\');if(a)a.style.opacity=1;"'
     + ' onmouseout="var a=this.querySelector(\'.topic-actions\');if(a)a.style.opacity=0;">'
     + '<div style="position:relative;">'
-    + '<div class="topic-body" style="width:100%;background:' + bodyBg + ';border:1px solid ' + bodyBorder + ';border-radius:14px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">' + tkBadge + txt + gal + '</div>'
+    + '<div class="topic-body" style="width:100%;background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:14px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">' + txt + gal + '</div>'
     + actions + '</div>'
     + '<span class="topic-stamp" style="font-size:10.5px;color:#A8A8A8;font-family:\'JetBrains Mono\',monospace;padding-left:6px;">' + topicTime(m.created_at) + edited + '</span>'
     + '</div>';
-}
-
-// Full-size message row used while picking messages to send to the board.
-// A transparent overlay captures the tap (so clicking a photo selects rather than
-// opening the lightbox); on-board messages are locked and shown dimmed.
-function topicBubbleSelect(m, p) {
-  const onBoard = !!m.task;
-  const sel = !!_topic.sel[m.id];
-  let bodyBg = p.bodyBg, bodyBorder = p.bodyBorder;
-  if (sel) { bodyBg = '#FFF6F6'; bodyBorder = '#CC0000'; }
-  const boxCol = onBoard ? (_TASK_DOT[m.task.status] || '#6B6B6B') : '#CC0000';
-  const checkbox = '<div style="position:absolute;top:12px;left:12px;z-index:6;pointer-events:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;'
-    + 'background:' + (sel ? '#CC0000' : (onBoard ? hexA(boxCol, 0.15) : 'rgba(255,255,255,0.96)')) + ';'
-    + 'color:' + (sel ? '#fff' : boxCol) + ';'
-    + 'border:1.5px solid ' + (sel ? '#CC0000' : (onBoard ? hexA(boxCol, 0.5) : 'rgba(0,0,0,0.28)')) + ';'
-    + 'box-shadow:0 1px 4px rgba(0,0,0,0.18);">' + ((sel || onBoard) ? '&#10003;' : '') + '</div>';
-  const overlay = '<div' + (onBoard ? '' : ' onclick="topicSelectToggle(\'' + m.id + '\')"')
-    + ' title="' + (onBoard ? 'Already on the board' : 'Tap to select') + '"'
-    + ' style="position:absolute;inset:0;z-index:5;border-radius:14px;cursor:' + (onBoard ? 'not-allowed' : 'pointer') + ';"></div>';
-  return '<div class="topic-msg" id="tm-' + m.id + '" style="position:relative;display:flex;flex-direction:column;align-items:stretch;gap:5px;' + (onBoard ? 'opacity:0.72;' : '') + '">'
-    + '<div style="position:relative;">'
-    + '<div class="topic-body" style="width:100%;background:' + bodyBg + ';border:1.5px solid ' + bodyBorder + ';border-radius:14px;padding:14px 16px 14px 50px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">' + p.tkBadge + p.txt + p.gal + '</div>'
-    + overlay + checkbox + '</div>'
-    + '<span class="topic-stamp" style="font-size:10.5px;color:#A8A8A8;font-family:\'JetBrains Mono\',monospace;padding-left:6px;">' + topicTime(m.created_at) + p.edited + '</span>'
-    + '</div>';
-}
-
-// Re-render every loaded message in place (used when toggling selection mode),
-// preserving scroll position. Rebuilds from _topic.msgs in chronological order.
-function topicRerender() {
-  const box = $('topic-messages'); if (!box) return;
-  const keep = box.scrollTop;
-  const all = Object.values(_topic.msgs).slice().sort((a, b) => (a.created_at || '').localeCompare(b.created_at || ''));
-  box.innerHTML = '';
-  _topic.lastDay = null;
-  if (!all.length) { box.insertAdjacentHTML('beforeend', topicEmpty()); return; }
-  all.forEach(m => {
-    const day = topicDayKey(m.created_at);
-    if (day !== _topic.lastDay) { box.insertAdjacentHTML('beforeend', topicDivider(topicDayLabel(m.created_at))); _topic.lastDay = day; }
-    box.insertAdjacentHTML('beforeend', topicBubble(m));
-  });
-  box.scrollTop = keep;
-}
-
-function topicSelectStart() {
-  if (!_topic.chatId) return;
-  _topic.selecting = true;
-  _topic.sel = {};
-  topicStopPoll();   // freeze the list while picking
-  const set = (id, disp) => { const e = $(id); if (e) e.style.display = disp; };
-  set('topic-composer', 'none'); set('topic-select-bar', '');
-  set('topic-select-btn', 'none'); set('topic-select-btn-mb', 'none');
-  topicRerender();
-  topicSelectUpdateBar();
-}
-// Restore composer/header UI and clear selection — no re-render or polling change.
-function topicSelectResetUI() {
-  _topic.selecting = false;
-  _topic.sel = {};
-  const set = (id, disp) => { const e = $(id); if (e) e.style.display = disp; };
-  set('topic-composer', ''); set('topic-select-bar', 'none');
-  set('topic-select-btn', ''); set('topic-select-btn-mb', '');
-}
-function topicSelectCancel() {
-  topicSelectResetUI();
-  topicRerender();
-  topicStopPoll();
-  _topic.poll = setInterval(() => topicLoadMessages(false), 4000);
-}
-function topicSelectToggle(mid) {
-  const m = _topic.msgs[mid];
-  if (!m || m.task) return;   // on-board messages are locked
-  _topic.sel[mid] = !_topic.sel[mid];
-  const el = $('tm-' + mid);
-  if (el) el.outerHTML = topicBubble(m); else topicRerender();
-  topicSelectUpdateBar();
-}
-function topicSelectUpdateBar() {
-  const n = Object.keys(_topic.sel).filter(k => _topic.sel[k]).length;
-  const c = $('topic-select-count');
-  if (c) c.textContent = n ? (n + ' selected') : 'Tap messages to add to a card';
-  const btn = $('topic-select-add');
-  if (btn) {
-    btn.textContent = n > 1 ? ('Add card (' + n + ' msgs)') : 'Add to board';
-    btn.style.background = n ? '#CC0000' : '#E4E0D9';
-    btn.style.color = n ? '#fff' : '#A8A39A';
-    btn.style.cursor = n ? 'pointer' : 'default';
-  }
-}
-async function topicSelectAdd() {
-  const ids = Object.keys(_topic.sel).filter(k => _topic.sel[k]);
-  if (!ids.length) return;
-  try { await api('POST', '/api/tasks', { channel_id: _topic.channelId, message_ids: ids }); }
-  catch (e) { toast('Add failed: ' + e.message); return; }
-  toast(ids.length + (ids.length === 1 ? ' message' : ' messages') + ' added to To do', 'success');
-  topicSelectCancel();
-  topicLoadMessages(true);   // refresh so the new card's messages show the on-board tint
-  topicRefreshChatMeta();    // refresh so the chat's "Task · TSK-nnn" badge appears everywhere
 }
 
 function topicEmpty() {
@@ -4274,7 +4588,7 @@ function topicCopy(id) {
 }
 
 async function topicDeleteMsg(id) {
-  if (!confirm('Delete this message?')) return;
+  if (!(await askDelete('Delete this message?'))) return;
   try { await api('DELETE', '/api/messages/' + id); }
   catch (e) { toast('Delete failed: ' + e.message); return; }
   delete _topic.msgs[id];
@@ -4346,6 +4660,7 @@ document.addEventListener('keydown', e => {
 
 function topicOpenModal() {
   $('topic-modal-name').value = '';
+  $('topic-modal-area').value = 'C';
   $('topic-modal').style.display = 'flex';
   setTimeout(() => $('topic-modal-name').focus(), 50);
 }
@@ -4355,8 +4670,9 @@ async function topicCreate() {
   const slug = ($('topic-modal-name').value || '').trim().toLowerCase()
     .replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '');
   if (!slug) { toast('Invalid topic name'); return; }
+  const area = $('topic-modal-area').value || 'C';
   try {
-    const ch = await api('POST', '/api/channels', { slug });
+    const ch = await api('POST', '/api/channels', { slug, area });
     try { _topic.channels = await api('GET', '/api/channels') || []; } catch (_) {}
     topicModalClose();
     openTopic(ch.id);
@@ -4371,7 +4687,7 @@ const _task = {
   tags: [],           // all tags (labels)
   filter: [],         // active tag-id filter on the board
   view: 'board',      // 'board' | 'archive'
-  detailId: null, detail: null, editTitle: false,
+  detailId: null, detail: null, editTitle: false, detailMsgsOpen: false,
   editCommentId: null, commentDraft: '',
   dragId: null,
   send: { channelId: null, channels: [], chatId: null, chats: [], msgs: [], sel: {} },
@@ -4443,17 +4759,16 @@ function tasksRender() {
 
 function tasksHeaderHtml(isBoard) {
   const archivedCount = _task.all.filter(t => t.archived).length;
-  const archiveCls = isBoard ? 'btn btn-ghost btn-sm' : 'btn btn-dark btn-sm';
+  const archiveCls = isBoard ? 'btn btn-ghost' : 'btn btn-dark';
   const archiveBtnLabel = isBoard ? ('Archive · ' + archivedCount) : '‹ Board';
   const sendBtn = isBoard
     ? '<button onclick="tasksOpenSend()" class="btn btn-primary dt-only"><span style="font-size:15px;line-height:1;">＋</span> Send from a topic</button>'
     : '';
-  const manageBtn = isBoard ? '<button onclick="tasksOpenTagMgr()" class="btn btn-ghost btn-sm">Manage tags</button>' : '';
-  return '<div class="tasks-header" style="flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.06);">'
+  return '<div class="tasks-header" style="flex-shrink:0;">'
     + '<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;max-width:1100px;margin:0 auto;width:100%;flex-wrap:wrap;">'
-    + '<div class="tasks-head-text"><h1 style="font-size:20px;font-weight:800;letter-spacing:-0.3px;color:#1A1A1A;">Tasks</h1></div>'
+    + '<div class="tasks-head-text"><h1 style="font-size:21px;font-weight:800;letter-spacing:-0.4px;color:#1A1A1A;">Tasks board</h1></div>'
     + '<div class="tasks-actions">'
-    + '<button onclick="tasksToggleArchive()" class="' + archiveCls + '">' + archiveBtnLabel + '</button>' + manageBtn + sendBtn + '</div></div></div>';
+    + '<button onclick="tasksToggleArchive()" class="' + archiveCls + '">' + archiveBtnLabel + '</button>' + sendBtn + '</div></div></div>';
 }
 
 function tasksBoardHtml() {
@@ -4482,11 +4797,8 @@ function tasksBoardHtml() {
 }
 
 function tasksTagChips(t) {
-  const tags = t.tags || [];
-  if (!tags.length) return '';
-  return '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;">'
-    + tags.map(g => '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:' + hexA(g.color, 0.14) + ';color:' + g.color + ';">' + esc(g.name) + '</span>').join('')
-    + '</div>';
+  const chips = tagChipsHtml(t.tags);
+  return chips ? '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;">' + chips + '</div>' : '';
 }
 
 function tasksFilterBar() {
@@ -4569,11 +4881,13 @@ async function tasksOpenDetail(id) {
   if (_task.detailId !== id) return;
   _task.detail = t;
   _task.editTitle = false;
+  _task.detailMsgsOpen = false;
   _task.editCommentId = null;
   _task.commentDraft = '';
   $('task-detail-overlay').style.display = 'block';
   tasksRenderDetail();
 }
+function tasksToggleDetailMsgs() { _task.detailMsgsOpen = !_task.detailMsgsOpen; tasksRenderDetail(); }
 function tasksCloseDetail() {
   _task.detailId = null; _task.detail = null;
   const o = $('task-detail-overlay'); if (o) o.style.display = 'none';
@@ -4607,28 +4921,29 @@ function tasksRenderDetail() {
     : '<div style="font-size:13px;color:#9B9B9B;padding:8px 0;">These messages are no longer in the topic.</div>';
   const next = t.status === 'todo' ? 'In progress' : t.status === 'doing' ? 'Done' : null;
   const advanceLabel = next ? ('Move to ' + next) : 'Archive task';
-  const topicArg = t.channel_id ? ('\'' + t.channel_id + '\'') : 'null';
+  const chatArg = t.chat_id ? ('\'' + t.chat_id + '\'') : 'null';
   const titleBlock = (!ro && _task.editTitle)
-    ? '<input id="task-title-input" value="' + esc(t.title) + '" onkeydown="if(event.key===\'Enter\'){this.blur();}else if(event.key===\'Escape\'){tasksTitleCancel();}" onblur="tasksTitleSave(this.value)" style="width:100%;margin-top:12px;font-size:19px;font-weight:800;letter-spacing:-0.3px;line-height:1.3;color:#1A1A1A;border:1px solid #CC0000;border-radius:8px;padding:6px 9px;margin-left:-9px;background:#fff;">'
+    ? '<input id="task-title-input" value="' + esc(t.title) + '" onkeydown="if(event.key===\'Enter\'){this.blur();}else if(event.key===\'Escape\'){tasksTitleCancel();}" onblur="tasksTitleSave(this.value)" style="flex:1;min-width:0;font-size:19px;font-weight:800;letter-spacing:-0.3px;line-height:1.3;color:#1A1A1A;border:1px solid #CC0000;border-radius:8px;padding:6px 9px;margin-left:-9px;background:#fff;">'
     : ro
-      ? '<div style="margin-top:12px;"><h2 style="font-size:19px;font-weight:800;letter-spacing:-0.3px;line-height:1.3;color:#1A1A1A;">' + esc(t.title) + '</h2></div>'
-      : '<div onclick="tasksTitleEdit()" title="Click to rename" class="task-title-row" style="display:flex;align-items:center;gap:8px;margin-top:12px;cursor:text;">'
-        + '<h2 style="font-size:19px;font-weight:800;letter-spacing:-0.3px;line-height:1.3;color:#1A1A1A;">' + esc(t.title) + '</h2>'
+      ? '<h2 style="flex:1;min-width:0;font-size:19px;font-weight:800;letter-spacing:-0.3px;line-height:1.3;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(t.title) + '</h2>'
+      : '<div onclick="tasksTitleEdit()" title="Click to rename" class="task-title-row" style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;cursor:text;">'
+        + '<h2 style="font-size:19px;font-weight:800;letter-spacing:-0.3px;line-height:1.3;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;">' + esc(t.title) + '</h2>'
         + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg></div>';
   // Archived banner so it's obvious why controls are read-only.
   const archBadge = ro ? '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#8A8A8A;background:#EAE7E2;padding:3px 10px;border-radius:7px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"></rect><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"></path><path d="M10 12h4"></path></svg>Archived</span>' : '';
-  // Delete-task button — top-right of the header, beside the title.
-  const delBtn = ro ? '' : '<button onclick="tasksDeleteActive(\'' + t.id + '\')" title="Delete task" style="flex-shrink:0;margin-top:12px;width:34px;height:34px;border-radius:9px;border:1px solid rgba(204,0,0,0.25);background:#fff;color:#CC0000;display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg></button>';
-  const titleRow = ro ? titleBlock
-    : '<div style="display:flex;align-items:flex-start;gap:8px;"><div style="flex:1;min-width:0;">' + titleBlock + '</div>' + delBtn + '</div>';
+  // Delete-task button — same row as title/id/topic/close.
+  const delBtn = ro ? '' : '<button onclick="tasksDeleteActive(\'' + t.id + '\')" title="Delete task" style="flex-shrink:0;width:32px;height:32px;border-radius:9px;border:1px solid rgba(204,0,0,0.25);background:#fff;color:#CC0000;display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg></button>';
   body.innerHTML =
     '<div style="padding:18px 22px 16px;background:#fff;border-bottom:1px solid rgba(0,0,0,0.07);flex-shrink:0;">'
-    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">'
-    + '<div style="display:flex;align-items:center;gap:8px;min-width:0;">'
+    + '<div style="display:flex;align-items:center;gap:12px;">'
+    + '<div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">'
+    + titleBlock
+    + '<span style="flex-shrink:0;font-size:11px;font-weight:600;color:#7A7A7A;background:#F2F0EC;padding:3px 10px;border-radius:7px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(t.channel_slug) + '</span>'
     + (taskNumLabel(t) ? '<span style="flex-shrink:0;font-size:11px;font-weight:700;color:#9B9B9B;font-family:\'JetBrains Mono\',monospace;">' + taskNumLabel(t) + '</span>' : '')
-    + '<span style="font-size:11px;font-weight:600;color:#7A7A7A;background:#F2F0EC;padding:3px 10px;border-radius:7px;max-width:80%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(t.channel_slug) + '</span></div>'
+    + '</div>'
+    + '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' + delBtn
     + '<button onclick="tasksCloseDetail()" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,0,0,0.08);background:#fff;color:#6B6B6B;font-size:17px;line-height:1;flex-shrink:0;">✕</button></div>'
-    + titleRow
+    + '</div>'
     + '<div style="display:flex;align-items:center;gap:9px;margin-top:12px;flex-wrap:wrap;">' + archBadge + prio + dueBadge + '</div></div>'
     + '<div style="flex:1;min-height:0;overflow-y:auto;">'
     + '<div style="padding:16px 22px 4px;"><div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Status</div>'
@@ -4642,14 +4957,17 @@ function tasksRenderDetail() {
         : '<div style="display:flex;gap:8px;align-items:center;"><input type="date" value="' + esc(t.due || '') + '" onchange="tasksSetDue(this.value)" style="padding:8px 10px;border:1px solid rgba(0,0,0,0.12);border-radius:8px;font-size:13px;color:#1A1A1A;">'
           + (t.due ? '<button onclick="tasksSetDue(\'\')" style="font-size:12px;font-weight:600;color:#8A8A8A;background:transparent;">Clear</button>' : '') + '</div>') + '</div></div>'
     + tasksDetailTags(t, ro)
-    + '<div style="padding:18px 22px 22px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">'
+    + '<div style="padding:18px 22px 22px;">'
+    + '<button onclick="tasksToggleDetailMsgs()" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;text-align:left;background:transparent;border:none;cursor:pointer;">'
     + '<div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;">Picked from topic</div>'
     + '<span style="font-size:11px;font-weight:600;color:#9B9B9B;background:#EAE7E2;padding:1px 8px;border-radius:20px;">' + msgs.length + (msgs.length === 1 ? ' message' : ' messages') + '</span>'
-    + (ro ? '' : '<button onclick="tasksAddMessages()" style="margin-left:auto;font-size:11.5px;font-weight:600;color:#CC0000;background:transparent;display:inline-flex;align-items:center;gap:4px;cursor:pointer;">＋ Add messages</button>') + '</div>'
-    + '<div style="display:flex;flex-direction:column;gap:12px;">' + msgList + '</div></div>'
+    + '<span style="margin-left:auto;color:#9B9B9B;font-size:11px;">' + (_task.detailMsgsOpen ? '&#9652; Hide' : '&#9662; Show') + '</span>'
+    + '</button>'
+    + (_task.detailMsgsOpen ? '<div style="display:flex;flex-direction:column;gap:12px;margin-top:14px;">' + msgList + '</div>' : '')
+    + '</div>'
     + tasksDetailComments(t, ro) + '</div>'
     + '<div style="flex-shrink:0;padding:14px 22px;background:#fff;border-top:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;gap:12px;">'
-    + '<button onclick="tasksOpenTopic(' + topicArg + ')" style="font-size:13px;font-weight:600;color:#6B6B6B;background:transparent;display:inline-flex;align-items:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Open full topic</button>'
+    + '<button onclick="tasksOpenChat(' + chatArg + ')" style="font-size:13px;font-weight:600;color:#6B6B6B;background:transparent;display:inline-flex;align-items:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Open chat</button>'
     + (ro
         ? '<button onclick="tasksRestore(\'' + t.id + '\', true)" class="btn btn-dark btn-sm">Restore to board</button>'
         : '<button onclick="tasksDetailAdvance()" class="btn btn-dark btn-sm">' + advanceLabel + '</button>') + '</div>';
@@ -4773,10 +5091,11 @@ async function tasksSetDue(v) {
   try { await api('PATCH', '/api/tasks/' + t.id, { due: t.due }); }
   catch (e) { toast('Save failed'); }
 }
-function tasksOpenTopic(channelId) {
-  if (!channelId) { toast('That topic no longer exists'); return; }
+function tasksOpenChat(chatId) {
+  if (!chatId) { toast('That chat no longer exists'); return; }
   tasksCloseDetail();
-  openTopic(channelId);
+  enterTopics();
+  chatOpen(chatId);
 }
 function tasksTitleEdit() {
   _task.editTitle = true;
@@ -4794,55 +5113,28 @@ async function tasksTitleSave(v) {
   try { await api('PATCH', '/api/tasks/' + t.id, { title: v }); }
   catch (e) { toast('Save failed'); }
 }
-function tasksAddMessages() {
-  const t = _task.detail; if (!t) return;
-  tasksOpenSend(t.id, t.channel_id, t.chat_id);  // open the send modal in add-to-task mode
-}
 
 // ---- tags on a task (detail drawer) ----
+// Read-only display only — tags are set on the source chat (see the chat header's
+// tag picker) and copied in at task creation; edit them there, not here, so there's
+// one place that manages the classification instead of two.
 function tasksDetailTags(t, ro) {
-  const sel = t.tag_ids || [];
-  let chips, head;
-  if (ro) {
-    // Read-only: just the applied tags as solid chips, no picker / Manage.
-    const applied = (t.tags || []);
-    chips = applied.length
-      ? applied.map(g => '<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px;border:1px solid ' + g.color + ';background:' + hexA(g.color, 0.14) + ';color:' + g.color + ';">'
-          + '<span style="width:8px;height:8px;border-radius:50%;background:' + g.color + ';"></span>' + esc(g.name) + '</span>').join('')
-      : '<span style="font-size:12.5px;color:#9B9B9B;">No tags.</span>';
-    head = '<div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;">Tags</div>';
-  } else {
-    chips = _task.tags.length
-      ? _task.tags.map(g => {
-          const on = sel.includes(g.id);
-          return '<button onclick="tasksToggleTag(\'' + g.id + '\')" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px;cursor:pointer;border:1px solid '
-            + (on ? g.color : 'rgba(0,0,0,0.12)') + ';background:' + (on ? hexA(g.color, 0.14) : '#fff') + ';color:' + (on ? g.color : '#6B6B6B') + ';">'
-            + '<span style="width:8px;height:8px;border-radius:50%;background:' + g.color + ';"></span>' + esc(g.name) + (on ? ' ✓' : '') + '</button>';
-        }).join('')
-      : '<span style="font-size:12.5px;color:#9B9B9B;">No tags yet.</span>';
-    head = '<div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;">Tags</div>'
-      + '<button onclick="tasksOpenTagMgr()" style="font-size:11px;font-weight:600;color:#8A8A8A;background:transparent;">Manage</button>';
-  }
+  const applied = t.tags || [];
+  const chips = applied.length
+    ? applied.map(g => '<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px;border:1px solid ' + g.color + ';background:' + hexA(g.color, 0.14) + ';color:' + g.color + ';">'
+        + '<span style="width:8px;height:8px;border-radius:50%;background:' + g.color + ';"></span>' + esc(g.name) + '</span>').join('')
+    : '<span style="font-size:12.5px;color:#9B9B9B;">No tags.</span>';
+  const editLink = (ro || !t.chat_id) ? '' : '<button onclick="tasksOpenChat(\'' + t.chat_id + '\')" style="font-size:11px;font-weight:600;color:#8A8A8A;background:transparent;">Edit in chat</button>';
+  const head = '<div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;">Tags</div>' + editLink;
   return '<div style="padding:16px 22px 4px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' + head + '</div>'
     + '<div style="display:flex;gap:6px;flex-wrap:wrap;">' + chips + '</div></div>';
 }
-async function tasksToggleTag(id) {
-  const t = _task.detail; if (!t) return;
-  const sel = new Set(t.tag_ids || []);
-  sel.has(id) ? sel.delete(id) : sel.add(id);
-  const ids = _task.tags.map(g => g.id).filter(x => sel.has(x));  // preserve tag order
-  t.tag_ids = ids;
-  t.tags = _task.tags.filter(g => sel.has(g.id));
-  _taskPatchLocal(t.id, { tag_ids: t.tag_ids, tags: t.tags });
-  tasksRenderDetail(); tasksRender();
-  try { await api('PATCH', '/api/tasks/' + t.id, { tag_ids: ids }); }
-  catch (e) { toast('Save failed'); }
-}
 
 // ---- tag manager modal ----
-function tasksOpenTagMgr() {
+async function tasksOpenTagMgr() {
   _task.tagMgr = { colorPickFor: null, newColor: _TAG_PALETTE[0] };
   $('tag-mgr-overlay').style.display = 'flex';
+  if (!_task.tags.length) { try { _task.tags = await api('GET', '/api/tags') || []; } catch (_) {} }
   tasksRenderTagMgr();
 }
 function tasksCloseTagMgr() { const o = $('tag-mgr-overlay'); if (o) o.style.display = 'none'; }
@@ -4917,6 +5209,7 @@ async function tasksAddTag() {
 
 // ---- archive / restore / delete ----
 async function tasksArchiveCard(id, fromDetail) {
+  if (!(await askDelete('Archive this task? You can restore it later.', { title: 'Archive task?', confirmLabel: 'Archive' }))) return;
   if (fromDetail) tasksCloseDetail();
   const t = _task.all.find(x => x.id === id);
   if (t) { t.archived = true; t.archived_at = new Date().toISOString(); }
@@ -4928,6 +5221,7 @@ async function tasksArchiveCard(id, fromDetail) {
 async function tasksArchiveAllDone() {
   const done = _task.all.filter(t => !t.archived && t.status === 'done');
   if (!done.length) return;
+  if (!(await askDelete('Archive all ' + done.length + ' done task' + (done.length > 1 ? 's' : '') + '? You can restore ' + (done.length > 1 ? 'them' : 'it') + ' later.', { title: 'Archive done tasks?', confirmLabel: 'Archive' }))) return;
   done.forEach(t => { t.archived = true; t.archived_at = new Date().toISOString(); });
   tasksRender();
   toast(done.length + ' done task' + (done.length > 1 ? 's' : '') + ' archived', 'success');
@@ -5028,8 +5322,6 @@ async function tasksOpenSend(taskId, channelId, chatId, preselectId) {
   $('task-send-overlay').style.display = 'flex';
   tasksRenderSend();
 }
-// Send one topic message straight to the board (create-new-task mode, pre-selected).
-function tasksSendFromMessage(channelId, chatId, msgId) { tasksOpenSend(null, channelId, chatId, msgId); }
 function tasksCloseSend() { const o = $('task-send-overlay'); if (o) o.style.display = 'none'; }
 async function tasksSendLoadChats() {
   _task.send.chatId = null; _task.send.chats = []; _task.send.msgs = []; _task.send.sel = {};
@@ -5204,9 +5496,6 @@ function tasksSendMsgHtml(m) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Landing module cards (mobile) — rendered from RAIL_PRODUCTS so order matches the menu.
-  $('landing-cards').innerHTML = landingCardsHtml();
-
   // Home (mobile)
   $('home-hamburger').addEventListener('click', openDrawer);
   $('home-new-btn').addEventListener('click', openModal);
@@ -5307,19 +5596,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ── Action Requests (formal 8D / root-cause docs sent from Topics) ──────────
-const _AR_STEPS = [
-  { code: 'd1', label: 'Team', ph: 'Who is working this — names and roles' },
-  { code: 'd2', label: 'Problem description', ph: 'What, where, how many — quantified' },
-  { code: 'd3', label: 'Containment', ph: 'Interim action to protect the customer now' },
-  { code: 'd4', label: 'Root cause', ph: 'Why it happened — verified, not assumed' },
-  { code: 'd5', label: 'Corrective action', ph: 'The permanent fix' },
-  { code: 'd6', label: 'Verify', ph: 'Evidence the fix works' },
-  { code: 'd7', label: 'Prevent recurrence', ph: 'System / SOP change so it can’t return' },
-  { code: 'd8', label: 'Close & recognise', ph: 'Sign-off and lessons learned' },
-];
+// ── Action Requests (real IXL 8D / root-cause form, sent from Topics) ───────
 const _AR_STATUSES = ['Draft', 'Open', 'Closed'];
-const _ar = { all: [], detail: null };
+const AR_AREA_NAME = { A: 'Assembly', B: 'Head Office & R&D', C: 'Press / Paint area', F: 'Foundry', S: 'IXL Solar' };
+const AR_ACTION_TYPES = ['Quality', 'O.H.&S.', 'Environment', 'Customer', 'Supplier', 'Improvement'];
+const AR_AFFECTED_AREAS = ['Assembly', 'Foundry', 'Manufacturing', 'Office'];
+const AR_DOC_UPDATE_LABELS = ['FMEA', 'Preventive Maint. Plan', 'PCP (Process Control)', 'Procedure', 'ICL', 'Bill of Materials', 'SOP', 'Training Matrix'];
+const AR_SIGNOFF_ROLES = ['Issued to', 'Department Manager', 'General Manager'];
+const _ar = { all: [], detail: null, sourceChat: null, sourcePanelOpen: true };
+function arSlug(s) { return s.replace(/[^a-z0-9]+/gi, '-').toLowerCase(); }
 
 function enterAction() { showScreen('action'); actionLoad(); }
 
@@ -5330,23 +5615,24 @@ async function actionLoad() {
   actionListRender();
 }
 
+const _AR_STATUS_COLOR = { Draft: ['#B7791F', '#FBF0DC'], Open: ['#2F62A8', '#E8F0FA'], Closed: ['#2E7D46', '#E7F4EB'] };
 function actionRowHtml(a) {
-  const idLabel = 'A' + String(a.number || 0).padStart(4, '0');
   const topicLine = a.channel_slug ? 'From topic · #' + esc(a.channel_slug) : '';
-  return '<div style="background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:13px;padding:15px 18px;display:flex;align-items:center;gap:16px;">'
-    + '<span style="width:84px;flex-shrink:0;font-family:\'JetBrains Mono\',monospace;font-size:12.5px;font-weight:600;color:#8A5A12;">' + idLabel + '</span>'
-    + '<div onclick="actionOpenRecord(\'' + a.id + '\')" style="flex:1;min-width:0;cursor:pointer;">'
+  const [stColor, stBg] = _AR_STATUS_COLOR[a.status] || _AR_STATUS_COLOR.Draft;
+  return '<div onclick="actionOpenRecord(\'' + a.id + '\')" style="background:#fff;border:1px solid #ECE9E3;border-radius:13px;padding:15px 18px;display:flex;align-items:center;gap:16px;cursor:pointer;">'
+    + '<span style="width:84px;flex-shrink:0;font-family:\'JetBrains Mono\',monospace;font-size:12.5px;font-weight:600;color:#CC0000;">' + esc(a.id_label) + '</span>'
+    + '<div style="flex:1;min-width:0;">'
     + '<div style="font-size:14px;font-weight:600;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(a.title) + '</div>'
     + '<div style="font-size:11.5px;color:#9A9A9A;margin-top:2px;">' + topicLine + '</div></div>'
-    + '<span style="width:90px;text-align:center;font-size:10.5px;font-weight:700;color:#8A5A12;background:#F6EDDC;padding:3px 10px;border-radius:20px;flex-shrink:0;">' + esc(a.status) + '</span>'
-    + '<button onclick="actionOpenRecord(\'' + a.id + '\')" style="width:64px;flex-shrink:0;font-size:12px;font-weight:600;color:#1A1A1A;background:#fff;border:1px solid rgba(0,0,0,0.12);border-radius:8px;padding:6px 0;cursor:pointer;">Open</button>'
+    + '<span style="width:90px;text-align:center;font-size:10.5px;font-weight:700;color:' + stColor + ';background:' + stBg + ';padding:3px 10px;border-radius:20px;flex-shrink:0;">' + esc(a.status) + '</span>'
+    + '<span style="font-size:18px;color:#C9C4BB;flex-shrink:0;">&rsaquo;</span>'
     + '</div>';
 }
 
 function actionListRender() {
   const q = (($('action-search') && $('action-search').value) || '').trim().toLowerCase();
-  const rows = _ar.all.filter(a => !q || (a.title || '').toLowerCase().includes(q) || (a.channel_slug || '').toLowerCase().includes(q));
-  $('action-count').textContent = _ar.all.length + ' raised from topics · formal 8D / root-cause';
+  const rows = _ar.all.filter(a => !q || (a.title || '').toLowerCase().includes(q) || (a.channel_slug || '').toLowerCase().includes(q) || (a.id_label || '').toLowerCase().includes(q));
+  $('action-count').textContent = _ar.all.length + ' raised from topics · root cause & corrective action';
   $('action-empty').style.display = rows.length ? 'none' : 'block';
   $('action-empty').textContent = q ? 'No action requests match your search.' : 'No action requests raised from topics yet.';
   $('action-items').innerHTML = rows.map(actionRowHtml).join('');
@@ -5355,67 +5641,269 @@ function actionListRender() {
 async function actionOpenRecord(id) {
   try { _ar.detail = await api('GET', '/api/action-requests/' + id); }
   catch (e) { toast('Load failed: ' + e.message); return; }
+  _ar.sourcePanelOpen = true;
   $('action-list-view').style.display = 'none';
   $('action-record-view').style.display = 'flex';
+  arStatusTabsRender();
   actionRecordRender();
+  arLoadSourceChat().then(() => { arRenderSourcePanel(); arApplySourcePanelVisibility(); });
+  arApplySourcePanelVisibility();
 }
 
 function actionCloseRecord() {
   const i = _ar.detail ? _ar.all.findIndex(a => a.id === _ar.detail.id) : -1;
   if (i >= 0) _ar.all[i] = _ar.detail;
   $('action-record-view').style.display = 'none';
+  $('ar-source-panel').style.display = 'none';
   $('action-list-view').style.display = 'flex';
   actionListRender();
 }
 
-function actionRecordRender() {
+// ── Source-chat panel (record view only) ─────────────────────────────────────
+async function arLoadSourceChat() {
+  const a = _ar.detail;
+  if (!a || !a.chat_id) { _ar.sourceChat = null; return; }
+  if (!_topic.channels.length) {
+    try { _topic.channels = await api('GET', '/api/channels') || []; } catch (_) {}
+  }
+  try {
+    const [chat, msgs] = await Promise.all([
+      api('GET', '/api/chats/' + a.chat_id),
+      api('GET', '/api/chats/' + a.chat_id + '/messages'),
+    ]);
+    _ar.sourceChat = { chat, msgs: msgs || [] };
+  } catch (_) { _ar.sourceChat = null; }
+}
+function arRenderSourcePanel() {
+  const sc = _ar.sourceChat;
+  const ch = sc && sc.chat.channel_id ? _topic.channels.find(c => c.id === sc.chat.channel_id) : null;
+  if ($('ar-source-title')) $('ar-source-title').textContent = sc ? (sc.chat.title || 'New chat') : '';
+  if ($('ar-source-sub')) $('ar-source-sub').textContent = sc ? ((ch ? '#' + ch.slug : 'No topic') + ' · Action · ' + (_ar.detail ? _ar.detail.id_label : '')) : '';
+  // "Linked" row — only the chat's OTHER destination (a Task), since this AR record
+  // is itself the destination currently being viewed.
+  const dests = $('ar-source-dests');
+  if (dests) {
+    if (sc && sc.chat.task) {
+      dests.style.display = 'flex';
+      $('ar-source-dests-items').innerHTML = '<button onclick="tasksOpenDetail(\'' + sc.chat.task.id + '\')" style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;color:#5E5A53;background:#fff;border:1px solid #D8D3CB;cursor:pointer;">' + chatTaskBadgeText(sc.chat.task) + '</button>';
+    } else { dests.style.display = 'none'; }
+  }
+  if ($('ar-source-messages')) {
+    $('ar-source-messages').innerHTML = sc ? sc.msgs.map(m =>
+      '<div><div style="font-size:10.5px;color:#A8A39A;">' + esc(topicTime(m.created_at)) + '</div>'
+      + (m.text ? '<div style="font-size:12.5px;color:#33312E;line-height:1.5;margin-top:2px;">' + esc(m.text) + '</div>' : '')
+      + (m.has_image ? '<div style="margin-top:7px;height:96px;border-radius:9px;overflow:hidden;border:1px solid rgba(0,0,0,0.05);"><img src="' + m.images[0] + '" style="width:100%;height:100%;object-fit:cover;" alt=""></div>' : '')
+      + '</div>'
+    ).join('') : '';
+  }
+  const openBtn = $('ar-source-open');
+  if (openBtn) openBtn.onclick = sc ? function () { enterTopics(); chatOpen(sc.chat.id); } : null;
+}
+function arToggleSourcePanel() { _ar.sourcePanelOpen = !_ar.sourcePanelOpen; arApplySourcePanelVisibility(); }
+function arApplySourcePanelVisibility() {
+  const has = !!(_ar.detail && _ar.detail.chat_id);
+  const open = has && _ar.sourcePanelOpen;
+  if ($('ar-source-panel')) $('ar-source-panel').style.display = open ? 'flex' : 'none';
+  if ($('ar-source-toggle')) $('ar-source-toggle').style.display = (has && !open) ? 'inline-flex' : 'none';
+}
+function arStatusTabsRender() {
   const a = _ar.detail; if (!a) return;
-  const steps = a.steps || {};
-  const statusTabs = _AR_STATUSES.map(s => {
+  $('ar-status-tabs').innerHTML = _AR_STATUSES.map(s => {
     const on = a.status === s;
     return '<button onclick="actionSetStatus(\'' + s + '\')" style="flex:1;padding:9px;border-radius:8px;font-size:12.5px;font-weight:600;border:none;cursor:pointer;background:' + (on ? '#fff' : 'transparent') + ';color:' + (on ? '#1A1A1A' : '#8A867E') + ';' + (on ? 'box-shadow:0 1px 3px rgba(0,0,0,0.12);' : '') + '">' + s + '</button>';
   }).join('');
-  const stepsHtml = _AR_STEPS.map(s => (
-    '<div style="display:flex;gap:12px;">'
-    + '<span style="width:36px;height:36px;border-radius:9px;background:#8A5A12;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;">' + s.code.toUpperCase() + '</span>'
-    + '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;color:#1A1A1A;margin-bottom:6px;">' + s.label + '</div>'
-    + '<textarea id="ar-step-' + s.code + '" placeholder="' + esc(s.ph) + '" style="width:100%;min-height:56px;padding:11px 13px;background:#fff;border:1px solid rgba(0,0,0,0.14);border-radius:10px;font-size:14px;color:#1A1A1A;outline:none;font-family:inherit;resize:vertical;line-height:1.5;">' + esc(steps[s.code] || '') + '</textarea></div>'
-    + '</div>'
-  )).join('');
-  const idLabel = 'A' + String(a.number || 0).padStart(4, '0');
+}
+
+// Reads every field currently in the DOM into a form object, falling back to the
+// last-saved value for any field not yet rendered. Used both to persist unsaved
+// text across a chip-toggle re-render and to build the payload on Save.
+function arCollectForm() {
+  const f = (_ar.detail && _ar.detail.form) || {};
+  const val = (id, fallback) => { const el = $(id); return el ? el.value : fallback; };
+  return {
+    raised_by: val('ar-f-raisedBy', f.raised_by || ''),
+    date_raised: val('ar-f-dateRaised', f.date_raised || ''),
+    department: val('ar-f-department', f.department || ''),
+    issued_to: val('ar-f-issuedTo', f.issued_to || ''),
+    types: f.types || [],
+    issue_text: val('ar-f-issueText', f.issue_text || ''),
+    where: val('ar-f-where', f.where || ''),
+    what: val('ar-f-what', f.what || ''),
+    when: val('ar-f-when', f.when || ''),
+    areas: f.areas || [],
+    whys: [0, 1, 2, 3, 4].map(i => val('ar-f-whys-' + i, (f.whys || [])[i] || '')),
+    root_cause: val('ar-f-rootCause', f.root_cause || ''),
+    within_14: f.within_14 || '',
+    pca: val('ar-f-pca', f.pca || ''),
+    verification: val('ar-f-verification', f.verification || ''),
+    doc_updates: Object.fromEntries(AR_DOC_UPDATE_LABELS.map(l => [l, val('ar-f-doc-' + arSlug(l), (f.doc_updates || {})[l] || '')])),
+    signoffs: AR_SIGNOFF_ROLES.map((role, i) => ({
+      role,
+      name: val('ar-f-signoff-' + i + '-name', ((f.signoffs || [])[i] || {}).name || ''),
+      date: val('ar-f-signoff-' + i + '-date', ((f.signoffs || [])[i] || {}).date || ''),
+    })),
+  };
+}
+function arToggleType(key) {
+  const f = arCollectForm();
+  const i = f.types.indexOf(key);
+  if (i >= 0) f.types.splice(i, 1); else f.types.push(key);
+  _ar.detail.form = f;
+  actionRecordRender();
+}
+function arToggleArea(key) {
+  const f = arCollectForm();
+  const i = f.areas.indexOf(key);
+  if (i >= 0) f.areas.splice(i, 1); else f.areas.push(key);
+  _ar.detail.form = f;
+  actionRecordRender();
+}
+function arSetWithin14(v) {
+  const f = arCollectForm();
+  f.within_14 = v;
+  _ar.detail.form = f;
+  actionRecordRender();
+}
+
+// Field helpers — a labelled text input/textarea matching the record's card style.
+function arLabel(text, badge) {
+  return '<div style="font-size:10px;font-weight:700;color:#9B9B9B;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">' + text
+    + (badge ? ' <span style="font-weight:600;text-transform:none;letter-spacing:0;color:#B0ABA2;">' + badge + '</span>' : '') + '</div>';
+}
+function arInput(id, value, placeholder) {
+  return '<input id="' + id + '" value="' + esc(value || '') + '" placeholder="' + esc(placeholder || '') + '" style="width:100%;padding:11px 13px;background:#fff;border:1px solid rgba(0,0,0,0.14);border-radius:10px;font-size:14px;color:#1A1A1A;outline:none;font-family:inherit;">';
+}
+function arTextarea(id, value, placeholder, minH) {
+  return '<textarea id="' + id + '" placeholder="' + esc(placeholder || '') + '" style="width:100%;min-height:' + (minH || 64) + 'px;padding:11px 13px;background:#fff;border:1px solid rgba(0,0,0,0.14);border-radius:10px;font-size:14px;color:#1A1A1A;outline:none;font-family:inherit;resize:vertical;line-height:1.5;">' + esc(value || '') + '</textarea>';
+}
+function arCard(inner) { return '<div style="background:#fff;border:1px solid #ECE9E3;border-radius:14px;padding:18px 20px;">' + inner + '</div>'; }
+function arCardTitle(text, badge) {
+  return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">'
+    + '<span style="font-size:11px;font-weight:800;color:#1A1A1A;letter-spacing:0.4px;">' + text + '</span>'
+    + '<span style="font-size:10px;font-weight:700;color:#8A867E;background:#ECE9E3;padding:2px 8px;border-radius:20px;">' + (badge || 'Originator') + '</span></div>';
+}
+function arChip(label, on, onClick) {
+  return '<button onclick="' + onClick + '" style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:9px;cursor:pointer;border:1px solid ' + (on ? '#CC0000' : '#E7E3DC') + ';background:' + (on ? '#FCE9E9' : '#fff') + ';color:' + (on ? '#CC0000' : '#5E5A53') + ';">' + label + '</button>';
+}
+
+function actionRecordRender() {
+  const a = _ar.detail; if (!a) return;
+  const f = a.form || {};
   const topicLine = a.channel_slug ? 'From topic · #' + esc(a.channel_slug) : '';
+  const areaName = AR_AREA_NAME[a.area] || AR_AREA_NAME.C;
+
+  const registerCard = arCard(
+    arCardTitle('Register details')
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:13px;">'
+    + '<div style="grid-column:1 / -1;">' + arLabel('AR number')
+    + '<input value="' + esc(a.id_label) + '" readonly style="width:100%;max-width:220px;padding:11px 13px;background:#F7F5F1;border:1px solid rgba(0,0,0,0.1);border-radius:10px;font-size:14px;color:#CC0000;outline:none;font-family:\'JetBrains Mono\',monospace;font-weight:700;"></div>'
+    + '<div>' + arLabel('Date raised') + arInput('ar-f-dateRaised', f.date_raised || shortDateLabel(a.created_at)) + '</div>'
+    + '<div>' + arLabel('Originator') + arInput('ar-f-raisedBy', f.raised_by, 'Name') + '</div>'
+    + '<div>' + arLabel('Department') + arInput('ar-f-department', f.department || areaName) + '</div>'
+    + '<div>' + arLabel('Issued to') + arInput('ar-f-issuedTo', f.issued_to, 'Person / team responsible for the investigation') + '</div>'
+    + '</div>'
+    + '<div style="margin-top:15px;">' + arLabel('Action type')
+    + '<div style="display:flex;flex-wrap:wrap;gap:7px;">' + AR_ACTION_TYPES.map(t => arChip(t, (f.types || []).includes(t), "arToggleType('" + t + "')")).join('') + '</div></div>'
+  );
+
+  const issueCard = arCard(
+    arCardTitle('Issue / improvement to be investigated')
+    + arTextarea('ar-f-issueText', f.issue_text, 'Describe the issue or improvement clearly', 84)
+  );
+
+  const teamBanner = '<div style="display:flex;align-items:center;gap:10px;background:#FCE9E9;border:1px solid #F3C9C9;border-radius:12px;padding:12px 16px;">'
+    + '<span style="width:30px;height:30px;border-radius:8px;background:#CC0000;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+    + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>'
+    + '<span style="font-size:13px;font-weight:700;color:#CC0000;">Root cause investigation now required — get the team together.</span></div>';
+
+  const breakdownCard = arCard(
+    arCardTitle('Issue breakdown', 'Investigation team')
+    + '<div style="font-size:11.5px;color:#9A9A9A;margin-bottom:13px;">Break down the problem using data to identify:</div>'
+    + '<div style="display:flex;flex-direction:column;gap:12px;">'
+    + '<div>' + arLabel('Where', '· which process, machine, tool, part') + arTextarea('ar-f-where', f.where, '', 52) + '</div>'
+    + '<div>' + arLabel('What', '· which assembly, part or material') + arTextarea('ar-f-what', f.what, '', 52) + '</div>'
+    + '<div>' + arLabel('When', '· frequency, time frame') + arTextarea('ar-f-when', f.when, '', 52) + '</div>'
+    + '</div>'
+    + '<div style="margin-top:15px;">' + arLabel('Other affected areas?')
+    + '<div style="display:flex;flex-wrap:wrap;gap:7px;">' + AR_AFFECTED_AREAS.map(t => arChip(t, (f.areas || []).includes(t), "arToggleArea('" + t + "')")).join('') + '</div></div>'
+  );
+
+  const whysCard = arCard(
+    arCardTitle('Root cause analysis — 5 Whys', 'Investigation team')
+    + '<div style="font-size:11.5px;color:#9A9A9A;margin-bottom:13px;">Investigate all possibilities and eliminate them through data analysis or countermeasures.</div>'
+    + '<div style="display:flex;flex-direction:column;gap:10px;">' + [0, 1, 2, 3, 4].map(i =>
+      '<div style="display:flex;gap:11px;align-items:flex-start;">'
+      + '<span style="width:50px;height:30px;border-radius:9px;background:#EDEAE4;color:#CC0000;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">Why ' + (i + 1) + '</span>'
+      + '<div style="flex:1;min-width:0;">' + arTextarea('ar-f-whys-' + i, (f.whys || [])[i], i === 0 ? 'Why did it happen?' : 'Why is that?', 48) + '</div></div>'
+    ).join('') + '</div>'
+  );
+
+  const rootCauseCard = arCard(
+    arCardTitle('Root cause', 'Investigation team')
+    + arTextarea('ar-f-rootCause', f.root_cause, 'List the root cause(s) to be actioned', 64)
+    + '<div style="display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap;">'
+    + '<span style="font-size:12.5px;color:#5E5A53;">Root cause identified within 14 days of issue date?</span>'
+    + '<div style="display:flex;gap:6px;background:#EAE7E2;border-radius:9px;padding:3px;">' + ['Yes', 'No'].map(y =>
+      '<button onclick="arSetWithin14(\'' + y + '\')" style="flex:1;padding:7px 13px;border-radius:7px;font-size:12.5px;font-weight:600;border:none;cursor:pointer;background:' + ((f.within_14 || '') === y ? '#fff' : 'transparent') + ';color:' + ((f.within_14 || '') === y ? '#1A1A1A' : '#8A867E') + ';' + ((f.within_14 || '') === y ? 'box-shadow:0 1px 3px rgba(0,0,0,0.12);' : '') + '">' + y + '</button>'
+    ).join('') + '</div></div>'
+  );
+
+  const pcaCard = arCard(
+    arCardTitle('Permanent corrective action', 'Investigation team')
+    + arTextarea('ar-f-pca', f.pca, 'Action(s) to eliminate the root cause(s) and permanently prevent recurrence', 80)
+    + '<div style="font-size:11px;font-weight:800;color:#1A1A1A;letter-spacing:0.4px;margin:16px 0 10px;">Verification <span style="font-weight:700;color:#8A867E;background:#ECE9E3;padding:2px 8px;border-radius:20px;letter-spacing:0;">Originator</span></div>'
+    + arTextarea('ar-f-verification', f.verification, 'How you verified the permanent corrective action is complete', 64)
+  );
+
+  const docCard = arCard(
+    arCardTitle('Document updates', 'Originator · include document numbers')
+    + '<div style="font-size:11.5px;color:#9A9A9A;margin-bottom:13px;">Record the document number for anything updated as a result of this AR.</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;">' + AR_DOC_UPDATE_LABELS.map(label =>
+      '<div style="display:flex;align-items:center;gap:10px;">'
+      + '<span style="width:132px;flex-shrink:0;font-size:12px;font-weight:700;color:#5E5A53;">' + label + '</span>'
+      + '<input id="ar-f-doc-' + arSlug(label) + '" value="' + esc((f.doc_updates || {})[label] || '') + '" placeholder="Doc no." style="flex:1;min-width:0;padding:9px 12px;background:#fff;border:1px solid rgba(0,0,0,0.14);border-radius:9px;font-size:13px;color:#1A1A1A;outline:none;font-family:inherit;"></div>'
+    ).join('') + '</div>'
+  );
+
+  const signCard = arCard(
+    '<div style="font-size:11px;font-weight:800;color:#1A1A1A;letter-spacing:0.4px;margin-bottom:6px;">Sign off when complete</div>'
+    + '<div style="font-size:11.5px;color:#B0202E;margin-bottom:14px;">The General Manager approver cannot be the person the AR was issued to.</div>'
+    + '<div style="display:flex;flex-direction:column;gap:12px;">' + AR_SIGNOFF_ROLES.map((role, i) => {
+      const s = (f.signoffs || [])[i] || {};
+      return '<div style="display:grid;grid-template-columns:1fr 150px;gap:11px;align-items:end;">'
+        + '<div>' + arLabel(role) + arInput('ar-f-signoff-' + i + '-name', s.name, 'Name') + '</div>'
+        + '<div>' + arLabel('Date') + arInput('ar-f-signoff-' + i + '-date', s.date, 'dd / mm / yyyy') + '</div></div>';
+    }).join('') + '</div>'
+  );
+
   $('action-record-body').innerHTML =
     '<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">'
-    + '<span style="font-family:\'JetBrains Mono\',monospace;font-size:13px;font-weight:700;color:#8A5A12;">' + idLabel + '</span>'
-    + '<span style="font-size:11px;font-weight:700;color:#5E5A53;background:#EDEAE4;padding:4px 11px;border-radius:20px;">8D · Root cause</span>'
+    + '<span style="font-family:\'JetBrains Mono\',monospace;font-size:13px;font-weight:700;color:#CC0000;">' + esc(a.id_label) + '</span>'
+    + '<span style="font-size:11px;font-weight:700;color:#5E5A53;background:#EDEAE4;padding:4px 11px;border-radius:20px;">Action Request &middot; ' + esc(areaName) + '</span>'
     + '</div>'
     + '<h1 style="font-size:24px;font-weight:800;letter-spacing:-0.5px;margin-top:11px;line-height:1.25;color:#1A1A1A;">' + esc(a.title) + '</h1>'
     + '<div style="font-size:12.5px;color:#9A9A9A;margin-top:6px;">' + topicLine + '</div>'
-    + '<div style="margin-top:20px;">'
-    + '<div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Status</div>'
-    + '<div style="display:flex;gap:6px;background:#EAE7E2;border-radius:11px;padding:4px;max-width:360px;">' + statusTabs + '</div>'
-    + '</div>'
-    + '<div style="font-size:10.5px;font-weight:700;color:#9B9B9B;letter-spacing:1px;text-transform:uppercase;margin:22px 0 13px;">8D investigation — complete as it progresses</div>'
-    + '<div style="display:flex;flex-direction:column;gap:16px;">' + stepsHtml + '</div>'
-    + '<div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:20px;">'
-    + '<button onclick="actionSaveSteps()" style="background:#8A5A12;color:#fff;padding:11px 22px;border-radius:10px;font-size:14px;font-weight:700;border:none;cursor:pointer;">Save Action Request</button>'
-    + '</div>';
+    + '<div style="margin-top:24px;display:flex;flex-direction:column;gap:16px;">'
+    + registerCard + issueCard + teamBanner + breakdownCard + whysCard + rootCauseCard + pcaCard + docCard + signCard
+    + '<div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;">'
+    + '<button onclick="actionSaveForm()" style="background:#CC0000;color:#fff;padding:11px 22px;border-radius:10px;font-size:14px;font-weight:700;border:none;cursor:pointer;">Save Action Request</button>'
+    + '</div></div>';
 }
 
 async function actionSetStatus(status) {
   const a = _ar.detail; if (!a) return;
   a.status = status;
-  actionRecordRender();
+  arStatusTabsRender();
   try { await api('PATCH', '/api/action-requests/' + a.id, { status }); }
   catch (e) { toast('Update failed: ' + e.message); }
 }
 
-async function actionSaveSteps() {
+async function actionSaveForm() {
   const a = _ar.detail; if (!a) return;
-  const steps = {};
-  _AR_STEPS.forEach(s => { const el = $('ar-step-' + s.code); if (el) steps[s.code] = el.value; });
+  const form = arCollectForm();
   try {
-    _ar.detail = await api('PATCH', '/api/action-requests/' + a.id, { steps });
+    _ar.detail = await api('PATCH', '/api/action-requests/' + a.id, { form });
+    actionRecordRender();
     toast('Action Request saved', 'success');
   } catch (e) { toast('Save failed: ' + e.message); }
 }
@@ -5426,8 +5914,8 @@ async function actionSendFromChat(chatId) {
   try { ar = await api('POST', '/api/action-requests', { chat_id: chatId }); }
   catch (e) { toast('Send failed: ' + e.message); return; }
   const i = _topic.chats.findIndex(c => c.id === chatId);
-  if (i >= 0) _topic.chats[i] = { ..._topic.chats[i], action: { id: ar.id, number: ar.number } };
-  toast('Sent to Action Request · ' + ('A' + String(ar.number || 0).padStart(4, '0')), 'success');
+  if (i >= 0) _topic.chats[i] = { ..._topic.chats[i], action: { id: ar.id, number: ar.number, area: ar.area, id_label: ar.id_label } };
+  toast('Sent to Action Request · ' + ar.id_label, 'success');
   enterAction();
   await actionOpenRecord(ar.id);
 }
@@ -6410,7 +6898,7 @@ function _iclRenderCaptures(){
       +'<button data-i="'+i+'" class="icl-cap-del" title="Remove" style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(26,26,26,0.78);color:#fff;font-size:11px;line-height:1;border:none;cursor:pointer;">✕</button>';
     strip.appendChild(cell);
   });
-  strip.querySelectorAll('.icl-cap-del').forEach(el=>el.addEventListener('click',e=>{ _icl.captures.splice(+e.target.dataset.i,1); _iclRenderCaptures(); }));
+  strip.querySelectorAll('.icl-cap-del').forEach(el=>el.addEventListener('click',e=>_iclRemoveCapture(+e.currentTarget.dataset.i)));
   strip.querySelectorAll('img').forEach(el=>el.addEventListener('click',_iclOpenCapModal));
 }
 
@@ -6426,7 +6914,13 @@ function _iclRenderCapModal(){
       +'<div style="padding:8px 11px;font-size:12px;font-weight:600;color:#555;">'+(cap.type==='iso'?'ISO overview':'View')+' &middot; #'+(i+1)+(cap.balloons&&cap.balloons.length?' &middot; balloons '+cap.balloons.join(', '):'')+'</div>';
     body.appendChild(cell);
   });
-  body.querySelectorAll('.icl-capm-del').forEach(el=>el.addEventListener('click',e=>{ _icl.captures.splice(+e.currentTarget.dataset.i,1); _iclRenderCaptures(); _iclRenderCapModal(); }));
+  body.querySelectorAll('.icl-capm-del').forEach(el=>el.addEventListener('click',e=>_iclRemoveCapture(+e.currentTarget.dataset.i, true)));
+}
+async function _iclRemoveCapture(i, alsoModal){
+  if(!(await askDelete('Remove this picture?',{title:'Remove picture?',confirmLabel:'Remove'})))return;
+  _icl.captures.splice(i,1);
+  _iclRenderCaptures();
+  if(alsoModal) _iclRenderCapModal();
 }
 function _iclOpenCapModal(){ const m=document.getElementById('icl-cap-modal'); if(!m)return; _iclRenderCapModal(); m.style.display='flex'; }
 function _iclCloseCapModal(){ const m=document.getElementById('icl-cap-modal'); if(m) m.style.display='none'; }
@@ -6484,8 +6978,9 @@ function _iclRenderChecks(){
   list.querySelectorAll('.icl-del').forEach(el=>el.addEventListener('click',e=>{_iclRemoveCheck(+e.target.dataset.i);}));
 }
 
-function _iclRemoveCheck(i){
+async function _iclRemoveCheck(i){
   const c=_icl.checks[i]; if(!c) return;
+  if(!(await askDelete('Remove this dimension and its balloon?', { title: 'Remove dimension?', confirmLabel: 'Remove' }))) return;
   if(c.checkId!=null){
     const di=_icl.dims.findIndex(d=>d.checkId===c.checkId);
     if(di>=0){ const dm=_icl.dims[di]; if(dm.group&&_icl.scene)_icl.scene.remove(dm.group); if(dm.label&&dm.label.parentNode)dm.label.parentNode.removeChild(dm.label); _icl.dims.splice(di,1); }
@@ -6658,7 +7153,32 @@ window.lbDeleteLabel = lbDeleteLabel;
 window.lbViewLabel = lbViewLabel;
 window.lbDownloadLabel = lbDownloadLabel;
 window.lbCloseModal = lbCloseModal;
-document.addEventListener('keydown', e => { if (e.key === 'Escape') lbCloseModal(); });
+// Global Esc — close the top-most open modal by z-index, using each modal's real close fn
+// (confirm-modal MUST resolve its promise via confirmResolve(false), not just hide).
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const modals = [
+    ['confirm-modal', () => confirmResolve(false), 1200],
+    ['topic-lb', topicLbClose, 2100],
+    ['lb-modal', lbCloseModal, 2000],
+    ['tag-mgr-overlay', tasksCloseTagMgr, 820],
+    ['task-send-overlay', tasksCloseSend, 720],
+    ['task-detail-overlay', tasksCloseDetail, 700],
+    ['icl-view-modal', () => window._iclCloseViewModal && window._iclCloseViewModal(), 700],
+    ['icl-cap-modal', () => window._iclCloseCapModal && window._iclCloseCapModal(), 700],
+    ['pfc-view-modal', pfcCloseView, 700],
+    ['lookup-drawer-overlay', lookupCloseForm, 700],
+    ['modal-overlay', closeModal, 500],
+    ['topic-modal', topicModalClose, 500],
+    ['drawer-overlay', closeDrawer, 400],
+  ];
+  let top = null;
+  for (const [id, fn, z] of modals) {
+    const el = document.getElementById(id);
+    if (el && el.style.display && el.style.display !== 'none' && (!top || z > top.z)) top = { fn, z };
+  }
+  if (top) { e.preventDefault(); top.fn(); }
+});
 </script>
 </body>
 </html>

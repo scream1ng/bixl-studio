@@ -10,8 +10,10 @@ Manufacturing documentation platform for IXL Group — a single hosted web app (
 
 | Module | What it does | Status |
 |--------|--------------|--------|
-| **Topics** | Team discussion channels — text/photo posts per thread. | ✅ |
-| **Tasks** | Kanban board fed from Topics — send messages onto To do / In progress / Done cards, drag to move, tags + filter, comments, archive history. | ✅ |
+| **Topics** | Team discussion channels, each split into Slack-style **Chats** (threads) — text/photo posts, tag a chat, file it under a topic (or leave it for **Messages**), "Send to ▾" a Task or Action Request. | ✅ |
+| **Messages** | Every chat not yet filed under a topic — search, open, file, or delete. | ✅ |
+| **Tasks** | Kanban board fed from Topics — send a chat onto To do / In progress / Done, drag to move, tags (inherited from the source chat), comments, archive history. | ✅ |
+| **Action Request** | 8D-style root-cause record raised from a chat — area-coded id (e.g. `C123`), doc-update checklist, sign-offs. | ✅ |
 | **Look Up** | FG ↔ WIP part-number finder. | ✅ |
 | **SOP** | Turn shop-floor photos + notes into a formatted IXL Word `.docx` (1–8 steps/page, multi-page). | ✅ |
 | **Label** | Three.js STEP viewer → wireframe label JPG at exact angle; history list. | ✅ |
@@ -89,6 +91,14 @@ Gauges: Vernier / Protractor / Visual (Visual takes an SOP reference → LIMITS 
 
 ---
 
+## Topics, Messages, Tasks & tags
+
+A **Chat** is a thread of text/photo messages. It can be filed under a **Topic** (channel) or left unfiled — unfiled chats live in **Messages**, reachable from the nav rail and searchable, so nothing gets lost before it's categorised.
+
+Each chat can carry one or more **tags** (Quality, Safety, Improvement, …) via a picker in the chat header — tags are managed from Topics ("Manage tags"), not duplicated in the Tasks board. Sending a chat to a **Task** ("Send to ▾") copies its tags onto the new task at creation time; after that the task's tags are edited independently (from the chat, via "Edit in chat" in the task detail), so classification always has one source of truth: the chat.
+
+---
+
 ## API surface (selected)
 
 ```
@@ -104,10 +114,16 @@ GET/POST/PUT/DELETE /api/sops ...             SOP CRUD + /generate
 GET/POST/DELETE /api/labels ...               Label history
 POST /api/pfc/parse                           BOM transaction export → flow chart
 GET/POST/DELETE /api/pfcs ... /thumb /export  PFC history + re-export
-GET/POST/DELETE /api/channels ...             Topics channels + messages
+GET/POST/DELETE /api/channels ...             Topics channels
+GET/POST /api/channels/:id/chats              chats filed under a topic
+GET/POST /api/chats                           create a chat (filed or unfiled)
+GET      /api/chats/unfiled                   chats with no topic (Messages screen)
+GET/PATCH/DELETE /api/chats/:id               fetch / rename / refile / retag / archive / delete a chat
+GET/POST/PATCH/DELETE /api/chats/:id/messages  messages within a chat
 GET/POST/PATCH/DELETE /api/tasks ...          Tasks board (status/priority/due/tags/add-messages/archive)
 POST /api/tasks/:id/comments                  task comments (+ PATCH/DELETE /api/comments/:id)
-GET/POST/PATCH/DELETE /api/tags ...           tags/labels (delete scrubs from tasks)
+GET/POST/PATCH/DELETE /api/tags ...           tags/labels (delete scrubs from tasks + chats)
+GET/POST/PATCH/DELETE /api/action-requests ...  Action Request 8D records
 GET/POST/PUT/DELETE /api/mappings ...         Look Up FG↔WIP mappings + /api/lookup
 GET  /healthz                                 Railway health check
 ```
